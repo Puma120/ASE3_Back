@@ -6,6 +6,8 @@ reenviar, excepto en las rutas publicas de registro/login (el usuario aun
 no tiene token en ese punto).
 """
 
+import asyncio
+
 import httpx
 from fastapi import APIRouter, Request, Response
 
@@ -18,6 +20,12 @@ router = APIRouter()
 # obteniendo su primer token o aun no tiene cuenta).
 PUBLIC_AUTH_PATHS = {"register", "login"}
 
+# Railway a veces tarda unos segundos en levantar el DNS/socket interno de un
+# servicio recien redeployado o "dormido" (cold start / red privada) -> se
+# reintenta antes de devolver 500 al cliente en vez de fallar al primer intento.
+PROXY_RETRIES = 4
+PROXY_RETRY_DELAY_SECONDS = 2.0
+
 
 async def _proxy(base_url: str, path: str, request: Request) -> Response:
     body = await request.body()
@@ -27,13 +35,20 @@ async def _proxy(base_url: str, path: str, request: Request) -> Response:
         if key.lower() not in ("host", "content-length")
     }
     async with httpx.AsyncClient(base_url=base_url, timeout=30.0) as client:
-        upstream = await client.request(
-            request.method,
-            f"/{path}",
-            params=request.query_params,
-            headers=headers,
-            content=body,
-        )
+        for attempt in range(PROXY_RETRIES):
+            try:
+                upstream = await client.request(
+                    request.method,
+                    f"/{path}",
+                    params=request.query_params,
+                    headers=headers,
+                    content=body,
+                )
+                break
+            except httpx.ConnectError:
+                if attempt == PROXY_RETRIES - 1:
+                    raise
+                await asyncio.sleep(PROXY_RETRY_DELAY_SECONDS)
     return Response(
         content=upstream.content,
         status_code=upstream.status_code,
