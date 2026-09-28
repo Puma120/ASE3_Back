@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Env files (nunca commitear secretos reales, solo .env.example)
+.env
+*/.env
+
+# Testing / tooling
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Docker volumes locales, si se llegan a montar como bind mounts
+docker-data/
