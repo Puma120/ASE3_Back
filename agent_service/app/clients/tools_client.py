@@ -25,11 +25,21 @@ TOOL_ROUTES = {
 
 async def call_tool(tool_name: str, payload: dict, bearer_token: str) -> dict:
     if tool_name not in TOOL_ROUTES:
-        raise ValueError(f"Tool desconocida: {tool_name}")
+        return {"error": f"Tool desconocida: {tool_name}"}
     method, path = TOOL_ROUTES[tool_name]
     async with httpx.AsyncClient(base_url=settings.tools_service_url, timeout=30.0) as client:
-        response = await client.request(
-            method, path, json=payload, headers={"Authorization": f"Bearer {bearer_token}"}
-        )
-        response.raise_for_status()
-        return response.json()
+        try:
+            response = await client.request(
+                method, path, json=payload, headers={"Authorization": f"Bearer {bearer_token}"}
+            )
+            if response.status_code >= 400:
+                detail = response.text
+                try:
+                    detail = response.json().get("detail", detail)
+                except Exception:
+                    pass
+                return {"error": f"Error al ejecutar {tool_name}: {detail}"}
+            return response.json()
+        except Exception as exc:
+            return {"error": f"No se pudo conectar con el servicio de herramientas: {str(exc)}"}
+

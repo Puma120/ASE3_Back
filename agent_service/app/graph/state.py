@@ -16,4 +16,5 @@ class AgentState(TypedDict, total=False):
     rag_context: list[str]
     tool_call: dict[str, Any] | None  # {"name": str, "arguments": dict} decidido por el LLM
     tool_result: Any | None
+    ai_message: Any | None  # AIMessage con tool_calls previo a ToolMessage para Gemini
     response: str

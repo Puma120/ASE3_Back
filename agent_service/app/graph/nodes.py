@@ -91,7 +91,18 @@ async def call_llm(state: AgentState) -> AgentState:
     una tool, la deja en state['tool_call']; si no, deja la respuesta final
     en state['response']."""
     messages = _to_langchain_messages(state)
-    if state.get("tool_result") is not None:
+    if state.get("tool_result") is not None and state.get("tool_call"):
+        # Gemini exige que todo ToolMessage vaya inmediatamente precedido por el
+        # AIMessage que solicito dicho tool_call en el historial de la conversacion.
+        ai_msg = state.get("ai_message") or AIMessage(
+            content="",
+            tool_calls=[{
+                "id": state["tool_call"]["id"],
+                "name": state["tool_call"]["name"],
+                "args": state["tool_call"].get("arguments", {}),
+            }],
+        )
+        messages.append(ai_msg)
         messages.append(
             ToolMessage(
                 content=json.dumps(state["tool_result"], default=str),
@@ -102,8 +113,18 @@ async def call_llm(state: AgentState) -> AgentState:
 
     if ai_message.tool_calls:
         call = ai_message.tool_calls[0]
-        return {**state, "tool_call": {"id": call["id"], "name": call["name"], "arguments": call["args"]}}
-    return {**state, "response": _extract_text(ai_message.content), "tool_call": None}
+        return {
+            **state,
+            "tool_call": {"id": call["id"], "name": call["name"], "arguments": call["args"]},
+            "ai_message": ai_message,
+        }
+    return {
+        **state,
+        "response": _extract_text(ai_message.content),
+        "tool_call": None,
+        "ai_message": None,
+        "tool_result": None,
+    }
 
 
 async def call_tool(state: AgentState) -> AgentState:
