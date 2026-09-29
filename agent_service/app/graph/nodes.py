@@ -66,6 +66,26 @@ def _to_langchain_messages(state: AgentState) -> list:
     return messages
 
 
+def _extract_text(content) -> str:
+    """Extrae texto plano de ai_message.content, que en langchain_google_genai
+    puede ser un str o una lista de partes/bloques de texto."""
+    if isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        parts = []
+        for part in content:
+            if isinstance(part, str):
+                parts.append(part)
+            elif isinstance(part, dict) and "text" in part:
+                parts.append(str(part["text"]))
+            elif hasattr(part, "text"):
+                parts.append(str(part.text))
+            else:
+                parts.append(str(part))
+        return "".join(parts)
+    return str(content or "")
+
+
 async def call_llm(state: AgentState) -> AgentState:
     """Llama a Gemini con el historial + contexto RAG. Si el LLM decide usar
     una tool, la deja en state['tool_call']; si no, deja la respuesta final
@@ -83,7 +103,7 @@ async def call_llm(state: AgentState) -> AgentState:
     if ai_message.tool_calls:
         call = ai_message.tool_calls[0]
         return {**state, "tool_call": {"id": call["id"], "name": call["name"], "arguments": call["args"]}}
-    return {**state, "response": ai_message.content, "tool_call": None}
+    return {**state, "response": _extract_text(ai_message.content), "tool_call": None}
 
 
 async def call_tool(state: AgentState) -> AgentState:
@@ -112,4 +132,5 @@ async def generate_proactive_suggestion(state: AgentState) -> AgentState:
             "pasos mas pequenos, o buscar un hueco libre en tu calendario para ella."
         )
 
-    return {**state, "response": state["response"] + suggestion}
+    base_response = _extract_text(state.get("response", ""))
+    return {**state, "response": base_response + suggestion}
