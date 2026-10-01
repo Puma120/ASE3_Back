@@ -2,6 +2,7 @@ import asyncio
 from logging.config import fileConfig
 
 from sqlalchemy import pool
+from sqlalchemy.exc import OperationalError
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
@@ -68,8 +69,21 @@ async def run_migrations_online() -> None:
         poolclass=pool.NullPool,
     )
 
-    async with connectable.connect() as connection:
-        await connection.run_sync(do_run_migrations)
+    # Reintento acotado: en un cold start de Railway el contenedor de este
+    # servicio puede arrancar antes de que Postgres este aceptando conexiones
+    # (ECONNREFUSED en vez de un error de credenciales/DNS), asi que un
+    # reintento corto evita que el deploy quede en crash loop por una
+    # condicion de carrera de arranque.
+    max_attempts = 10
+    for attempt in range(1, max_attempts + 1):
+        try:
+            async with connectable.connect() as connection:
+                await connection.run_sync(do_run_migrations)
+            break
+        except OperationalError:
+            if attempt == max_attempts:
+                raise
+            await asyncio.sleep(3)
 
     await connectable.dispose()
 
