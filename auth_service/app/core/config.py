@@ -16,6 +16,15 @@ class Settings(BaseSettings):
 
     google_oauth_client_id: str = ""
     google_oauth_client_secret: str = ""
+    # URL publica de ESTE servicio tal como la ve Google (pasa por el gateway,
+    # ver deploy_railway_vercel.md 3.1 - ya configurada como Authorized redirect
+    # URI en Google Cloud Console).
+    google_oauth_redirect_uri: str = "http://localhost:8000/auth/google/callback"
+    # A donde redirigir tras un login exitoso con Google. Web: se le agrega
+    # "#token=...". Movil: usa el scheme propio (GOOGLE_OAUTH_MOBILE_SCHEME),
+    # no esta URL.
+    pwa_base_url: str = "http://localhost:5173"
+    google_oauth_mobile_scheme: str = "ase3agentetdah"
 
 
 settings = Settings()

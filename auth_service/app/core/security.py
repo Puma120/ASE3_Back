@@ -30,3 +30,21 @@ def create_access_token(subject: str, expires_minutes: int | None = None) -> str
     )
     payload = {"sub": subject, "exp": expire}
     return jwt.encode(payload, settings.jwt_secret_key, algorithm=settings.jwt_algorithm)
+
+
+def create_oauth_state_token(platform: str) -> str:
+    """Firma un token de corta duracion que viaja como "state" en el flujo
+    OAuth de Google - evita CSRF (que /auth/google/callback solo acepte un
+    state que esta misma app emitio) y le dice al callback a donde redirigir
+    de vuelta (web vs movil) sin depender de sesion de servidor.
+    """
+    expire = datetime.now(timezone.utc) + timedelta(minutes=10)
+    payload = {"platform": platform, "exp": expire}
+    return jwt.encode(payload, settings.jwt_secret_key, algorithm=settings.jwt_algorithm)
+
+
+def verify_oauth_state_token(token: str) -> str:
+    """Devuelve el platform ("web"/"mobile") o lanza jwt.PyJWTError si el
+    state es invalido/expirado/no fue emitido por este servicio."""
+    payload = jwt.decode(token, settings.jwt_secret_key, algorithms=[settings.jwt_algorithm])
+    return payload["platform"]
