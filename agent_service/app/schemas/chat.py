@@ -9,3 +9,7 @@ class ChatMessageRequest(BaseModel):
 
 class ChatMessageResponse(BaseModel):
     response: str
+
+
+class SuggestionResponse(BaseModel):
+    suggestion: str | None = None

@@ -11,3 +11,4 @@ mongo_client = AsyncIOMotorClient(settings.mongo_uri)
 mongo_db = mongo_client[settings.mongo_db_name]
 
 activity_logs: AsyncIOMotorCollection = mongo_db["activity_logs"]
+agent_params: AsyncIOMotorCollection = mongo_db["agent_params"]

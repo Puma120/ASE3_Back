@@ -44,3 +44,10 @@ async def create_event(
         )
     )
     return event
+
+
+async def list_events(
+    db: AsyncSession, user_id: uuid.UUID, window_start: datetime, window_end: datetime
+) -> list[dict]:
+    credentials = await get_user_credentials(db, user_id)
+    return calendar_client.list_events(credentials, window_start, window_end)

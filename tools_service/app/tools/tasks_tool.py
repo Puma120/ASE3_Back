@@ -39,3 +39,17 @@ async def create_subtasks(
         )
     )
     return created
+
+
+async def list_pending_tasks(db: AsyncSession, user_id: uuid.UUID) -> list[dict]:
+    credentials = await get_user_credentials(db, user_id)
+    return tasks_client.list_pending_tasks(credentials)
+
+
+async def complete_task(db: AsyncSession, user_id: uuid.UUID, task_id: str) -> dict:
+    credentials = await get_user_credentials(db, user_id)
+    task = tasks_client.complete_task(credentials, task_id)
+    await activity_logs.insert_one(
+        build_activity_log(str(user_id), "task_completed", {"title": task.get("title", "")})
+    )
+    return task

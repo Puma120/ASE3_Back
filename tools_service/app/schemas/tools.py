@@ -26,7 +26,22 @@ class EventCreate(BaseModel):
     description: str = ""
 
 
+class EventSummary(BaseModel):
+    id: str
+    summary: str
+    start: str
+    end: str
+    all_day: bool = False
+
+
 # --- Tasks ---
+
+
+class TaskSummary(BaseModel):
+    id: str
+    title: str
+    notes: str = ""
+    due: str | None = None
 
 
 class TaskCreate(BaseModel):

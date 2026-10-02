@@ -44,3 +44,22 @@ def create_subtasks(credentials: Credentials, parent_title: str, subtasks: list[
             .execute()
         )
     return created
+
+
+def list_pending_tasks(credentials: Credentials) -> list[dict]:
+    result = (
+        _service(credentials)
+        .tasks()
+        .list(tasklist=DEFAULT_TASKLIST, showCompleted=False, maxResults=50)
+        .execute()
+    )
+    return result.get("items", [])
+
+
+def complete_task(credentials: Credentials, task_id: str) -> dict:
+    return (
+        _service(credentials)
+        .tasks()
+        .patch(tasklist=DEFAULT_TASKLIST, task=task_id, body={"status": "completed"})
+        .execute()
+    )

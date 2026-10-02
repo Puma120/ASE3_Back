@@ -18,3 +18,4 @@ class AgentState(TypedDict, total=False):
     tool_result: Any | None
     ai_message: Any | None  # AIMessage con tool_calls previo a ToolMessage para Gemini
     response: str
+    params: dict[str, Any]  # AgentParams del usuario (top-k, temperatura, ventana)

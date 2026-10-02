@@ -7,7 +7,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.deps import get_current_user_id
 from app.db.session import get_db
-from app.schemas.auth import UserResponse
+from app.models.google_credential import GoogleCredential
+from app.schemas.auth import GoogleStatusResponse, UserResponse
 from app.schemas.user_settings import UserSettingsResponse, UserSettingsUpdate
 from app.services.user_service import get_or_create_settings, get_user_or_404, update_settings
 
@@ -40,3 +41,11 @@ async def patch_settings(
 ) -> UserSettingsResponse:
     settings_row = await update_settings(db, user_id, data)
     return UserSettingsResponse.model_validate(settings_row)
+
+
+@router.get("/me/google-status", response_model=GoogleStatusResponse)
+async def google_status(
+    user_id: uuid.UUID = Depends(get_current_user_id),
+    db: AsyncSession = Depends(get_db),
+) -> GoogleStatusResponse:
+    return GoogleStatusResponse(connected=await db.get(GoogleCredential, user_id) is not None)

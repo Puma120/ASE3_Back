@@ -6,6 +6,7 @@ solo moveria el dispatch de FastAPI a codigo propio sin ganar nada.
 """
 
 import uuid
+from datetime import datetime
 
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -14,6 +15,7 @@ from app.core.deps import get_current_user_id
 from app.db.postgres import get_db
 from app.schemas.tools import (
     EventCreate,
+    EventSummary,
     FreeSlot,
     FreeSlotsRequest,
     RecentEmailsRequest,
@@ -21,10 +23,18 @@ from app.schemas.tools import (
     SetFocusModeRequest,
     SubtasksCreate,
     TaskCreate,
+    TaskSummary,
     TravelTimeRequest,
     TravelTimeResponse,
 )
-from app.tools import calendar_tool, device_tool, gmail_tool, maps_tool, tasks_tool
+from app.tools import (
+    calendar_tool,
+    device_tool,
+    gmail_tool,
+    maps_tool,
+    routines_tool,
+    tasks_tool,
+)
 
 router = APIRouter(prefix="/tools", tags=["tools"])
 
@@ -42,6 +52,26 @@ async def free_slots(
         db, user_id, body.window_start, body.window_end, body.duration_minutes
     )
     return [FreeSlot(start=start, end=end) for start, end in slots]
+
+
+@router.get("/calendar/events")
+async def list_calendar_events(
+    window_start: datetime,
+    window_end: datetime,
+    user_id: uuid.UUID = Depends(get_current_user_id),
+    db: AsyncSession = Depends(get_db),
+):
+    events = await calendar_tool.list_events(db, user_id, window_start, window_end)
+    return [
+        EventSummary(
+            id=e["id"],
+            summary=e.get("summary", "(sin titulo)"),
+            start=e["start"].get("dateTime") or e["start"].get("date"),
+            end=e["end"].get("dateTime") or e["end"].get("date"),
+            all_day="date" in e["start"],
+        )
+        for e in events
+    ]
 
 
 @router.post("/calendar/events")
@@ -74,6 +104,37 @@ async def create_subtasks(
     db: AsyncSession = Depends(get_db),
 ):
     return await tasks_tool.create_subtasks(db, user_id, body.parent_title, body.subtasks)
+
+
+@router.get("/tasks", response_model=list[TaskSummary])
+async def list_tasks(
+    user_id: uuid.UUID = Depends(get_current_user_id),
+    db: AsyncSession = Depends(get_db),
+):
+    tasks = await tasks_tool.list_pending_tasks(db, user_id)
+    return [
+        TaskSummary(id=t["id"], title=t.get("title", ""), notes=t.get("notes", ""), due=t.get("due"))
+        for t in tasks
+        if t.get("title")
+    ]
+
+
+@router.post("/tasks/{task_id}/complete")
+async def complete_task(
+    task_id: str,
+    user_id: uuid.UUID = Depends(get_current_user_id),
+    db: AsyncSession = Depends(get_db),
+):
+    task = await tasks_tool.complete_task(db, user_id, task_id)
+    return {"id": task["id"], "status": task["status"]}
+
+
+# --- Routines ---
+
+
+@router.get("/routines/summary")
+async def routines_summary(user_id: uuid.UUID = Depends(get_current_user_id)):
+    return await routines_tool.routines_summary(user_id)
 
 
 # --- Maps ---

@@ -18,9 +18,11 @@ def get_history(user_id: UUID) -> list[dict[str, str]]:
     return list(_sessions[user_id])
 
 
-def append_exchange(user_id: UUID, role: str, content: str) -> None:
+def append_exchange(
+    user_id: UUID, role: str, content: str, window: int | None = None
+) -> None:
     history = _sessions[user_id]
     history.append({"role": role, "content": content})
-    window = settings.short_term_memory_window
+    window = window or settings.short_term_memory_window
     if len(history) > window:
         del history[: len(history) - window]

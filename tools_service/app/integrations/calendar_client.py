@@ -60,3 +60,20 @@ def create_event(
         "end": {"dateTime": end.isoformat()},
     }
     return service.events().insert(calendarId="primary", body=event).execute()
+
+
+def list_events(credentials: Credentials, window_start: datetime, window_end: datetime) -> list[dict]:
+    """Eventos del calendario principal en [window_start, window_end], por hora de inicio."""
+    service = _service(credentials)
+    result = (
+        service.events()
+        .list(
+            calendarId="primary",
+            timeMin=window_start.isoformat(),
+            timeMax=window_end.isoformat(),
+            singleEvents=True,
+            orderBy="startTime",
+        )
+        .execute()
+    )
+    return result.get("items", [])

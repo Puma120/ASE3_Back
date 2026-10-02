@@ -6,6 +6,7 @@ pidio una tool] -> generate_proactive_suggestion (Objetivo 4 del PDF).
 """
 
 import json
+from typing import Any
 from collections import Counter
 from datetime import datetime, timedelta, timezone
 
@@ -28,28 +29,29 @@ SYSTEM_PROMPT = (
     "de solo describir que se podria hacer."
 )
 
-_llm = None
+_llms: dict[float, Any] = {}
 
 
-def _get_llm():
+def _get_llm(temperature: float):
     """Lazy init: construir ChatGoogleGenerativeAI en el import falla si
     GEMINI_API_KEY esta vacio (pydantic valida el key al crear el objeto),
     lo cual tumbaria el servicio completo antes de tener credenciales reales."""
-    global _llm
-    if _llm is None:
-        _llm = ChatGoogleGenerativeAI(
+    if temperature not in _llms:
+        _llms[temperature] = ChatGoogleGenerativeAI(
             model=settings.gemini_chat_model,
             google_api_key=settings.gemini_api_key,
-            temperature=settings.llm_temperature,
+            temperature=temperature,
         ).bind_tools(TOOL_SPECS)
-    return _llm
+    return _llms[temperature]
 
 
 async def retrieve_context(state: AgentState) -> AgentState:
     """Objetivo 2 del PDF: recupera contexto relevante del historial
     persistente del usuario (Qdrant) para la ultima consulta."""
     last_message = state["messages"][-1]["content"]
-    context = await vector_store.search(str(state["user_id"]), last_message)
+    context = await vector_store.search(
+        str(state["user_id"]), last_message, state.get("params", {}).get("rag_top_k")
+    )
     return {**state, "rag_context": context}
 
 
@@ -109,7 +111,9 @@ async def call_llm(state: AgentState) -> AgentState:
                 tool_call_id=state["tool_call"]["id"],
             )
         )
-    ai_message = await _get_llm().ainvoke(messages)
+    ai_message = await _get_llm(
+        state.get("params", {}).get("llm_temperature", settings.llm_temperature)
+    ).ainvoke(messages)
 
     if ai_message.tool_calls:
         call = ai_message.tool_calls[0]
@@ -135,23 +139,26 @@ async def call_tool(state: AgentState) -> AgentState:
     return {**state, "tool_result": result}
 
 
-async def generate_proactive_suggestion(state: AgentState) -> AgentState:
-    """Objetivo 4 del PDF: analiza el historial reciente de activity_logs del
-    usuario y, si detecta un patron simple (tareas pospuestas repetidamente),
-    agrega una sugerencia proactiva a la respuesta."""
+SUGGESTION_TEXT = (
+    "Note que has pospuesto varias tareas ultimamente. "
+    "Si quieres, puedo ayudarte a dividir tu proxima tarea grande en "
+    "pasos mas pequenos, o buscar un hueco libre en tu calendario para ella."
+)
+
+
+async def proactive_suggestion_text(user_id: str) -> str:
+    """Objetivo 4 del PDF: analiza el historial reciente de activity_logs y,
+    si detecta un patron simple (tareas pospuestas repetidamente), devuelve
+    una sugerencia; cadena vacia si no hay patron."""
     since = datetime.now(timezone.utc) - timedelta(days=14)
-    cursor = activity_logs.find(
-        {"user_id": str(state["user_id"]), "created_at": {"$gte": since}}
-    )
+    cursor = activity_logs.find({"user_id": user_id, "created_at": {"$gte": since}})
     kinds = Counter([doc["kind"] async for doc in cursor])
+    return SUGGESTION_TEXT if kinds.get("task_postponed", 0) >= 3 else ""
 
-    suggestion = ""
-    if kinds.get("task_postponed", 0) >= 3:
-        suggestion = (
-            "\n\nNote que has pospuesto varias tareas ultimamente. "
-            "Si quieres, puedo ayudarte a dividir tu proxima tarea grande en "
-            "pasos mas pequenos, o buscar un hueco libre en tu calendario para ella."
-        )
 
+async def generate_proactive_suggestion(state: AgentState) -> AgentState:
+    """Agrega la sugerencia proactiva (si hay patron) a la respuesta."""
+    suggestion = await proactive_suggestion_text(str(state["user_id"]))
     base_response = _extract_text(state.get("response", ""))
-    return {**state, "response": base_response + suggestion}
+    suffix = f"\n\n{suggestion}" if suggestion else ""
+    return {**state, "response": base_response + suffix}
