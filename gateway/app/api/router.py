@@ -2,7 +2,7 @@
 
 Proxy generico: reenvia metodo/headers/body/query tal cual al microservicio
 destino segun el prefijo de la ruta. Valida el JWT de sesion antes de
-reenviar, excepto en las rutas publicas de registro/login (el usuario aun
+reenviar, excepto en las rutas publicas del login con Google (el usuario aun
 no tiene token en ese punto).
 """
 
@@ -16,11 +16,10 @@ from app.middleware.session import validate_session
 
 router = APIRouter()
 
-# Rutas de auth_service que no requieren sesion previa (el usuario esta
-# obteniendo su primer token o aun no tiene cuenta). "google/login" y
-# "google/callback" tambien son pre-login: el usuario todavia no tiene JWT
+# Rutas de auth_service que no requieren sesion previa (el login es solo con
+# Google). "google/login" y "google/callback" son pre-login: el usuario todavia no tiene JWT
 # propio cuando Google lo redirige de vuelta aqui.
-PUBLIC_AUTH_PATHS = {"register", "login", "google/login", "google/callback"}
+PUBLIC_AUTH_PATHS = {"google/login", "google/callback"}
 
 # Railway a veces tarda unos segundos en levantar el DNS/socket interno de un
 # servicio recien redeployado o "dormido" (cold start / red privada) -> se
