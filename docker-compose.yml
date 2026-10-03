@@ -1,6 +1,6 @@
 version: "3.9"
 
-# Orquesta los 4 microservicios Python + las 3 bases de datos de la Capa de
+# Orquesta los 5 microservicios Python + las 3 bases de datos de la Capa de
 # Persistencia (ver .antigravity/project_map.md). Cada servicio de app/ tiene
 # su propio pyproject.toml/.env.example; este compose asume que existira un
 # Dockerfile por servicio (pendiente de crear cuando cada servicio tenga
@@ -58,6 +58,16 @@ services:
       - qdrant
       - tools_service
 
+  proactive_service:
+    build: ./proactive_service
+    env_file: ./proactive_service/.env
+    ports:
+      - "8004:8004"
+    depends_on:
+      - mongo
+      - tools_service
+      - agent_service
+
   gateway:
     build: ./gateway
     env_file: ./gateway/.env
@@ -67,6 +77,7 @@ services:
       - auth_service
       - tools_service
       - agent_service
+      - proactive_service
 
 volumes:
   postgres_data:

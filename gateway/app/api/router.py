@@ -78,3 +78,9 @@ async def proxy_tools(path: str, request: Request) -> Response:
 async def proxy_agent(path: str, request: Request) -> Response:
     validate_session(request)
     return await _proxy(settings.agent_service_url, f"agent/{path}", request)
+
+
+@router.api_route("/proactive/{path:path}", methods=["GET", "POST", "PUT", "PATCH", "DELETE"])
+async def proxy_proactive(path: str, request: Request) -> Response:
+    validate_session(request)
+    return await _proxy(settings.proactive_service_url, f"proactive/{path}", request)
