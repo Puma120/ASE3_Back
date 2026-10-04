@@ -12,7 +12,7 @@ class Settings(BaseSettings):
 
     jwt_secret_key: str = "change-me"
     jwt_algorithm: str = "HS256"
-    jwt_access_token_expire_minutes: int = 60
+    jwt_access_token_expire_minutes: int = 43200  # 30 dias
 
     google_oauth_client_id: str = ""
     google_oauth_client_secret: str = ""

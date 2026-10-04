@@ -11,5 +11,9 @@ class UserResponse(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class TokenResponse(BaseModel):
+    access_token: str
+
+
 class GoogleStatusResponse(BaseModel):
     connected: bool
