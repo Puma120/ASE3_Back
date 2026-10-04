@@ -35,7 +35,7 @@ async def _proxy(base_url: str, path: str, request: Request) -> Response:
         for key, value in request.headers.items()
         if key.lower() not in ("host", "content-length")
     }
-    async with httpx.AsyncClient(base_url=base_url, timeout=30.0) as client:
+    async with httpx.AsyncClient(base_url=base_url, timeout=90.0) as client:
         for attempt in range(PROXY_RETRIES):
             try:
                 upstream = await client.request(

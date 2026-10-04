@@ -21,6 +21,8 @@ class Settings(BaseSettings):
     gemini_embedding_model: str = "gemini-embedding-001"
 
     tools_service_url: str = "http://localhost:8002"
+    auth_service_url: str = "http://localhost:8001"
+    proactive_service_url: str = "http://localhost:8004"
 
     jwt_secret_key: str = "change-me"
     jwt_algorithm: str = "HS256"
@@ -28,6 +30,8 @@ class Settings(BaseSettings):
     short_term_memory_window: int = 10
     rag_top_k: int = 5
     llm_temperature: float = 0.3
+    # Tope de rondas LLM -> tools por mensaje (evita bucles).
+    max_tool_rounds: int = 6
 
 
 settings = Settings()

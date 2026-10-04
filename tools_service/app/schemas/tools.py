@@ -32,6 +32,7 @@ class EventSummary(BaseModel):
     start: str
     end: str
     all_day: bool = False
+    location: str | None = None
 
 
 # --- Tasks ---

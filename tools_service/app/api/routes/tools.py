@@ -69,6 +69,7 @@ async def list_calendar_events(
             start=e["start"].get("dateTime") or e["start"].get("date"),
             end=e["end"].get("dateTime") or e["end"].get("date"),
             all_day="date" in e["start"],
+            location=e.get("location"),
         )
         for e in events
     ]

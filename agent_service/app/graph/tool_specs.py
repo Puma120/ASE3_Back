@@ -72,7 +72,7 @@ TOOL_SPECS = [
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "origin": {"type": "string"},
+                    "origin": {"type": "string", "description": "Direccion o coordenadas lat,lng (usa la ubicacion actual del usuario si la conoces)"},
                     "destination": {"type": "string"},
                     "event_start": {"type": "string", "description": "ISO datetime del evento destino"},
                 },
@@ -117,6 +117,73 @@ TOOL_SPECS = [
                 "properties": {"enabled": {"type": "boolean"}},
                 "required": ["enabled"],
             },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "list_events",
+            "description": "Lista los eventos del calendario del usuario en una ventana de tiempo (para saber que tiene hoy, manana o esta semana).",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "window_start": {"type": "string", "description": "ISO datetime de inicio, con zona horaria"},
+                    "window_end": {"type": "string", "description": "ISO datetime de fin, con zona horaria"},
+                },
+                "required": ["window_start", "window_end"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "list_tasks",
+            "description": "Lista las tareas pendientes del usuario en Google Tasks.",
+            "parameters": {"type": "object", "properties": {}, "required": []},
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "complete_task",
+            "description": "Marca una tarea como completada. Usa el id que devolvio list_tasks.",
+            "parameters": {
+                "type": "object",
+                "properties": {"task_id": {"type": "string"}},
+                "required": ["task_id"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_routine_summary",
+            "description": "Resumen de la rutina del usuario: racha de dias activos y tareas/eventos de los ultimos 7 dias. Sirve para revisar como le va y adaptar sugerencias.",
+            "parameters": {"type": "object", "properties": {}, "required": []},
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "create_reminder",
+            "description": "Programa una notificacion push inteligente para el usuario a una hora concreta (recordatorio, preparacion, tomar algo, salir).",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "message": {"type": "string", "description": "Texto breve y accionable de la notificacion"},
+                    "fire_at": {"type": "string", "description": "ISO datetime, con zona horaria, en que debe sonar"},
+                    "title": {"type": "string"},
+                },
+                "required": ["message", "fire_at"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "list_reminders",
+            "description": "Lista los recordatorios pendientes que ya estan programados para el usuario.",
+            "parameters": {"type": "object", "properties": {}, "required": []},
         },
     },
 ]
