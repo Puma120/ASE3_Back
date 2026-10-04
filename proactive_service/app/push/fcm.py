@@ -46,7 +46,7 @@ async def send(token: str, title: str, body: str, data: dict[str, str] | None = 
                 "token": token,
                 "notification": {"title": title, "body": body},
                 "data": {k: str(v) for k, v in (data or {}).items()},
-                "android": {"priority": "high"},
+                "android": {"priority": "high", "notification": {"channel_id": "proactive"}},
             }
         }
         async with httpx.AsyncClient(timeout=15.0) as client:
