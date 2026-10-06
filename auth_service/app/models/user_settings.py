@@ -19,6 +19,9 @@ class UserSettings(Base):
     - focus_mode_enabled: preferencia de "Control de Enfoque" (DND) que
       tools_service.device_tool consulta antes de emitir el comando -
       recordar que solo tiene efecto real en front/mobile sobre Android.
+    - quiet_hours_*: horas de silencio. proactive_service guarda los avisos
+      generados en ese rango (se ven en Inicio) pero no los manda por push.
+      El rango puede cruzar la medianoche (22 -> 8).
     """
 
     __tablename__ = "user_settings"
@@ -31,3 +34,6 @@ class UserSettings(Base):
     work_end_hour: Mapped[int] = mapped_column(Integer, default=18)
     proactive_suggestions_enabled: Mapped[bool] = mapped_column(Boolean, default=True)
     focus_mode_enabled: Mapped[bool] = mapped_column(Boolean, default=False)
+    quiet_hours_enabled: Mapped[bool] = mapped_column(Boolean, default=False)
+    quiet_start_hour: Mapped[int] = mapped_column(Integer, default=22)
+    quiet_end_hour: Mapped[int] = mapped_column(Integer, default=8)

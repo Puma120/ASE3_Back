@@ -50,6 +50,20 @@ async def complete_task(db: AsyncSession, user_id: uuid.UUID, task_id: str) -> d
     credentials = await get_user_credentials(db, user_id)
     task = tasks_client.complete_task(credentials, task_id)
     await activity_logs.insert_one(
-        build_activity_log(str(user_id), "task_completed", {"title": task.get("title", "")})
+        build_activity_log(
+            str(user_id), "task_completed", {"task_id": task_id, "title": task.get("title", "")}
+        )
+    )
+    return task
+
+
+async def reopen_task(db: AsyncSession, user_id: uuid.UUID, task_id: str) -> dict:
+    """"Deshacer" del front: reabre la tarea y borra su registro de completada
+    para que la racha y el resumen semanal no cuenten un error de toque."""
+    credentials = await get_user_credentials(db, user_id)
+    task = tasks_client.reopen_task(credentials, task_id)
+    await activity_logs.find_one_and_delete(
+        {"user_id": str(user_id), "kind": "task_completed", "payload.task_id": task_id},
+        sort=[("created_at", -1)],
     )
     return task

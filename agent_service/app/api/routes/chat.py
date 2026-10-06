@@ -6,14 +6,14 @@ import asyncio
 import logging
 import uuid
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Query, Request
 
 from app.core.deps import get_current_user_id
 from app.graph.builder import agent_graph
 from app.memory import params as params_store
 from app.memory import vector_store
-from app.memory.short_term import append_exchange, get_history
-from app.schemas.chat import ChatMessageRequest, ChatMessageResponse, DeviceCommand
+from app.memory.short_term import append_exchange, get_history, get_recent_messages
+from app.schemas.chat import ChatMessageRequest, ChatMessageResponse, DeviceCommand, HistoryMessage
 
 log = logging.getLogger("agent.chat")
 
@@ -56,3 +56,13 @@ async def chat(
         response=result["response"],
         device_commands=[DeviceCommand(**c) for c in result.get("device_commands", [])],
     )
+
+
+@router.get("/history", response_model=list[HistoryMessage])
+async def history(
+    limit: int = Query(default=30, ge=1, le=100),
+    user_id: uuid.UUID = Depends(get_current_user_id),
+) -> list[HistoryMessage]:
+    """Ultimos mensajes de la conversacion: al volver a la app el usuario ve en
+    que iba (decision 5 del documento de diseno TDAH del front)."""
+    return [HistoryMessage(**m) for m in await get_recent_messages(user_id, limit)]

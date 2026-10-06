@@ -72,3 +72,23 @@ def test_briefing_only_in_morning_window_and_once_per_day():
     evening = datetime(2026, 6, 2, 2, 0, tzinfo=timezone.utc)  # 20:00 local
     assert rules.briefing_alert(events, [], evening, TZ, 9) is None
     assert rules.briefing_alert([], [], morning, TZ, 9) is None
+
+
+def test_quiet_hours_same_day_range():
+    assert rules.in_quiet_hours(13, 13, 15)
+    assert rules.in_quiet_hours(14, 13, 15)
+    assert not rules.in_quiet_hours(15, 13, 15)
+    assert not rules.in_quiet_hours(12, 13, 15)
+
+
+def test_quiet_hours_wraps_midnight():
+    assert rules.in_quiet_hours(22, 22, 8)
+    assert rules.in_quiet_hours(23, 22, 8)
+    assert rules.in_quiet_hours(0, 22, 8)
+    assert rules.in_quiet_hours(7, 22, 8)
+    assert not rules.in_quiet_hours(8, 22, 8)
+    assert not rules.in_quiet_hours(21, 22, 8)
+
+
+def test_quiet_hours_empty_range():
+    assert not any(rules.in_quiet_hours(h, 9, 9) for h in range(24))

@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field
 class DeviceRegister(BaseModel):
     token: str = Field(min_length=10, max_length=4096)
     platform: str = Field(default="android", pattern="^(android|ios|web)$")
+    sound: bool = False  # canal con sonido o silencioso (ver push/fcm.py)
 
 
 class DeviceUnregister(BaseModel):

@@ -36,6 +36,16 @@ def _minutes(seconds: float) -> int:
     return max(1, math.ceil(seconds / 60))
 
 
+def in_quiet_hours(hour: int, start: int, end: int) -> bool:
+    """True si `hour` (hora local) cae en las horas de silencio [start, end).
+    El rango puede cruzar la medianoche (22 -> 8); start == end = sin silencio."""
+    if start == end:
+        return False
+    if start < end:
+        return start <= hour < end
+    return hour >= start or hour < end
+
+
 def departure_alerts(
     event: dict,
     now: datetime,

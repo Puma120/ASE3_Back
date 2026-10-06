@@ -130,6 +130,16 @@ async def complete_task(
     return {"id": task["id"], "status": task["status"]}
 
 
+@router.post("/tasks/{task_id}/reopen")
+async def reopen_task(
+    task_id: str,
+    user_id: uuid.UUID = Depends(get_current_user_id),
+    db: AsyncSession = Depends(get_db),
+):
+    task = await tasks_tool.reopen_task(db, user_id, task_id)
+    return {"id": task["id"], "status": task["status"]}
+
+
 # --- Routines ---
 
 

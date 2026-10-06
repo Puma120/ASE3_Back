@@ -27,6 +27,16 @@ async def get_history(user_id: UUID, window: int | None = None) -> list[dict[str
     return [{"role": d["role"], "content": d["content"]} for d in reversed(docs)]
 
 
+async def get_recent_messages(user_id: UUID, limit: int) -> list[dict]:
+    """Como get_history pero con fecha: lo que el front muestra al reabrir el chat."""
+    cursor = chat_history.find({"user_id": str(user_id)}).sort("created_at", -1).limit(limit)
+    docs = [doc async for doc in cursor]
+    return [
+        {"role": d["role"], "content": d["content"], "created_at": d["created_at"]}
+        for d in reversed(docs)
+    ]
+
+
 async def append_exchange(user_id: UUID, user_message: str, assistant_message: str) -> None:
     now = datetime.now(timezone.utc)
     await chat_history.insert_many(

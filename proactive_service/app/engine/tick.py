@@ -125,9 +125,20 @@ async def evaluate_user(user_id: str, now: datetime) -> int:
     except httpx.HTTPError as exc:
         log.warning("reglas de %s fallaron: %s", user_id, exc)
 
+    # Horas de silencio: el aviso se guarda (se ve en Inicio) pero no se manda
+    # por push. Los recordatorios que el usuario pidio (fire_due_reminders)
+    # no pasan por aqui y siempre llegan.
+    quiet = bool(user_settings.get("quiet_hours_enabled")) and rules.in_quiet_hours(
+        now.astimezone(tz).hour,
+        user_settings.get("quiet_start_hour", 22),
+        user_settings.get("quiet_end_hour", 8),
+    )
+
     delivered = 0
     for alert in alerts:
-        if await deliver(user_id, alert.kind, alert.title, alert.body, alert.dedupe_key, alert.data):
+        if await deliver(
+            user_id, alert.kind, alert.title, alert.body, alert.dedupe_key, alert.data, push=not quiet
+        ):
             delivered += 1
     return delivered
 

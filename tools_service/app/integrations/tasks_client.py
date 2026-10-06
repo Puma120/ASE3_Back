@@ -63,3 +63,17 @@ def complete_task(credentials: Credentials, task_id: str) -> dict:
         .patch(tasklist=DEFAULT_TASKLIST, task=task_id, body={"status": "completed"})
         .execute()
     )
+
+
+def reopen_task(credentials: Credentials, task_id: str) -> dict:
+    """Deshace complete_task: la tarea vuelve a pendientes."""
+    return (
+        _service(credentials)
+        .tasks()
+        .patch(
+            tasklist=DEFAULT_TASKLIST,
+            task=task_id,
+            body={"status": "needsAction", "completed": None},
+        )
+        .execute()
+    )

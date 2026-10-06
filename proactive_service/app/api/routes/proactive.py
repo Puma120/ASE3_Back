@@ -79,7 +79,14 @@ async def register_device(
     # otra cuenta) se reasigna.
     await devices.update_one(
         {"token": body.token},
-        {"$set": {"user_id": str(user_id), "platform": body.platform, "updated_at": _now()}},
+        {
+            "$set": {
+                "user_id": str(user_id),
+                "platform": body.platform,
+                "sound": body.sound,
+                "updated_at": _now(),
+            }
+        },
         upsert=True,
     )
     await _touch(str(user_id))

@@ -18,8 +18,10 @@ async def deliver(
     body: str,
     dedupe_key: str,
     data: dict | None = None,
+    push: bool = True,
 ) -> bool:
-    """False si ya se habia avisado lo mismo (dedupe_key repetido por usuario)."""
+    """False si ya se habia avisado lo mismo (dedupe_key repetido por usuario).
+    push=False (horas de silencio) solo guarda el aviso, sin mandarlo al telefono."""
     doc = {
         "user_id": user_id,
         "kind": kind,
@@ -36,10 +38,18 @@ async def deliver(
     except DuplicateKeyError:
         return False
 
+    if not push:
+        await notifications.update_one({"_id": result.inserted_id}, {"$set": {"push": "quiet"}})
+        return True
+
     statuses: list[str] = []
     async for device in devices.find({"user_id": user_id}):
         status = await fcm.send(
-            device["token"], title, body, {"kind": kind, "notification_id": str(result.inserted_id)}
+            device["token"],
+            title,
+            body,
+            {"kind": kind, "notification_id": str(result.inserted_id)},
+            channel_id=fcm.CHANNEL_SOUND if device.get("sound") else fcm.CHANNEL_SILENT,
         )
         if status == "invalid_token":
             await devices.delete_one({"_id": device["_id"]})

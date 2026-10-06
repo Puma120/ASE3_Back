@@ -35,7 +35,19 @@ def _access_token() -> str:
     return _credentials.token
 
 
-async def send(token: str, title: str, body: str, data: dict[str, str] | None = None) -> str:
+# Canales que crea el front (mobile/src/native/push.native.ts). Por defecto
+# los avisos no suenan; el usuario elige "Con sonido" en Ajustes.
+CHANNEL_SILENT = "avisos_silencio"
+CHANNEL_SOUND = "avisos_sonido"
+
+
+async def send(
+    token: str,
+    title: str,
+    body: str,
+    data: dict[str, str] | None = None,
+    channel_id: str = CHANNEL_SILENT,
+) -> str:
     """Devuelve "sent", "invalid_token" (borrar el dispositivo), "disabled" o "error"."""
     if not is_configured():
         return "disabled"
@@ -46,7 +58,7 @@ async def send(token: str, title: str, body: str, data: dict[str, str] | None = 
                 "token": token,
                 "notification": {"title": title, "body": body},
                 "data": {k: str(v) for k, v in (data or {}).items()},
-                "android": {"priority": "high", "notification": {"channel_id": "proactive"}},
+                "android": {"priority": "high", "notification": {"channel_id": channel_id}},
             }
         }
         async with httpx.AsyncClient(timeout=15.0) as client:
