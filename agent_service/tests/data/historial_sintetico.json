@@ -1,0 +1,4374 @@
+{
+ "descripcion": "Historial sintetico etiquetado para evaluar la recuperacion de contexto (Objetivo 2). Usuaria A: adulta joven con TDAH que acaba de independizarse (estudia, trabaja medio tiempo, paga renta, tiene pareja); cada tema (20 en total) es un asunto de organizacion y gestion del tiempo del que hablo varias veces con el agente (citas, entregas, tramites pospuestos, medicacion, rutinas, turnos, examenes, pagos, compromisos). Cada intercambio se indexa como lo hace /agent/chat ('Usuario: ...\\nAsistente: ...'). Un fragmento recuperado es relevante si es del mismo usuario y comparte tema con la consulta. El usuario B tiene los mismos temas con otros datos para detectar fugas entre usuarios.",
+ "usuarios": {
+  "a": {
+   "user_id": "11111111-1111-4111-8111-111111111111",
+   "intercambios": [
+    {
+     "id": "imss-1",
+     "temas": [
+      "cita_imss"
+     ],
+     "usuario": "Me dieron cita de seguimiento con el psiquiatra en el IMSS el jueves 15 a las 10:30.",
+     "asistente": "Anotado: **consulta de seguimiento en el IMSS, jueves 15 a las 10:30**. ¿Quieres que la agregue a tu calendario?"
+    },
+    {
+     "id": "imss-2",
+     "temas": [
+      "cita_imss"
+     ],
+     "usuario": "La consulta es en la Unidad de Medicina Familiar 20, ¿cuánto hago desde la escuela?",
+     "asistente": "De la escuela a la UMF 20 son unos **40 minutos en metro**. Para llegar 10:15, sal a las **9:30**. ¿Te pongo un recordatorio para salir?"
+    },
+    {
+     "id": "imss-3",
+     "temas": [
+      "cita_imss"
+     ],
+     "usuario": "Para la consulta del IMSS tengo que llevar mi carnet y la hoja de referencia.",
+     "asistente": "Lista para la consulta:\n- Carnet del IMSS\n- Hoja de referencia\nDéjalos en tu mochila desde el miércoles en la noche."
+    },
+    {
+     "id": "imss-4",
+     "temas": [
+      "cita_imss"
+     ],
+     "usuario": "Ese jueves tengo laboratorio a las 9, se me empalma con la cita del IMSS.",
+     "asistente": "Se empalman. Opciones:\n1. Avisar al profesor que faltas al laboratorio.\n2. Llamar al IMSS para cambiar la hora.\n¿Cuál prefieres?"
+    },
+    {
+     "id": "imss-5",
+     "temas": [
+      "cita_imss"
+     ],
+     "usuario": "Mejor le aviso al profe del laboratorio, la cita del IMSS es más difícil de conseguir.",
+     "asistente": "Buena decisión. Escríbele hoy al profesor de laboratorio. ¿Te creo una tarea para hacerlo antes de las 18:00?"
+    },
+    {
+     "id": "imss-6",
+     "temas": [
+      "cita_imss"
+     ],
+     "usuario": "Ponme dos recordatorios para la cita del IMSS: uno para prepararme y otro para salir.",
+     "asistente": "Listo:\n- **9:00** prepararte (carnet y hoja de referencia)\n- **9:30** salir a la UMF 20"
+    },
+    {
+     "id": "bd-1",
+     "temas": [
+      "proyecto_bd"
+     ],
+     "usuario": "El proyecto final de Bases de Datos se entrega el 27 de noviembre.",
+     "asistente": "Anotado: **entrega del proyecto de Bases de Datos, 27 de noviembre**. Es grande; ¿lo dividimos en pasos?"
+    },
+    {
+     "id": "bd-2",
+     "temas": [
+      "proyecto_bd"
+     ],
+     "usuario": "Sí, divídeme el proyecto de Bases de Datos en pasos pequeños.",
+     "asistente": "Pasos del proyecto:\n1. Diagrama entidad-relación\n2. Crear las tablas\n3. Cargar datos de prueba\n4. Consultas del reporte\n5. Documento final\nEmpieza hoy solo con el paso 1."
+    },
+    {
+     "id": "bd-3",
+     "temas": [
+      "proyecto_bd"
+     ],
+     "usuario": "Ya terminé el diagrama entidad-relación del proyecto.",
+     "asistente": "¡Bien hecho! Paso 1 listo. Sigue **crear las tablas**. ¿Le reservamos un bloque de 45 minutos mañana?"
+    },
+    {
+     "id": "bd-4",
+     "temas": [
+      "proyecto_bd"
+     ],
+     "usuario": "Llevo tres días sin avanzar en las tablas del proyecto, no sé por dónde empezar.",
+     "asistente": "Hazlo más pequeño: crea **solo la tabla de usuarios** hoy. 15 minutos y paras."
+    },
+    {
+     "id": "bd-5",
+     "temas": [
+      "proyecto_bd"
+     ],
+     "usuario": "Me atoré con las llaves foráneas del proyecto de Bases de Datos.",
+     "asistente": "Anota la duda exacta y llévala a la reunión con tu equipo. Mientras, avanza con los datos de prueba."
+    },
+    {
+     "id": "bd-6",
+     "temas": [
+      "proyecto_bd"
+     ],
+     "usuario": "Mi equipo del proyecto quedó de juntarse el martes a las 5 en la biblioteca.",
+     "asistente": "Reunión del proyecto: **martes 17:00 en la biblioteca**. Lleva tus tablas aunque no estén completas."
+    },
+    {
+     "id": "beca-1",
+     "temas": [
+      "beca"
+     ],
+     "usuario": "La solicitud de la beca de manutención cierra el 20 de octubre.",
+     "asistente": "Anotado: **la beca cierra el 20 de octubre**. Faltan dos semanas; ¿empezamos hoy?"
+    },
+    {
+     "id": "beca-2",
+     "temas": [
+      "beca"
+     ],
+     "usuario": "Para la beca me piden comprobante de domicilio, constancia de estudios y CURP.",
+     "asistente": "Documentos de la beca:\n- Comprobante de domicilio\n- Constancia de estudios\n- CURP\n¿Cuál tienes ya?"
+    },
+    {
+     "id": "beca-3",
+     "temas": [
+      "beca"
+     ],
+     "usuario": "Otra vez pospuse llenar la solicitud de la beca, ya van tres veces.",
+     "asistente": "Pasa, no te castigues. Esta vez solo **abre el formulario y llena tus datos personales**: 10 minutos."
+    },
+    {
+     "id": "beca-4",
+     "temas": [
+      "beca"
+     ],
+     "usuario": "La constancia de estudios para la beca la tramito en servicios escolares, abren de 9 a 2.",
+     "asistente": "Servicios escolares: **9:00 a 14:00**. Tienes hueco el miércoles a las 12; ¿lo agendo?"
+    },
+    {
+     "id": "beca-5",
+     "temas": [
+      "beca"
+     ],
+     "usuario": "Ya pedí la constancia de estudios, me la entregan en tres días hábiles.",
+     "asistente": "Bien. Constancia lista el **viernes**. Te recuerdo ese día recogerla."
+    },
+    {
+     "id": "beca-6",
+     "temas": [
+      "beca"
+     ],
+     "usuario": "¿Me ayudas a priorizar lo de la beca? Siento que es mucho.",
+     "asistente": "Por urgencia:\n1. Recoger la constancia (viernes)\n2. Escanear los documentos\n3. Enviar la solicitud antes del 20\nUno a la vez."
+    },
+    {
+     "id": "med-1",
+     "temas": [
+      "medicamento"
+     ],
+     "usuario": "El psiquiatra me ajustó la dosis: metilfenidato de 10 mg en la mañana.",
+     "asistente": "Anotado: **metilfenidato 10 mg por la mañana**. ¿A qué hora desayunas normalmente?"
+    },
+    {
+     "id": "med-2",
+     "temas": [
+      "medicamento"
+     ],
+     "usuario": "Quiero tomarme la pastilla siempre después de lavarme los dientes en la mañana.",
+     "asistente": "Buena idea ligarla a algo que ya haces. Pastilla **justo después de lavarte los dientes**. Deja el frasco junto al cepillo."
+    },
+    {
+     "id": "med-3",
+     "temas": [
+      "medicamento"
+     ],
+     "usuario": "Pon una alarma diaria para la pastilla a las 7:10.",
+     "asistente": "Listo: **alarma diaria a las 7:10** para la pastilla."
+    },
+    {
+     "id": "med-4",
+     "temas": [
+      "medicamento"
+     ],
+     "usuario": "Ayer se me olvidó la pastilla y en la tarde ya no me la tomé.",
+     "asistente": "Hiciste bien en no tomarla tarde. Hoy tómala a tu hora; la alarma de las 7:10 sigue activa."
+    },
+    {
+     "id": "med-5",
+     "temas": [
+      "medicamento"
+     ],
+     "usuario": "Me quedan 6 pastillas, tengo que surtir la receta.",
+     "asistente": "Te alcanzan **6 días**. Surte la receta antes del sábado. ¿Te pongo recordatorio el jueves?"
+    },
+    {
+     "id": "med-6",
+     "temas": [
+      "medicamento",
+      "cita_imss"
+     ],
+     "usuario": "La farmacia del IMSS surte recetas de lunes a viernes de 8 a 3.",
+     "asistente": "Farmacia: **lunes a viernes, 8:00 a 15:00**. Puedes surtir el jueves después de tu consulta."
+    },
+    {
+     "id": "man-1",
+     "temas": [
+      "rutina_manana"
+     ],
+     "usuario": "Entre semana me tengo que despertar a las 6:30 para llegar a la primera clase.",
+     "asistente": "Hora de despertar: **6:30** entre semana. ¿Pongo la alarma?"
+    },
+    {
+     "id": "man-2",
+     "temas": [
+      "rutina_manana"
+     ],
+     "usuario": "Siempre se me hace tarde en la mañana, ¿me armas una rutina?",
+     "asistente": "Rutina de mañana:\n1. 6:30 levantarte\n2. 6:40 bañarte\n3. 7:00 desayunar\n4. 7:20 salir\nTen la ropa lista desde la noche."
+    },
+    {
+     "id": "man-3",
+     "temas": [
+      "rutina_manana"
+     ],
+     "usuario": "Quiero revisar mi agenda del día mientras me tomo el café en la mañana.",
+     "asistente": "Perfecto: revisa tu agenda **con el café de las 7:00**. Te mando el resumen del día a esa hora."
+    },
+    {
+     "id": "man-4",
+     "temas": [
+      "rutina_manana"
+     ],
+     "usuario": "Hoy salí de la casa a las 7:40 y llegué tarde a clase otra vez.",
+     "asistente": "Pasa. Mañana prueba poner la alarma de salir a las **7:15**, cinco minutos antes."
+    },
+    {
+     "id": "man-5",
+     "temas": [
+      "rutina_manana"
+     ],
+     "usuario": "Arreglarme en la mañana me toma como 40 minutos aunque crea que son 20.",
+     "asistente": "Entonces calcula **40 minutos** para arreglarte. Es mejor planear con el tiempo real."
+    },
+    {
+     "id": "man-6",
+     "temas": [
+      "rutina_manana"
+     ],
+     "usuario": "Los sábados no quiero alarma, pero sí desayunar antes de las 10.",
+     "asistente": "Sábados sin alarma. Recordatorio suave a las **9:30** para desayunar."
+    },
+    {
+     "id": "trb-1",
+     "temas": [
+      "trabajo"
+     ],
+     "usuario": "Conseguí trabajo de medio tiempo en una cafetería, entro martes y jueves a las 4 de la tarde.",
+     "asistente": "¡Felicidades! Turnos: **martes y jueves desde las 16:00**. ¿Hasta qué hora sales?"
+    },
+    {
+     "id": "trb-2",
+     "temas": [
+      "trabajo"
+     ],
+     "usuario": "Salgo del trabajo en la cafetería a las 9 de la noche.",
+     "asistente": "Turno: **16:00 a 21:00**. Lo agrego a tu calendario como evento fijo."
+    },
+    {
+     "id": "trb-3",
+     "temas": [
+      "trabajo"
+     ],
+     "usuario": "Los viernes también me toca turno en la cafetería, pero en la mañana de 8 a 12.",
+     "asistente": "Agregado: **viernes 8:00 a 12:00** en la cafetería."
+    },
+    {
+     "id": "trb-4",
+     "temas": [
+      "trabajo"
+     ],
+     "usuario": "Le cambié el turno del sábado a mi compañera Sofía.",
+     "asistente": "Anotado: **cambiaste el turno del sábado con Sofía**. ¿Qué turno de ella tomas tú?"
+    },
+    {
+     "id": "trb-5",
+     "temas": [
+      "trabajo"
+     ],
+     "usuario": "De la escuela a la cafetería hago 25 minutos en camión.",
+     "asistente": "Traslado: **25 minutos**. Los martes y jueves sal de la escuela a las **15:25**."
+    },
+    {
+     "id": "trb-6",
+     "temas": [
+      "trabajo"
+     ],
+     "usuario": "Mi jefe me dijo que si llego tarde otra vez al turno me descuenta.",
+     "asistente": "Entendido. Pongo recordatorio para **salir a las 15:25** los días de turno."
+    },
+    {
+     "id": "calc-1",
+     "temas": [
+      "examen_calculo"
+     ],
+     "usuario": "El segundo parcial de Cálculo es el lunes 26 a las 7 de la mañana.",
+     "asistente": "Anotado: **parcial de Cálculo, lunes 26 a las 7:00**."
+    },
+    {
+     "id": "calc-2",
+     "temas": [
+      "examen_calculo"
+     ],
+     "usuario": "En el examen de Cálculo entran derivadas, regla de la cadena y optimización.",
+     "asistente": "Temas del parcial:\n- Derivadas\n- Regla de la cadena\n- Optimización"
+    },
+    {
+     "id": "calc-3",
+     "temas": [
+      "examen_calculo"
+     ],
+     "usuario": "Ayúdame a repartir el estudio de Cálculo en la semana.",
+     "asistente": "Bloques de estudio:\n- Martes: derivadas\n- Miércoles: regla de la cadena\n- Jueves: optimización\n- Sábado: examen de práctica"
+    },
+    {
+     "id": "calc-4",
+     "temas": [
+      "examen_calculo"
+     ],
+     "usuario": "Activa el modo focus por 45 minutos, voy a estudiar Cálculo.",
+     "asistente": "Listo: **modo focus 45 minutos**. Celular en silencio."
+    },
+    {
+     "id": "calc-5",
+     "temas": [
+      "examen_calculo"
+     ],
+     "usuario": "No me concentro estudiando Cálculo más de 20 minutos seguidos.",
+     "asistente": "Entonces usa **bloques de 20 minutos** con 5 de descanso. Cuatro bloques bastan por día."
+    },
+    {
+     "id": "calc-6",
+     "temas": [
+      "examen_calculo"
+     ],
+     "usuario": "La asesoría de Cálculo es los miércoles a la 1 en el salón 204.",
+     "asistente": "Asesoría de Cálculo: **miércoles 13:00, salón 204**. Lleva tus dudas de regla de la cadena."
+    },
+    {
+     "id": "pag-1",
+     "temas": [
+      "pagos"
+     ],
+     "usuario": "La renta del cuarto se paga el día 1 de cada mes, son 4500.",
+     "asistente": "Renta: **4,500 el día 1**. ¿Recordatorio el 28 para tener el dinero listo?"
+    },
+    {
+     "id": "pag-2",
+     "temas": [
+      "pagos"
+     ],
+     "usuario": "El plan del celular vence el 12 de cada mes.",
+     "asistente": "Celular: **vence el 12**. Te recuerdo el 10."
+    },
+    {
+     "id": "pag-3",
+     "temas": [
+      "pagos"
+     ],
+     "usuario": "Se me pasó pagar el internet y me cortaron el servicio.",
+     "asistente": "Para que no se repita: pago del internet el **día 5** con recordatorio el 3. ¿Lo programo?"
+    },
+    {
+     "id": "pag-4",
+     "temas": [
+      "pagos"
+     ],
+     "usuario": "Me pagan cada quincena, el 15 y el 30.",
+     "asistente": "Ingresos: **15 y 30**. Conviene pagar la renta con la quincena del 30."
+    },
+    {
+     "id": "pag-5",
+     "temas": [
+      "pagos"
+     ],
+     "usuario": "Quiero un recordatorio el último domingo del mes para revisar todos mis pagos.",
+     "asistente": "Listo: **último domingo del mes, 18:00**, revisar pagos."
+    },
+    {
+     "id": "pag-6",
+     "temas": [
+      "pagos"
+     ],
+     "usuario": "El recibo de luz llega cada dos meses y tengo 10 días para pagarlo.",
+     "asistente": "Luz: bimestral, **10 días** para pagar desde que llega. Avísame cuando llegue el recibo."
+    },
+    {
+     "id": "noc-1",
+     "temas": [
+      "rutina_noche"
+     ],
+     "usuario": "Anoche me quedé hasta las 3 viendo videos y hoy no me levanté.",
+     "asistente": "Pasa. Hoy intenta **apagar pantallas a las 23:00**. ¿Te pongo una alarma de aviso?"
+    },
+    {
+     "id": "noc-2",
+     "temas": [
+      "rutina_noche"
+     ],
+     "usuario": "Quiero dormirme a las 11:30 de la noche entre semana.",
+     "asistente": "Meta: **dormir a las 23:30** entre semana. Aviso para prepararte a las 23:00."
+    },
+    {
+     "id": "noc-3",
+     "temas": [
+      "rutina_noche"
+     ],
+     "usuario": "Antes de dormir quiero dejar lista la mochila y la ropa del día siguiente.",
+     "asistente": "Rutina de noche:\n1. Mochila lista\n2. Ropa lista\n3. Celular a cargar fuera de la cama"
+    },
+    {
+     "id": "noc-4",
+     "temas": [
+      "rutina_noche"
+     ],
+     "usuario": "Pon el celular en modo no molestar desde las 11 de la noche.",
+     "asistente": "Listo: **no molestar desde las 23:00** hasta las 6:30."
+    },
+    {
+     "id": "noc-5",
+     "temas": [
+      "rutina_noche"
+     ],
+     "usuario": "Si duermo menos de 7 horas al otro día no rindo nada.",
+     "asistente": "Entonces, para despertar a las 6:30, acuéstate antes de las **23:30**."
+    },
+    {
+     "id": "noc-6",
+     "temas": [
+      "rutina_noche"
+     ],
+     "usuario": "Los viernes en la noche me puedo dormir más tarde, a la 1.",
+     "asistente": "Viernes: hora de dormir **1:00**. El sábado no hay alarma."
+    },
+    {
+     "id": "ani-1",
+     "temas": [
+      "aniversario"
+     ],
+     "usuario": "El sábado 17 es mi aniversario con Diego, cumplimos un año.",
+     "asistente": "Anotado: **aniversario con Diego, sábado 17**. ¿Tienen planes?"
+    },
+    {
+     "id": "ani-2",
+     "temas": [
+      "aniversario"
+     ],
+     "usuario": "Reservé para el aniversario en el restaurante La Pérgola el sábado a las 8 de la noche.",
+     "asistente": "Reservación: **La Pérgola, sábado 20:00**. ¿Agrego el evento a tu calendario?"
+    },
+    {
+     "id": "ani-3",
+     "temas": [
+      "aniversario"
+     ],
+     "usuario": "Tengo que comprarle el regalo a Diego antes del jueves.",
+     "asistente": "Pendiente: **regalo para Diego antes del jueves**. ¿Qué día tienes tiempo para ir?"
+    },
+    {
+     "id": "ani-4",
+     "temas": [
+      "aniversario"
+     ],
+     "usuario": "De mi cuarto a La Pérgola son 35 minutos en Uber.",
+     "asistente": "Traslado: **35 minutos**. Para llegar a las 20:00, pide el Uber a las **19:15**."
+    },
+    {
+     "id": "ani-5",
+     "temas": [
+      "aniversario"
+     ],
+     "usuario": "El año pasado se me olvidó la fecha del aniversario y Diego se sintió mal.",
+     "asistente": "Este año está agendado. Te recuerdo el **miércoles** y el **sábado en la mañana**."
+    },
+    {
+     "id": "ani-6",
+     "temas": [
+      "aniversario"
+     ],
+     "usuario": "Quiero escribirle una carta a Diego, pero siempre lo dejo para el final.",
+     "asistente": "Hazlo en partes: hoy solo escribe **tres ideas** de la carta. 10 minutos."
+    },
+    {
+     "id": "pas-1",
+     "temas": [
+      "pasaporte"
+     ],
+     "usuario": "Saqué cita en la SRE para tramitar mi pasaporte el martes 20 a las 11:40.",
+     "asistente": "Anotado: **cita del pasaporte en la SRE, martes 20 a las 11:40**. ¿La agrego a tu calendario?"
+    },
+    {
+     "id": "pas-2",
+     "temas": [
+      "pasaporte"
+     ],
+     "usuario": "Para el pasaporte tengo que llevar acta de nacimiento, INE y el comprobante de pago.",
+     "asistente": "Documentos del pasaporte:\n- Acta de nacimiento\n- INE\n- Comprobante de pago\nGuárdalos en un sobre desde hoy."
+    },
+    {
+     "id": "pas-3",
+     "temas": [
+      "pasaporte"
+     ],
+     "usuario": "El pago del pasaporte lo tengo que hacer en el banco antes de la cita.",
+     "asistente": "Pendiente: **pagar el pasaporte en el banco** antes del martes 20. ¿Te pongo recordatorio el viernes?"
+    },
+    {
+     "id": "pas-4",
+     "temas": [
+      "pasaporte"
+     ],
+     "usuario": "La oficina de la SRE está en Polanco, ¿cuánto me tardo desde mi casa?",
+     "asistente": "Son unos **50 minutos en metro**. Para llegar 11:20, sal a las **10:30**."
+    },
+    {
+     "id": "pas-5",
+     "temas": [
+      "pasaporte"
+     ],
+     "usuario": "En la SRE piden llegar 15 minutos antes y sin acompañantes.",
+     "asistente": "Anotado: llegar **15 minutos antes**, solo tú."
+    },
+    {
+     "id": "pas-6",
+     "temas": [
+      "pasaporte"
+     ],
+     "usuario": "Ya pagué el pasaporte, guardé el comprobante en la carpeta azul.",
+     "asistente": "¡Bien! Comprobante en la **carpeta azul**. Llévala el martes."
+    },
+    {
+     "id": "ss-1",
+     "temas": [
+      "servicio_social"
+     ],
+     "usuario": "Empecé mi servicio social en la biblioteca de la facultad, son 480 horas.",
+     "asistente": "Anotado: **servicio social en la biblioteca, 480 horas**. ¿Qué horario tienes?"
+    },
+    {
+     "id": "ss-2",
+     "temas": [
+      "servicio_social"
+     ],
+     "usuario": "Voy al servicio social lunes, miércoles y viernes de 2 a 6.",
+     "asistente": "Horario: **lunes, miércoles y viernes de 14:00 a 18:00**. Lo agrego como evento fijo."
+    },
+    {
+     "id": "ss-3",
+     "temas": [
+      "servicio_social"
+     ],
+     "usuario": "Cada mes tengo que entregar un reporte de horas del servicio social.",
+     "asistente": "Reporte mensual de horas. ¿Qué día lo entregas?"
+    },
+    {
+     "id": "ss-4",
+     "temas": [
+      "servicio_social"
+     ],
+     "usuario": "El reporte de horas del servicio social se entrega los primeros 5 días del mes.",
+     "asistente": "Entrega del reporte: **del 1 al 5 de cada mes**. Te recuerdo el día 1."
+    },
+    {
+     "id": "ss-5",
+     "temas": [
+      "servicio_social"
+     ],
+     "usuario": "Llevo 120 horas del servicio social.",
+     "asistente": "Llevas **120 de 480 horas**: 25 %. A tu ritmo terminas en unos 6 meses."
+    },
+    {
+     "id": "ss-6",
+     "temas": [
+      "servicio_social"
+     ],
+     "usuario": "Mi responsable del servicio social es la licenciada Ortega, ella me firma los reportes.",
+     "asistente": "Responsable: **Lic. Ortega**, firma tus reportes. Llévaselos antes del día 5."
+    },
+    {
+     "id": "ing-1",
+     "temas": [
+      "curso_ingles"
+     ],
+     "usuario": "Me inscribí a un curso de inglés los sábados de 9 a 12.",
+     "asistente": "Anotado: **inglés los sábados de 9:00 a 12:00**."
+    },
+    {
+     "id": "ing-2",
+     "temas": [
+      "curso_ingles"
+     ],
+     "usuario": "La maestra de inglés deja tarea cada semana y se entrega el sábado.",
+     "asistente": "Tarea de inglés: **entrega cada sábado**. ¿Te aparto un bloque el jueves para hacerla?"
+    },
+    {
+     "id": "ing-3",
+     "temas": [
+      "curso_ingles"
+     ],
+     "usuario": "El examen de nivel de inglés es el 8 de noviembre.",
+     "asistente": "Examen de nivel de inglés: **8 de noviembre**."
+    },
+    {
+     "id": "ing-4",
+     "temas": [
+      "curso_ingles"
+     ],
+     "usuario": "Falté a dos clases de inglés y si falto a otra me dan de baja.",
+     "asistente": "Cuidado: **una falta más y te dan de baja**. Pongo alarma los sábados a las 8:00."
+    },
+    {
+     "id": "ing-5",
+     "temas": [
+      "curso_ingles"
+     ],
+     "usuario": "Ayúdame a preparar la presentación oral de inglés, son 5 minutos.",
+     "asistente": "Pasos:\n1. Elegir tema\n2. Escribir 5 ideas\n3. Ensayar 3 veces\nHoy solo elige el tema."
+    },
+    {
+     "id": "ing-6",
+     "temas": [
+      "curso_ingles"
+     ],
+     "usuario": "El curso de inglés está en el centro de idiomas, a 20 minutos de mi casa.",
+     "asistente": "Traslado al centro de idiomas: **20 minutos**. Los sábados sal a las 8:35."
+    },
+    {
+     "id": "nat-1",
+     "temas": [
+      "natacion"
+     ],
+     "usuario": "Me apunté a natación en el deportivo, lunes y miércoles a las 7 de la noche.",
+     "asistente": "Anotado: **natación lunes y miércoles a las 19:00**."
+    },
+    {
+     "id": "nat-2",
+     "temas": [
+      "natacion"
+     ],
+     "usuario": "Para natación necesito gorra, goggles y sandalias.",
+     "asistente": "Lista de natación:\n- Gorra\n- Goggles\n- Sandalias"
+    },
+    {
+     "id": "nat-3",
+     "temas": [
+      "natacion",
+      "servicio_social"
+     ],
+     "usuario": "Saliendo del servicio social me da tiempo justo de llegar a natación.",
+     "asistente": "Sales a las 18:00 y la clase es a las 19:00. Lleva la maleta de natación desde la mañana."
+    },
+    {
+     "id": "nat-4",
+     "temas": [
+      "natacion",
+      "pagos"
+     ],
+     "usuario": "El deportivo cobra la mensualidad de natación los primeros 10 días del mes.",
+     "asistente": "Mensualidad de natación: **del 1 al 10**. La agrego a tu revisión de pagos."
+    },
+    {
+     "id": "nat-5",
+     "temas": [
+      "natacion"
+     ],
+     "usuario": "Hoy no fui a natación porque se me hizo tarde.",
+     "asistente": "Pasa. El miércoles sal 10 minutos antes."
+    },
+    {
+     "id": "nat-6",
+     "temas": [
+      "natacion"
+     ],
+     "usuario": "El maestro de natación dijo que en diciembre no hay clases.",
+     "asistente": "Anotado: **sin natación en diciembre**."
+    },
+    {
+     "id": "fam-1",
+     "temas": [
+      "comida_familiar"
+     ],
+     "usuario": "Los domingos comemos en casa de mis papás a las 3.",
+     "asistente": "Comida familiar: **domingos 15:00** en casa de tus papás."
+    },
+    {
+     "id": "fam-2",
+     "temas": [
+      "comida_familiar"
+     ],
+     "usuario": "Este domingo me toca llevar el postre a la comida con mis papás.",
+     "asistente": "Tu parte del domingo: **el postre**. Cómpralo el sábado."
+    },
+    {
+     "id": "fam-3",
+     "temas": [
+      "comida_familiar"
+     ],
+     "usuario": "Mi mamá me pidió llegar temprano el domingo para ayudarle a cocinar.",
+     "asistente": "Llega a las **13:30** para ayudar. Sal de tu casa a las 13:00."
+    },
+    {
+     "id": "fam-4",
+     "temas": [
+      "comida_familiar"
+     ],
+     "usuario": "De mi casa a la de mis papás hago media hora en camión.",
+     "asistente": "Traslado: **30 minutos**. Para las 15:00 sal a las 14:25."
+    },
+    {
+     "id": "fam-5",
+     "temas": [
+      "comida_familiar"
+     ],
+     "usuario": "El domingo 25 no hay comida familiar porque mis papás salen de viaje.",
+     "asistente": "Anotado: **domingo 25 sin comida familiar**."
+    },
+    {
+     "id": "fam-6",
+     "temas": [
+      "comida_familiar"
+     ],
+     "usuario": "Siempre llego tarde a la comida de los domingos y mi papá se enoja.",
+     "asistente": "Pongo recordatorio para **salir a las 14:25** cada domingo."
+    },
+    {
+     "id": "ter-1",
+     "temas": [
+      "terapia"
+     ],
+     "usuario": "Empecé terapia con una psicóloga, voy cada 15 días los miércoles a las 6.",
+     "asistente": "Terapia: **miércoles cada 15 días, 18:00**."
+    },
+    {
+     "id": "ter-2",
+     "temas": [
+      "terapia"
+     ],
+     "usuario": "La próxima sesión con la psicóloga es el miércoles 21.",
+     "asistente": "Próxima sesión: **miércoles 21 a las 18:00**."
+    },
+    {
+     "id": "ter-3",
+     "temas": [
+      "terapia"
+     ],
+     "usuario": "La psicóloga me dejó de tarea anotar cuándo pospongo las cosas.",
+     "asistente": "Tarea de terapia: **registrar cuándo pospones**. Puedo recordarte anotarlo cada noche."
+    },
+    {
+     "id": "ter-4",
+     "temas": [
+      "terapia"
+     ],
+     "usuario": "La terapia es en línea por videollamada.",
+     "asistente": "Sesión en línea. Busca un lugar tranquilo 5 minutos antes."
+    },
+    {
+     "id": "ter-5",
+     "temas": [
+      "terapia"
+     ],
+     "usuario": "Si cancelo la sesión de terapia con menos de 24 horas me la cobran.",
+     "asistente": "Regla: cancelar **con 24 horas de anticipación**. Si algo choca, avísame el martes."
+    },
+    {
+     "id": "ter-6",
+     "temas": [
+      "terapia"
+     ],
+     "usuario": "Quiero que antes de terapia me recuerdes qué quería platicar.",
+     "asistente": "Listo: recordatorio **miércoles 17:30** para repasar tus temas."
+    },
+    {
+     "id": "ent-1",
+     "temas": [
+      "entrevista_practicas"
+     ],
+     "usuario": "Me llamaron para una entrevista de prácticas profesionales el viernes a las 11.",
+     "asistente": "Anotado: **entrevista de prácticas, viernes 11:00**."
+    },
+    {
+     "id": "ent-2",
+     "temas": [
+      "entrevista_practicas"
+     ],
+     "usuario": "La entrevista de prácticas es en una empresa de software en Santa Fe.",
+     "asistente": "Santa Fe. Desde la escuela son **unos 60 minutos**. Sal a las 9:45."
+    },
+    {
+     "id": "ent-3",
+     "temas": [
+      "entrevista_practicas"
+     ],
+     "usuario": "Tengo que actualizar mi CV antes de la entrevista.",
+     "asistente": "Pendiente: **actualizar el CV** antes del jueves. Hazlo en dos partes de 20 minutos."
+    },
+    {
+     "id": "ent-4",
+     "temas": [
+      "entrevista_practicas",
+      "trabajo"
+     ],
+     "usuario": "Ese viernes tengo turno en la cafetería de 8 a 12, se empalma con la entrevista.",
+     "asistente": "Se empalman. Pide cambio de turno hoy; la entrevista es prioridad."
+    },
+    {
+     "id": "ent-5",
+     "temas": [
+      "entrevista_practicas"
+     ],
+     "usuario": "Quiero practicar preguntas típicas de entrevista.",
+     "asistente": "Practiquemos 3 preguntas:\n1. Háblame de ti\n2. ¿Por qué esta empresa?\n3. Un reto que resolviste"
+    },
+    {
+     "id": "ent-6",
+     "temas": [
+      "entrevista_practicas"
+     ],
+     "usuario": "Me pidieron llevar mi portafolio de proyectos a la entrevista.",
+     "asistente": "Lleva el **portafolio** impreso y en USB."
+    },
+    {
+     "id": "plo-1",
+     "temas": [
+      "plomero"
+     ],
+     "usuario": "Hay una fuga en el baño, el plomero viene el martes entre 9 y 12.",
+     "asistente": "Plomero: **martes entre 9:00 y 12:00**. Alguien debe estar en casa."
+    },
+    {
+     "id": "plo-2",
+     "temas": [
+      "plomero"
+     ],
+     "usuario": "El martes que viene el plomero tengo clase a las 9.",
+     "asistente": "Choca con tu clase. ¿Le pides a tu roomie que reciba al plomero?"
+    },
+    {
+     "id": "plo-3",
+     "temas": [
+      "plomero"
+     ],
+     "usuario": "Mi roomie puede recibir al plomero hasta las 11.",
+     "asistente": "Tu roomie lo recibe hasta las **11:00**. Pide al plomero llegar temprano."
+    },
+    {
+     "id": "plo-4",
+     "temas": [
+      "plomero"
+     ],
+     "usuario": "El plomero cobra 600 por la reparación.",
+     "asistente": "Reparación: **600**. Ten el efectivo listo el martes."
+    },
+    {
+     "id": "plo-5",
+     "temas": [
+      "plomero"
+     ],
+     "usuario": "Antes de que venga el plomero tengo que cerrar la llave de paso.",
+     "asistente": "Recordatorio: **cerrar la llave de paso** el lunes en la noche."
+    },
+    {
+     "id": "plo-6",
+     "temas": [
+      "plomero"
+     ],
+     "usuario": "El plomero no llegó, lo reprogramaron para el jueves a las 10.",
+     "asistente": "Reprogramado: **plomero jueves 10:00**."
+    },
+    {
+     "id": "val-1",
+     "temas": [
+      "cumple_valeria"
+     ],
+     "usuario": "El cumpleaños de mi amiga Valeria es el sábado 24.",
+     "asistente": "Anotado: **cumpleaños de Valeria, sábado 24**."
+    },
+    {
+     "id": "val-2",
+     "temas": [
+      "cumple_valeria"
+     ],
+     "usuario": "La fiesta de Valeria es a las 9 de la noche en su departamento.",
+     "asistente": "Fiesta: **sábado 24 a las 21:00**, depa de Valeria."
+    },
+    {
+     "id": "val-3",
+     "temas": [
+      "cumple_valeria"
+     ],
+     "usuario": "Quiero regalarle a Valeria un libro, tengo que comprarlo antes del viernes.",
+     "asistente": "Pendiente: **libro para Valeria antes del viernes**."
+    },
+    {
+     "id": "val-4",
+     "temas": [
+      "cumple_valeria"
+     ],
+     "usuario": "Quedé de llevar hielos y refrescos a la fiesta de Valeria.",
+     "asistente": "Tu parte: **hielos y refrescos**. Cómpralos el sábado en la tarde."
+    },
+    {
+     "id": "val-5",
+     "temas": [
+      "cumple_valeria",
+      "curso_ingles"
+     ],
+     "usuario": "Ese sábado salgo del curso de inglés a las 12 y la fiesta es en la noche.",
+     "asistente": "Te da tiempo: inglés termina a las 12:00 y la fiesta es a las 21:00."
+    },
+    {
+     "id": "val-6",
+     "temas": [
+      "cumple_valeria"
+     ],
+     "usuario": "Para regresar de la fiesta de Valeria voy a pedir Uber a la 1.",
+     "asistente": "Recordatorio: **Uber a la 1:00** para regresar."
+    },
+    {
+     "id": "lim-1",
+     "temas": [
+      "limpieza_roomie"
+     ],
+     "usuario": "Con mi roomie acordamos que yo limpio la cocina los domingos.",
+     "asistente": "Acuerdo: **tú limpias la cocina los domingos**."
+    },
+    {
+     "id": "lim-2",
+     "temas": [
+      "limpieza_roomie"
+     ],
+     "usuario": "A mi roomie le toca el baño y a mí la sala cada 15 días.",
+     "asistente": "Turnos: tu roomie el baño, tú **la sala cada 15 días**."
+    },
+    {
+     "id": "lim-3",
+     "temas": [
+      "limpieza_roomie"
+     ],
+     "usuario": "Otra vez no limpié la cocina el domingo y mi roomie se molestó.",
+     "asistente": "Pasa. Pongo recordatorio **domingo 11:00** para la cocina."
+    },
+    {
+     "id": "lim-4",
+     "temas": [
+      "limpieza_roomie",
+      "comida_familiar"
+     ],
+     "usuario": "Quiero limpiar la cocina antes de irme a casa de mis papás el domingo.",
+     "asistente": "Limpia la cocina a las **11:00**; así sales a las 14:25 sin pendientes."
+    },
+    {
+     "id": "lim-5",
+     "temas": [
+      "limpieza_roomie"
+     ],
+     "usuario": "La basura la sacamos martes, jueves y sábado en la noche.",
+     "asistente": "Basura: **martes, jueves y sábado en la noche**. ¿Recordatorio a las 21:00?"
+    },
+    {
+     "id": "lim-6",
+     "temas": [
+      "limpieza_roomie"
+     ],
+     "usuario": "Mi roomie y yo compramos productos de limpieza a medias cada mes.",
+     "asistente": "Productos de limpieza **a medias, cada mes**. Lo agrego a tu revisión de pagos."
+    }
+   ]
+  },
+  "b": {
+   "user_id": "22222222-2222-4222-8222-222222222222",
+   "intercambios": [
+    {
+     "id": "b-imss",
+     "temas": [
+      "cita_imss"
+     ],
+     "usuario": "Mi cita en el IMSS con medicina familiar es el martes a las 8:20.",
+     "asistente": "Anotado: **IMSS, martes 8:20**."
+    },
+    {
+     "id": "b-bd",
+     "temas": [
+      "proyecto_bd"
+     ],
+     "usuario": "El proyecto final de Programación Web se entrega el 4 de diciembre.",
+     "asistente": "Entrega del proyecto de Programación Web: **4 de diciembre**."
+    },
+    {
+     "id": "b-beca",
+     "temas": [
+      "beca"
+     ],
+     "usuario": "La beca de transporte cierra el 30 de octubre y no he juntado los papeles.",
+     "asistente": "Beca de transporte: **cierra el 30 de octubre**. Empecemos por un documento hoy."
+    },
+    {
+     "id": "b-med",
+     "temas": [
+      "medicamento"
+     ],
+     "usuario": "Me tomo la atomoxetina en la noche con la cena.",
+     "asistente": "Atomoxetina: **con la cena**. ¿Pongo alarma a las 21:00?"
+    },
+    {
+     "id": "b-man",
+     "temas": [
+      "rutina_manana"
+     ],
+     "usuario": "Me despierto a las 5:45 porque vivo lejos de la escuela.",
+     "asistente": "Despertar: **5:45**. Prepara todo desde la noche."
+    },
+    {
+     "id": "b-trb",
+     "temas": [
+      "trabajo"
+     ],
+     "usuario": "Trabajo los fines de semana en una tienda de 10 a 6.",
+     "asistente": "Turno: **sábado y domingo, 10:00 a 18:00**."
+    },
+    {
+     "id": "b-calc",
+     "temas": [
+      "examen_calculo"
+     ],
+     "usuario": "El parcial de Física es el viernes a las 11.",
+     "asistente": "Parcial de Física: **viernes 11:00**."
+    },
+    {
+     "id": "b-pag",
+     "temas": [
+      "pagos"
+     ],
+     "usuario": "La tarjeta de crédito se paga el día 22.",
+     "asistente": "Pago de la tarjeta: **día 22**. Te recuerdo el 20."
+    },
+    {
+     "id": "b-noc",
+     "temas": [
+      "rutina_noche"
+     ],
+     "usuario": "Me duermo a las 10 de la noche porque entro temprano.",
+     "asistente": "Hora de dormir: **22:00**."
+    },
+    {
+     "id": "b-ani",
+     "temas": [
+      "aniversario"
+     ],
+     "usuario": "El cumpleaños de mi novia es el 9 de noviembre y quiero organizarle una cena.",
+     "asistente": "Cumpleaños de tu novia: **9 de noviembre**. ¿Reservo un recordatorio para planear la cena?"
+    },
+    {
+     "id": "b-pas",
+     "temas": [
+      "pasaporte"
+     ],
+     "usuario": "Mi cita para la visa es el 3 de diciembre a las 8.",
+     "asistente": "Visa: **3 de diciembre, 8:00**."
+    },
+    {
+     "id": "b-ss",
+     "temas": [
+      "servicio_social"
+     ],
+     "usuario": "Hago mi servicio social en un museo los sábados.",
+     "asistente": "Servicio social: **sábados en el museo**."
+    },
+    {
+     "id": "b-ing",
+     "temas": [
+      "curso_ingles"
+     ],
+     "usuario": "Tomo clases de francés los martes a las 7.",
+     "asistente": "Francés: **martes 19:00**."
+    },
+    {
+     "id": "b-nat",
+     "temas": [
+      "natacion"
+     ],
+     "usuario": "Voy a yoga los jueves a las 6 de la tarde.",
+     "asistente": "Yoga: **jueves 18:00**."
+    },
+    {
+     "id": "b-fam",
+     "temas": [
+      "comida_familiar"
+     ],
+     "usuario": "Los sábados desayuno con mis abuelos a las 10.",
+     "asistente": "Desayuno con tus abuelos: **sábados 10:00**."
+    },
+    {
+     "id": "b-ter",
+     "temas": [
+      "terapia"
+     ],
+     "usuario": "Mi sesión con el nutriólogo es cada mes.",
+     "asistente": "Nutriólogo: **una vez al mes**."
+    },
+    {
+     "id": "b-ent",
+     "temas": [
+      "entrevista_practicas"
+     ],
+     "usuario": "Tengo entrevista de trabajo el lunes a las 9 en Reforma.",
+     "asistente": "Entrevista: **lunes 9:00 en Reforma**."
+    },
+    {
+     "id": "b-plo",
+     "temas": [
+      "plomero"
+     ],
+     "usuario": "El técnico del internet viene el miércoles de 2 a 6.",
+     "asistente": "Técnico: **miércoles 14:00 a 18:00**."
+    },
+    {
+     "id": "b-val",
+     "temas": [
+      "cumple_valeria"
+     ],
+     "usuario": "La fiesta de mi primo es el domingo a las 4.",
+     "asistente": "Fiesta de tu primo: **domingo 16:00**."
+    },
+    {
+     "id": "b-lim",
+     "temas": [
+      "limpieza_roomie"
+     ],
+     "usuario": "Me toca lavar los trastes los lunes.",
+     "asistente": "Trastes: **los lunes**."
+    }
+   ]
+  }
+ },
+ "consultas": [
+  {
+   "id": "q-imss-1",
+   "usuario": "a",
+   "nivel": "directa",
+   "temas": [
+    "cita_imss"
+   ],
+   "consulta": "¿A qué hora tengo que salir para llegar a la consulta del IMSS?",
+   "esperado": [
+    [
+     "9:30",
+     "nueve y media"
+    ]
+   ]
+  },
+  {
+   "id": "q-imss-2",
+   "usuario": "a",
+   "nivel": "directa",
+   "temas": [
+    "cita_imss"
+   ],
+   "consulta": "¿Qué tengo que llevar a mi cita del IMSS?",
+   "esperado": [
+    [
+     "carnet"
+    ],
+    [
+     "referencia"
+    ]
+   ]
+  },
+  {
+   "id": "q-imss-3",
+   "usuario": "a",
+   "nivel": "directa",
+   "temas": [
+    "cita_imss"
+   ],
+   "consulta": "¿Qué día es mi consulta de seguimiento en el IMSS?",
+   "esperado": [
+    [
+     "jueves",
+     "15"
+    ]
+   ]
+  },
+  {
+   "id": "q-imss-4",
+   "usuario": "a",
+   "nivel": "parafraseada",
+   "temas": [
+    "cita_imss"
+   ],
+   "consulta": "¿Qué tengo que llevar a mi cita de seguimiento?",
+   "esperado": [
+    [
+     "carnet"
+    ],
+    [
+     "referencia"
+    ]
+   ]
+  },
+  {
+   "id": "q-imss-5",
+   "usuario": "a",
+   "nivel": "parafraseada",
+   "temas": [
+    "cita_imss"
+   ],
+   "consulta": "¿Qué decidí hacer con el laboratorio que choca con mi consulta?",
+   "esperado": [
+    [
+     "profe",
+     "avis"
+    ]
+   ]
+  },
+  {
+   "id": "q-imss-6",
+   "usuario": "a",
+   "nivel": "parafraseada",
+   "temas": [
+    "cita_imss"
+   ],
+   "consulta": "¿Cuánto me tardo en llegar a la clínica?",
+   "esperado": [
+    [
+     "40",
+     "cuarenta"
+    ]
+   ]
+  },
+  {
+   "id": "q-imss-7",
+   "usuario": "a",
+   "nivel": "vaga",
+   "temas": [
+    "cita_imss"
+   ],
+   "consulta": "¿A qué hora era lo del doctor?",
+   "esperado": [
+    [
+     "10:30",
+     "10 y media",
+     "diez y media"
+    ]
+   ]
+  },
+  {
+   "id": "q-imss-8",
+   "usuario": "a",
+   "nivel": "vaga",
+   "temas": [
+    "cita_imss"
+   ],
+   "consulta": "¿Qué había quedado de hacer con lo que se me empalmaba el jueves?",
+   "esperado": [
+    [
+     "profe",
+     "avis"
+    ]
+   ]
+  },
+  {
+   "id": "q-imss-9",
+   "usuario": "a",
+   "nivel": "coloquial",
+   "temas": [
+    "cita_imss"
+   ],
+   "consulta": "a q hora salgo pa lo dl imss",
+   "esperado": [
+    [
+     "9:30",
+     "nueve y media"
+    ]
+   ]
+  },
+  {
+   "id": "q-imss-10",
+   "usuario": "a",
+   "nivel": "coloquial",
+   "temas": [
+    "cita_imss"
+   ],
+   "consulta": "ke papeles llevo a la clinica",
+   "esperado": [
+    [
+     "carnet"
+    ],
+    [
+     "referencia"
+    ]
+   ]
+  },
+  {
+   "id": "q-bd-1",
+   "usuario": "a",
+   "nivel": "directa",
+   "temas": [
+    "proyecto_bd"
+   ],
+   "consulta": "¿Cuándo se entrega el proyecto de Bases de Datos?",
+   "esperado": [
+    [
+     "27"
+    ],
+    [
+     "noviembre"
+    ]
+   ]
+  },
+  {
+   "id": "q-bd-2",
+   "usuario": "a",
+   "nivel": "directa",
+   "temas": [
+    "proyecto_bd"
+   ],
+   "consulta": "¿Qué pasos tiene el proyecto de Bases de Datos?",
+   "esperado": [
+    [
+     "tablas"
+    ],
+    [
+     "datos de prueba"
+    ]
+   ]
+  },
+  {
+   "id": "q-bd-3",
+   "usuario": "a",
+   "nivel": "directa",
+   "temas": [
+    "proyecto_bd"
+   ],
+   "consulta": "¿Cuándo es la reunión del equipo del proyecto de Bases de Datos?",
+   "esperado": [
+    [
+     "martes"
+    ],
+    [
+     "17",
+     "5"
+    ]
+   ]
+  },
+  {
+   "id": "q-bd-4",
+   "usuario": "a",
+   "nivel": "parafraseada",
+   "temas": [
+    "proyecto_bd"
+   ],
+   "consulta": "¿Qué pasos me faltan del proyecto final?",
+   "esperado": [
+    [
+     "tablas"
+    ]
+   ]
+  },
+  {
+   "id": "q-bd-5",
+   "usuario": "a",
+   "nivel": "parafraseada",
+   "temas": [
+    "proyecto_bd"
+   ],
+   "consulta": "¿Cuándo se entrega el proyecto de la escuela?",
+   "esperado": [
+    [
+     "27"
+    ]
+   ]
+  },
+  {
+   "id": "q-bd-6",
+   "usuario": "a",
+   "nivel": "parafraseada",
+   "temas": [
+    "proyecto_bd"
+   ],
+   "consulta": "¿Cuándo me junto con mi equipo para el proyecto?",
+   "esperado": [
+    [
+     "martes"
+    ],
+    [
+     "biblioteca",
+     "17",
+     "5"
+    ]
+   ]
+  },
+  {
+   "id": "q-bd-7",
+   "usuario": "a",
+   "nivel": "vaga",
+   "temas": [
+    "proyecto_bd"
+   ],
+   "consulta": "¿En qué me quedé atorada con lo de la escuela?",
+   "esperado": [
+    [
+     "foranea",
+     "tablas"
+    ]
+   ]
+  },
+  {
+   "id": "q-bd-8",
+   "usuario": "a",
+   "nivel": "vaga",
+   "temas": [
+    "proyecto_bd"
+   ],
+   "consulta": "¿Qué sigue después del diagrama?",
+   "esperado": [
+    [
+     "tablas"
+    ]
+   ]
+  },
+  {
+   "id": "q-bd-9",
+   "usuario": "a",
+   "nivel": "coloquial",
+   "temas": [
+    "proyecto_bd"
+   ],
+   "consulta": "cuando c entrega lo d bases",
+   "esperado": [
+    [
+     "27"
+    ]
+   ]
+  },
+  {
+   "id": "q-bd-10",
+   "usuario": "a",
+   "nivel": "coloquial",
+   "temas": [
+    "proyecto_bd"
+   ],
+   "consulta": "ya no se q sigue del proyecto ayudaa",
+   "esperado": [
+    [
+     "tablas",
+     "tabla de usuarios"
+    ]
+   ]
+  },
+  {
+   "id": "q-beca-1",
+   "usuario": "a",
+   "nivel": "directa",
+   "temas": [
+    "beca"
+   ],
+   "consulta": "¿Cuál es la fecha límite del trámite de la beca?",
+   "esperado": [
+    [
+     "20"
+    ],
+    [
+     "octubre"
+    ]
+   ]
+  },
+  {
+   "id": "q-beca-2",
+   "usuario": "a",
+   "nivel": "directa",
+   "temas": [
+    "beca"
+   ],
+   "consulta": "¿Qué documentos me piden para la beca?",
+   "esperado": [
+    [
+     "domicilio"
+    ],
+    [
+     "constancia"
+    ],
+    [
+     "curp"
+    ]
+   ]
+  },
+  {
+   "id": "q-beca-3",
+   "usuario": "a",
+   "nivel": "directa",
+   "temas": [
+    "beca"
+   ],
+   "consulta": "¿Cuándo recojo la constancia de estudios?",
+   "esperado": [
+    [
+     "viernes"
+    ]
+   ]
+  },
+  {
+   "id": "q-beca-4",
+   "usuario": "a",
+   "nivel": "parafraseada",
+   "temas": [
+    "beca"
+   ],
+   "consulta": "¿Hasta cuándo puedo mandar la solicitud del apoyo de manutención?",
+   "esperado": [
+    [
+     "20"
+    ]
+   ]
+  },
+  {
+   "id": "q-beca-5",
+   "usuario": "a",
+   "nivel": "parafraseada",
+   "temas": [
+    "beca"
+   ],
+   "consulta": "¿Qué papeles necesito juntar para el apoyo económico de la escuela?",
+   "esperado": [
+    [
+     "domicilio"
+    ],
+    [
+     "constancia"
+    ],
+    [
+     "curp"
+    ]
+   ]
+  },
+  {
+   "id": "q-beca-6",
+   "usuario": "a",
+   "nivel": "parafraseada",
+   "temas": [
+    "beca"
+   ],
+   "consulta": "¿En qué orden hago los pendientes del apoyo económico?",
+   "esperado": [
+    [
+     "constancia"
+    ],
+    [
+     "escane"
+    ]
+   ]
+  },
+  {
+   "id": "q-beca-7",
+   "usuario": "a",
+   "nivel": "vaga",
+   "temas": [
+    "beca"
+   ],
+   "consulta": "¿Cuántas veces he dejado para después lo del formulario?",
+   "esperado": [
+    [
+     "tres",
+     "3"
+    ]
+   ]
+  },
+  {
+   "id": "q-beca-8",
+   "usuario": "a",
+   "nivel": "vaga",
+   "temas": [
+    "beca"
+   ],
+   "consulta": "¿Cuándo abren la oficina donde pedí el documento?",
+   "esperado": [
+    [
+     "9"
+    ],
+    [
+     "14",
+     "2"
+    ]
+   ]
+  },
+  {
+   "id": "q-beca-9",
+   "usuario": "a",
+   "nivel": "coloquial",
+   "temas": [
+    "beca"
+   ],
+   "consulta": "kuando cierra lo d la vca",
+   "esperado": [
+    [
+     "20"
+    ]
+   ]
+  },
+  {
+   "id": "q-beca-10",
+   "usuario": "a",
+   "nivel": "coloquial",
+   "temas": [
+    "beca"
+   ],
+   "consulta": "q me falta pa la beka",
+   "esperado": [
+    [
+     "constancia",
+     "domicilio",
+     "curp",
+     "escane",
+     "solicitud"
+    ]
+   ]
+  },
+  {
+   "id": "q-med-1",
+   "usuario": "a",
+   "nivel": "directa",
+   "temas": [
+    "medicamento"
+   ],
+   "consulta": "¿A qué hora me toca la pastilla?",
+   "esperado": [
+    [
+     "7:10"
+    ]
+   ]
+  },
+  {
+   "id": "q-med-2",
+   "usuario": "a",
+   "nivel": "directa",
+   "temas": [
+    "medicamento"
+   ],
+   "consulta": "¿Qué dosis de metilfenidato me recetaron?",
+   "esperado": [
+    [
+     "10 mg",
+     "10mg",
+     "10 miligramos"
+    ]
+   ]
+  },
+  {
+   "id": "q-med-3",
+   "usuario": "a",
+   "nivel": "directa",
+   "temas": [
+    "medicamento"
+   ],
+   "consulta": "¿Cuándo tengo que surtir la receta?",
+   "esperado": [
+    [
+     "sabado",
+     "jueves"
+    ]
+   ]
+  },
+  {
+   "id": "q-med-4",
+   "usuario": "a",
+   "nivel": "parafraseada",
+   "temas": [
+    "medicamento"
+   ],
+   "consulta": "¿Con qué actividad quedé de ligar la medicina?",
+   "esperado": [
+    [
+     "dientes"
+    ]
+   ]
+  },
+  {
+   "id": "q-med-5",
+   "usuario": "a",
+   "nivel": "parafraseada",
+   "temas": [
+    "medicamento"
+   ],
+   "consulta": "¿Qué hago si se me olvida el tratamiento en la mañana?",
+   "esperado": [
+    [
+     "tarde"
+    ]
+   ]
+  },
+  {
+   "id": "q-med-6",
+   "usuario": "a",
+   "nivel": "parafraseada",
+   "temas": [
+    "medicamento"
+   ],
+   "consulta": "¿Cuántas tomas me quedan antes de quedarme sin medicamento?",
+   "esperado": [
+    [
+     "6",
+     "seis"
+    ]
+   ]
+  },
+  {
+   "id": "q-med-7",
+   "usuario": "a",
+   "nivel": "vaga",
+   "temas": [
+    "medicamento"
+   ],
+   "consulta": "¿Cuándo abre el lugar donde surto?",
+   "esperado": [
+    [
+     "8"
+    ],
+    [
+     "15",
+     "3"
+    ]
+   ]
+  },
+  {
+   "id": "q-med-8",
+   "usuario": "a",
+   "nivel": "vaga",
+   "temas": [
+    "medicamento"
+   ],
+   "consulta": "¿Qué me había dicho el doctor sobre la dosis?",
+   "esperado": [
+    [
+     "10 mg",
+     "10mg",
+     "10 miligramos"
+    ]
+   ]
+  },
+  {
+   "id": "q-med-9",
+   "usuario": "a",
+   "nivel": "coloquial",
+   "temas": [
+    "medicamento"
+   ],
+   "consulta": "a q hra me tomo la medizina",
+   "esperado": [
+    [
+     "7:10"
+    ]
+   ]
+  },
+  {
+   "id": "q-med-10",
+   "usuario": "a",
+   "nivel": "coloquial",
+   "temas": [
+    "medicamento"
+   ],
+   "consulta": "ya se me acaban las pastis cuando voy x mas",
+   "esperado": [
+    [
+     "sabado",
+     "jueves"
+    ]
+   ]
+  },
+  {
+   "id": "q-man-1",
+   "usuario": "a",
+   "nivel": "directa",
+   "temas": [
+    "rutina_manana"
+   ],
+   "consulta": "¿A qué hora me tengo que despertar entre semana?",
+   "esperado": [
+    [
+     "6:30"
+    ]
+   ]
+  },
+  {
+   "id": "q-man-2",
+   "usuario": "a",
+   "nivel": "directa",
+   "temas": [
+    "rutina_manana"
+   ],
+   "consulta": "¿Cuál es mi rutina de la mañana?",
+   "esperado": [
+    [
+     "ban"
+    ],
+    [
+     "desayun"
+    ]
+   ]
+  },
+  {
+   "id": "q-man-3",
+   "usuario": "a",
+   "nivel": "directa",
+   "temas": [
+    "rutina_manana"
+   ],
+   "consulta": "¿En qué momento de la mañana reviso mi agenda?",
+   "esperado": [
+    [
+     "cafe"
+    ]
+   ]
+  },
+  {
+   "id": "q-man-4",
+   "usuario": "a",
+   "nivel": "parafraseada",
+   "temas": [
+    "rutina_manana"
+   ],
+   "consulta": "¿Cuánto tiempo me toma realmente arreglarme?",
+   "esperado": [
+    [
+     "40",
+     "cuarenta"
+    ]
+   ]
+  },
+  {
+   "id": "q-man-5",
+   "usuario": "a",
+   "nivel": "parafraseada",
+   "temas": [
+    "rutina_manana"
+   ],
+   "consulta": "¿A qué hora debo salir de casa para no llegar tarde a clase?",
+   "esperado": [
+    [
+     "7:15",
+     "7:20"
+    ]
+   ]
+  },
+  {
+   "id": "q-man-6",
+   "usuario": "a",
+   "nivel": "parafraseada",
+   "temas": [
+    "rutina_manana"
+   ],
+   "consulta": "¿Qué hago los fines de semana al levantarme?",
+   "esperado": [
+    [
+     "9:30",
+     "desayun"
+    ]
+   ]
+  },
+  {
+   "id": "q-man-7",
+   "usuario": "a",
+   "nivel": "vaga",
+   "temas": [
+    "rutina_manana"
+   ],
+   "consulta": "¿Por qué siempre llego tarde a la escuela?",
+   "esperado": [
+    [
+     "40",
+     "7:40",
+     "7:15",
+     "arreglar"
+    ]
+   ]
+  },
+  {
+   "id": "q-man-8",
+   "usuario": "a",
+   "nivel": "vaga",
+   "temas": [
+    "rutina_manana"
+   ],
+   "consulta": "¿Cuándo me mandas el resumen del día?",
+   "esperado": [
+    [
+     "7"
+    ]
+   ]
+  },
+  {
+   "id": "q-man-9",
+   "usuario": "a",
+   "nivel": "coloquial",
+   "temas": [
+    "rutina_manana"
+   ],
+   "consulta": "a q ora me levanto",
+   "esperado": [
+    [
+     "6:30"
+    ]
+   ]
+  },
+  {
+   "id": "q-man-10",
+   "usuario": "a",
+   "nivel": "coloquial",
+   "temas": [
+    "rutina_manana"
+   ],
+   "consulta": "siempre llego tarde a la primer clase q hago",
+   "esperado": [
+    [
+     "7:15",
+     "40",
+     "ropa"
+    ]
+   ]
+  },
+  {
+   "id": "q-trb-1",
+   "usuario": "a",
+   "nivel": "directa",
+   "temas": [
+    "trabajo"
+   ],
+   "consulta": "¿Qué días tengo turno en la cafetería?",
+   "esperado": [
+    [
+     "martes"
+    ],
+    [
+     "jueves"
+    ]
+   ]
+  },
+  {
+   "id": "q-trb-2",
+   "usuario": "a",
+   "nivel": "directa",
+   "temas": [
+    "trabajo"
+   ],
+   "consulta": "¿A qué hora salgo del trabajo en la cafetería?",
+   "esperado": [
+    [
+     "21",
+     "9 de la noche",
+     "nueve"
+    ]
+   ]
+  },
+  {
+   "id": "q-trb-3",
+   "usuario": "a",
+   "nivel": "directa",
+   "temas": [
+    "trabajo"
+   ],
+   "consulta": "¿Qué turno tengo los viernes en la cafetería?",
+   "esperado": [
+    [
+     "8"
+    ],
+    [
+     "12"
+    ]
+   ]
+  },
+  {
+   "id": "q-trb-4",
+   "usuario": "a",
+   "nivel": "parafraseada",
+   "temas": [
+    "trabajo"
+   ],
+   "consulta": "¿Con quién cambié el turno del fin de semana?",
+   "esperado": [
+    [
+     "sofia"
+    ]
+   ]
+  },
+  {
+   "id": "q-trb-5",
+   "usuario": "a",
+   "nivel": "parafraseada",
+   "temas": [
+    "trabajo"
+   ],
+   "consulta": "¿A qué hora tengo que salir de la escuela para llegar al trabajo?",
+   "esperado": [
+    [
+     "15:25"
+    ]
+   ]
+  },
+  {
+   "id": "q-trb-6",
+   "usuario": "a",
+   "nivel": "parafraseada",
+   "temas": [
+    "trabajo"
+   ],
+   "consulta": "¿Qué me advirtió mi jefe?",
+   "esperado": [
+    [
+     "descuent"
+    ]
+   ]
+  },
+  {
+   "id": "q-trb-7",
+   "usuario": "a",
+   "nivel": "vaga",
+   "temas": [
+    "trabajo"
+   ],
+   "consulta": "¿Qué días trabajo en la tarde?",
+   "esperado": [
+    [
+     "martes"
+    ],
+    [
+     "jueves"
+    ]
+   ]
+  },
+  {
+   "id": "q-trb-8",
+   "usuario": "a",
+   "nivel": "vaga",
+   "temas": [
+    "trabajo"
+   ],
+   "consulta": "¿Qué me dijeron que pasaría si llego tarde otra vez?",
+   "esperado": [
+    [
+     "descuent"
+    ]
+   ]
+  },
+  {
+   "id": "q-trb-9",
+   "usuario": "a",
+   "nivel": "coloquial",
+   "temas": [
+    "trabajo"
+   ],
+   "consulta": "q dias tngo chamba",
+   "esperado": [
+    [
+     "martes"
+    ],
+    [
+     "jueves"
+    ]
+   ]
+  },
+  {
+   "id": "q-trb-10",
+   "usuario": "a",
+   "nivel": "coloquial",
+   "temas": [
+    "trabajo"
+   ],
+   "consulta": "a q hora salgo pa la cafe",
+   "esperado": [
+    [
+     "15:25"
+    ]
+   ]
+  },
+  {
+   "id": "q-calc-1",
+   "usuario": "a",
+   "nivel": "directa",
+   "temas": [
+    "examen_calculo"
+   ],
+   "consulta": "¿Cuándo es el examen de Cálculo?",
+   "esperado": [
+    [
+     "lunes",
+     "26"
+    ]
+   ]
+  },
+  {
+   "id": "q-calc-2",
+   "usuario": "a",
+   "nivel": "directa",
+   "temas": [
+    "examen_calculo"
+   ],
+   "consulta": "¿Qué temas entran en el parcial de Cálculo?",
+   "esperado": [
+    [
+     "derivadas"
+    ],
+    [
+     "cadena"
+    ],
+    [
+     "optimizacion"
+    ]
+   ]
+  },
+  {
+   "id": "q-calc-3",
+   "usuario": "a",
+   "nivel": "directa",
+   "temas": [
+    "examen_calculo"
+   ],
+   "consulta": "¿Cuándo es la asesoría de Cálculo?",
+   "esperado": [
+    [
+     "miercoles"
+    ],
+    [
+     "13",
+     "1"
+    ]
+   ]
+  },
+  {
+   "id": "q-calc-4",
+   "usuario": "a",
+   "nivel": "parafraseada",
+   "temas": [
+    "examen_calculo"
+   ],
+   "consulta": "¿Cómo quedó repartido mi estudio de la semana?",
+   "esperado": [
+    [
+     "martes"
+    ],
+    [
+     "derivadas"
+    ]
+   ]
+  },
+  {
+   "id": "q-calc-5",
+   "usuario": "a",
+   "nivel": "parafraseada",
+   "temas": [
+    "examen_calculo"
+   ],
+   "consulta": "¿Cuándo es la asesoría para resolver dudas del parcial?",
+   "esperado": [
+    [
+     "miercoles"
+    ]
+   ]
+  },
+  {
+   "id": "q-calc-6",
+   "usuario": "a",
+   "nivel": "parafraseada",
+   "temas": [
+    "examen_calculo"
+   ],
+   "consulta": "¿Cuánto tiempo puedo concentrarme estudiando matemáticas?",
+   "esperado": [
+    [
+     "20",
+     "veinte"
+    ]
+   ]
+  },
+  {
+   "id": "q-calc-7",
+   "usuario": "a",
+   "nivel": "vaga",
+   "temas": [
+    "examen_calculo"
+   ],
+   "consulta": "¿Qué estudio el miércoles?",
+   "esperado": [
+    [
+     "cadena"
+    ]
+   ]
+  },
+  {
+   "id": "q-calc-8",
+   "usuario": "a",
+   "nivel": "vaga",
+   "temas": [
+    "examen_calculo"
+   ],
+   "consulta": "¿En qué salón era lo de las dudas?",
+   "esperado": [
+    [
+     "204"
+    ]
+   ]
+  },
+  {
+   "id": "q-calc-9",
+   "usuario": "a",
+   "nivel": "coloquial",
+   "temas": [
+    "examen_calculo"
+   ],
+   "consulta": "cuando es el parcial d calcu",
+   "esperado": [
+    [
+     "lunes",
+     "26"
+    ]
+   ]
+  },
+  {
+   "id": "q-calc-10",
+   "usuario": "a",
+   "nivel": "coloquial",
+   "temas": [
+    "examen_calculo"
+   ],
+   "consulta": "q temas vienen en el examen de mate",
+   "esperado": [
+    [
+     "derivadas"
+    ],
+    [
+     "cadena",
+     "optimizacion"
+    ]
+   ]
+  },
+  {
+   "id": "q-pag-1",
+   "usuario": "a",
+   "nivel": "directa",
+   "temas": [
+    "pagos"
+   ],
+   "consulta": "¿Qué día se paga la renta?",
+   "esperado": [
+    [
+     "dia 1",
+     "primero",
+     "el 1"
+    ]
+   ]
+  },
+  {
+   "id": "q-pag-2",
+   "usuario": "a",
+   "nivel": "directa",
+   "temas": [
+    "pagos"
+   ],
+   "consulta": "¿Cuándo vence el plan del celular?",
+   "esperado": [
+    [
+     "12"
+    ]
+   ]
+  },
+  {
+   "id": "q-pag-3",
+   "usuario": "a",
+   "nivel": "directa",
+   "temas": [
+    "pagos"
+   ],
+   "consulta": "¿Cuándo reviso mis pagos del mes?",
+   "esperado": [
+    [
+     "domingo"
+    ]
+   ]
+  },
+  {
+   "id": "q-pag-4",
+   "usuario": "a",
+   "nivel": "parafraseada",
+   "temas": [
+    "pagos"
+   ],
+   "consulta": "¿Cuánto pago por el cuarto?",
+   "esperado": [
+    [
+     "4500"
+    ]
+   ]
+  },
+  {
+   "id": "q-pag-5",
+   "usuario": "a",
+   "nivel": "parafraseada",
+   "temas": [
+    "pagos"
+   ],
+   "consulta": "¿Qué día me depositan la quincena?",
+   "esperado": [
+    [
+     "15"
+    ],
+    [
+     "30"
+    ]
+   ]
+  },
+  {
+   "id": "q-pag-6",
+   "usuario": "a",
+   "nivel": "parafraseada",
+   "temas": [
+    "pagos"
+   ],
+   "consulta": "¿Cuántos días tengo para pagar el recibo de la luz?",
+   "esperado": [
+    [
+     "10",
+     "diez"
+    ]
+   ]
+  },
+  {
+   "id": "q-pag-7",
+   "usuario": "a",
+   "nivel": "vaga",
+   "temas": [
+    "pagos"
+   ],
+   "consulta": "¿Qué tengo que pagar antes de fin de mes?",
+   "esperado": [
+    [
+     "renta"
+    ]
+   ]
+  },
+  {
+   "id": "q-pag-8",
+   "usuario": "a",
+   "nivel": "vaga",
+   "temas": [
+    "pagos"
+   ],
+   "consulta": "¿Por qué me cortaron el servicio?",
+   "esperado": [
+    [
+     "internet"
+    ]
+   ]
+  },
+  {
+   "id": "q-pag-9",
+   "usuario": "a",
+   "nivel": "coloquial",
+   "temas": [
+    "pagos"
+   ],
+   "consulta": "cuando pago la renta",
+   "esperado": [
+    [
+     "dia 1",
+     "primero",
+     "el 1"
+    ]
+   ]
+  },
+  {
+   "id": "q-pag-10",
+   "usuario": "a",
+   "nivel": "coloquial",
+   "temas": [
+    "pagos"
+   ],
+   "consulta": "q dia se vence el cel",
+   "esperado": [
+    [
+     "12"
+    ]
+   ]
+  },
+  {
+   "id": "q-noc-1",
+   "usuario": "a",
+   "nivel": "directa",
+   "temas": [
+    "rutina_noche"
+   ],
+   "consulta": "¿A qué hora quiero irme a dormir entre semana?",
+   "esperado": [
+    [
+     "23:30",
+     "11:30",
+     "once y media"
+    ]
+   ]
+  },
+  {
+   "id": "q-noc-2",
+   "usuario": "a",
+   "nivel": "directa",
+   "temas": [
+    "rutina_noche"
+   ],
+   "consulta": "¿Desde qué hora se activa el no molestar?",
+   "esperado": [
+    [
+     "23",
+     "11"
+    ]
+   ]
+  },
+  {
+   "id": "q-noc-3",
+   "usuario": "a",
+   "nivel": "directa",
+   "temas": [
+    "rutina_noche"
+   ],
+   "consulta": "¿Cuál es mi rutina de noche?",
+   "esperado": [
+    [
+     "mochila"
+    ],
+    [
+     "ropa"
+    ]
+   ]
+  },
+  {
+   "id": "q-noc-4",
+   "usuario": "a",
+   "nivel": "parafraseada",
+   "temas": [
+    "rutina_noche"
+   ],
+   "consulta": "¿Qué dejo preparado antes de acostarme?",
+   "esperado": [
+    [
+     "mochila"
+    ],
+    [
+     "ropa"
+    ]
+   ]
+  },
+  {
+   "id": "q-noc-5",
+   "usuario": "a",
+   "nivel": "parafraseada",
+   "temas": [
+    "rutina_noche"
+   ],
+   "consulta": "¿Cuántas horas necesito descansar para rendir?",
+   "esperado": [
+    [
+     "7",
+     "siete"
+    ]
+   ]
+  },
+  {
+   "id": "q-noc-6",
+   "usuario": "a",
+   "nivel": "parafraseada",
+   "temas": [
+    "rutina_noche"
+   ],
+   "consulta": "¿A qué hora debo apagar las pantallas?",
+   "esperado": [
+    [
+     "23",
+     "11"
+    ]
+   ]
+  },
+  {
+   "id": "q-noc-7",
+   "usuario": "a",
+   "nivel": "vaga",
+   "temas": [
+    "rutina_noche"
+   ],
+   "consulta": "¿Hasta qué hora me puedo desvelar el viernes?",
+   "esperado": [
+    [
+     "1:00",
+     "a la 1",
+     "1 de la"
+    ]
+   ]
+  },
+  {
+   "id": "q-noc-8",
+   "usuario": "a",
+   "nivel": "vaga",
+   "temas": [
+    "rutina_noche"
+   ],
+   "consulta": "¿Qué hago para no quedarme viendo videos?",
+   "esperado": [
+    [
+     "pantallas",
+     "23",
+     "11",
+     "celular"
+    ]
+   ]
+  },
+  {
+   "id": "q-noc-9",
+   "usuario": "a",
+   "nivel": "coloquial",
+   "temas": [
+    "rutina_noche"
+   ],
+   "consulta": "a q hora m duermo",
+   "esperado": [
+    [
+     "23:30",
+     "11:30"
+    ]
+   ]
+  },
+  {
+   "id": "q-noc-10",
+   "usuario": "a",
+   "nivel": "coloquial",
+   "temas": [
+    "rutina_noche"
+   ],
+   "consulta": "pq no m puedo dormir temprano",
+   "esperado": [
+    [
+     "pantallas",
+     "celular",
+     "videos",
+     "23"
+    ]
+   ]
+  },
+  {
+   "id": "q-ani-1",
+   "usuario": "a",
+   "nivel": "directa",
+   "temas": [
+    "aniversario"
+   ],
+   "consulta": "¿A qué hora es la reservación del sábado?",
+   "esperado": [
+    [
+     "20",
+     "8"
+    ]
+   ]
+  },
+  {
+   "id": "q-ani-2",
+   "usuario": "a",
+   "nivel": "directa",
+   "temas": [
+    "aniversario"
+   ],
+   "consulta": "¿Para cuándo tengo que tener el regalo de Diego?",
+   "esperado": [
+    [
+     "jueves"
+    ]
+   ]
+  },
+  {
+   "id": "q-ani-3",
+   "usuario": "a",
+   "nivel": "directa",
+   "temas": [
+    "aniversario"
+   ],
+   "consulta": "¿Cuándo es mi aniversario con Diego?",
+   "esperado": [
+    [
+     "sabado",
+     "17"
+    ]
+   ]
+  },
+  {
+   "id": "q-ani-4",
+   "usuario": "a",
+   "nivel": "parafraseada",
+   "temas": [
+    "aniversario"
+   ],
+   "consulta": "¿A qué hora pido el Uber para la cena?",
+   "esperado": [
+    [
+     "19:15",
+     "7:15"
+    ]
+   ]
+  },
+  {
+   "id": "q-ani-5",
+   "usuario": "a",
+   "nivel": "parafraseada",
+   "temas": [
+    "aniversario"
+   ],
+   "consulta": "¿En qué restaurante reservé?",
+   "esperado": [
+    [
+     "pergola"
+    ]
+   ]
+  },
+  {
+   "id": "q-ani-6",
+   "usuario": "a",
+   "nivel": "parafraseada",
+   "temas": [
+    "aniversario"
+   ],
+   "consulta": "¿Qué le quería escribir a mi novio?",
+   "esperado": [
+    [
+     "carta"
+    ]
+   ]
+  },
+  {
+   "id": "q-ani-7",
+   "usuario": "a",
+   "nivel": "vaga",
+   "temas": [
+    "aniversario"
+   ],
+   "consulta": "¿Qué pasó el año pasado que no quiero repetir?",
+   "esperado": [
+    [
+     "olvid"
+    ]
+   ]
+  },
+  {
+   "id": "q-ani-8",
+   "usuario": "a",
+   "nivel": "vaga",
+   "temas": [
+    "aniversario"
+   ],
+   "consulta": "¿Qué tengo pendiente para el sábado 17?",
+   "esperado": [
+    [
+     "pergola",
+     "reserv",
+     "cena",
+     "20",
+     "regalo"
+    ]
+   ]
+  },
+  {
+   "id": "q-ani-9",
+   "usuario": "a",
+   "nivel": "coloquial",
+   "temas": [
+    "aniversario"
+   ],
+   "consulta": "a q hora es la cena con diego",
+   "esperado": [
+    [
+     "20",
+     "8"
+    ]
+   ]
+  },
+  {
+   "id": "q-ani-10",
+   "usuario": "a",
+   "nivel": "coloquial",
+   "temas": [
+    "aniversario"
+   ],
+   "consulta": "q le regalo a mi novio y para cuando",
+   "esperado": [
+    [
+     "jueves"
+    ]
+   ]
+  },
+  {
+   "id": "q-pas-1",
+   "usuario": "a",
+   "nivel": "directa",
+   "temas": [
+    "pasaporte"
+   ],
+   "consulta": "¿Cuándo es mi cita del pasaporte?",
+   "esperado": [
+    [
+     "martes",
+     "20"
+    ],
+    [
+     "11:40"
+    ]
+   ]
+  },
+  {
+   "id": "q-pas-2",
+   "usuario": "a",
+   "nivel": "directa",
+   "temas": [
+    "pasaporte"
+   ],
+   "consulta": "¿Qué documentos llevo para el pasaporte?",
+   "esperado": [
+    [
+     "acta"
+    ],
+    [
+     "ine"
+    ],
+    [
+     "comprobante"
+    ]
+   ]
+  },
+  {
+   "id": "q-pas-3",
+   "usuario": "a",
+   "nivel": "directa",
+   "temas": [
+    "pasaporte"
+   ],
+   "consulta": "¿Dónde guardé el comprobante de pago del pasaporte?",
+   "esperado": [
+    [
+     "azul"
+    ]
+   ]
+  },
+  {
+   "id": "q-pas-4",
+   "usuario": "a",
+   "nivel": "parafraseada",
+   "temas": [
+    "pasaporte"
+   ],
+   "consulta": "¿A qué hora salgo para la cita en Relaciones Exteriores?",
+   "esperado": [
+    [
+     "10:30"
+    ]
+   ]
+  },
+  {
+   "id": "q-pas-5",
+   "usuario": "a",
+   "nivel": "parafraseada",
+   "temas": [
+    "pasaporte"
+   ],
+   "consulta": "¿Qué requisitos tiene la oficina de la SRE?",
+   "esperado": [
+    [
+     "15",
+     "acompa"
+    ]
+   ]
+  },
+  {
+   "id": "q-pas-6",
+   "usuario": "a",
+   "nivel": "parafraseada",
+   "temas": [
+    "pasaporte"
+   ],
+   "consulta": "¿Ya pagué el trámite para viajar al extranjero?",
+   "esperado": [
+    [
+     "carpeta",
+     "pagaste",
+     "pagado",
+     "ya lo pag"
+    ]
+   ]
+  },
+  {
+   "id": "q-pas-7",
+   "usuario": "a",
+   "nivel": "vaga",
+   "temas": [
+    "pasaporte"
+   ],
+   "consulta": "¿Qué tenía que pagar en el banco?",
+   "esperado": [
+    [
+     "pasaporte"
+    ]
+   ]
+  },
+  {
+   "id": "q-pas-8",
+   "usuario": "a",
+   "nivel": "vaga",
+   "temas": [
+    "pasaporte"
+   ],
+   "consulta": "¿Qué día era lo de Polanco?",
+   "esperado": [
+    [
+     "martes",
+     "20"
+    ]
+   ]
+  },
+  {
+   "id": "q-pas-9",
+   "usuario": "a",
+   "nivel": "coloquial",
+   "temas": [
+    "pasaporte"
+   ],
+   "consulta": "q llevo pa el pasaprte",
+   "esperado": [
+    [
+     "acta"
+    ],
+    [
+     "ine"
+    ]
+   ]
+  },
+  {
+   "id": "q-pas-10",
+   "usuario": "a",
+   "nivel": "coloquial",
+   "temas": [
+    "pasaporte"
+   ],
+   "consulta": "a q hora es lo d la sre",
+   "esperado": [
+    [
+     "11:40"
+    ]
+   ]
+  },
+  {
+   "id": "q-ss-1",
+   "usuario": "a",
+   "nivel": "directa",
+   "temas": [
+    "servicio_social"
+   ],
+   "consulta": "¿Qué horario tengo en el servicio social?",
+   "esperado": [
+    [
+     "14",
+     "2"
+    ],
+    [
+     "18",
+     "6"
+    ]
+   ]
+  },
+  {
+   "id": "q-ss-2",
+   "usuario": "a",
+   "nivel": "directa",
+   "temas": [
+    "servicio_social"
+   ],
+   "consulta": "¿Cuántas horas llevo de servicio social?",
+   "esperado": [
+    [
+     "120"
+    ]
+   ]
+  },
+  {
+   "id": "q-ss-3",
+   "usuario": "a",
+   "nivel": "directa",
+   "temas": [
+    "servicio_social"
+   ],
+   "consulta": "¿Cuándo entrego el reporte de horas del servicio social?",
+   "esperado": [
+    [
+     "5",
+     "cinco"
+    ]
+   ]
+  },
+  {
+   "id": "q-ss-4",
+   "usuario": "a",
+   "nivel": "parafraseada",
+   "temas": [
+    "servicio_social"
+   ],
+   "consulta": "¿Quién me firma los reportes mensuales?",
+   "esperado": [
+    [
+     "ortega"
+    ]
+   ]
+  },
+  {
+   "id": "q-ss-5",
+   "usuario": "a",
+   "nivel": "parafraseada",
+   "temas": [
+    "servicio_social"
+   ],
+   "consulta": "¿Dónde hago mis horas obligatorias para titularme?",
+   "esperado": [
+    [
+     "biblioteca"
+    ]
+   ]
+  },
+  {
+   "id": "q-ss-6",
+   "usuario": "a",
+   "nivel": "parafraseada",
+   "temas": [
+    "servicio_social"
+   ],
+   "consulta": "¿Cuánto me falta para terminar las 480 horas?",
+   "esperado": [
+    [
+     "360",
+     "6 meses",
+     "seis meses"
+    ]
+   ]
+  },
+  {
+   "id": "q-ss-7",
+   "usuario": "a",
+   "nivel": "vaga",
+   "temas": [
+    "servicio_social"
+   ],
+   "consulta": "¿Qué tengo que entregar al inicio de cada mes?",
+   "esperado": [
+    [
+     "reporte"
+    ]
+   ]
+  },
+  {
+   "id": "q-ss-8",
+   "usuario": "a",
+   "nivel": "vaga",
+   "temas": [
+    "servicio_social",
+    "natacion"
+   ],
+   "consulta": "¿Qué hago los lunes en la tarde?",
+   "esperado": [
+    [
+     "servicio",
+     "natacion"
+    ]
+   ]
+  },
+  {
+   "id": "q-ss-9",
+   "usuario": "a",
+   "nivel": "coloquial",
+   "temas": [
+    "servicio_social"
+   ],
+   "consulta": "cuantas horas llevo d servicio",
+   "esperado": [
+    [
+     "120"
+    ]
+   ]
+  },
+  {
+   "id": "q-ss-10",
+   "usuario": "a",
+   "nivel": "coloquial",
+   "temas": [
+    "servicio_social"
+   ],
+   "consulta": "cuando entrego lo d las horas",
+   "esperado": [
+    [
+     "5",
+     "cinco"
+    ]
+   ]
+  },
+  {
+   "id": "q-ing-1",
+   "usuario": "a",
+   "nivel": "directa",
+   "temas": [
+    "curso_ingles"
+   ],
+   "consulta": "¿Qué horario tiene mi curso de inglés?",
+   "esperado": [
+    [
+     "sabado"
+    ],
+    [
+     "9"
+    ]
+   ]
+  },
+  {
+   "id": "q-ing-2",
+   "usuario": "a",
+   "nivel": "directa",
+   "temas": [
+    "curso_ingles"
+   ],
+   "consulta": "¿Cuándo es el examen de nivel de inglés?",
+   "esperado": [
+    [
+     "8"
+    ],
+    [
+     "noviembre"
+    ]
+   ]
+  },
+  {
+   "id": "q-ing-3",
+   "usuario": "a",
+   "nivel": "directa",
+   "temas": [
+    "curso_ingles"
+   ],
+   "consulta": "¿Cuántas faltas llevo en inglés?",
+   "esperado": [
+    [
+     "2",
+     "dos"
+    ]
+   ]
+  },
+  {
+   "id": "q-ing-4",
+   "usuario": "a",
+   "nivel": "parafraseada",
+   "temas": [
+    "curso_ingles"
+   ],
+   "consulta": "¿Qué pasa si vuelvo a faltar a la clase de idiomas?",
+   "esperado": [
+    [
+     "baja"
+    ]
+   ]
+  },
+  {
+   "id": "q-ing-5",
+   "usuario": "a",
+   "nivel": "parafraseada",
+   "temas": [
+    "curso_ingles"
+   ],
+   "consulta": "¿Cuándo entrego la tarea de la maestra?",
+   "esperado": [
+    [
+     "sabado"
+    ]
+   ]
+  },
+  {
+   "id": "q-ing-6",
+   "usuario": "a",
+   "nivel": "parafraseada",
+   "temas": [
+    "curso_ingles"
+   ],
+   "consulta": "¿Cómo preparo mi exposición oral?",
+   "esperado": [
+    [
+     "tema",
+     "ensay",
+     "ideas"
+    ]
+   ]
+  },
+  {
+   "id": "q-ing-7",
+   "usuario": "a",
+   "nivel": "vaga",
+   "temas": [
+    "curso_ingles"
+   ],
+   "consulta": "¿Cuándo era lo de medir mi nivel?",
+   "esperado": [
+    [
+     "8"
+    ],
+    [
+     "noviembre"
+    ]
+   ]
+  },
+  {
+   "id": "q-ing-8",
+   "usuario": "a",
+   "nivel": "vaga",
+   "temas": [
+    "curso_ingles"
+   ],
+   "consulta": "¿Qué tengo el 8 de noviembre?",
+   "esperado": [
+    [
+     "examen"
+    ],
+    [
+     "ingles",
+     "nivel"
+    ]
+   ]
+  },
+  {
+   "id": "q-ing-9",
+   "usuario": "a",
+   "nivel": "coloquial",
+   "temas": [
+    "curso_ingles"
+   ],
+   "consulta": "a q hora es ingles",
+   "esperado": [
+    [
+     "9"
+    ]
+   ]
+  },
+  {
+   "id": "q-ing-10",
+   "usuario": "a",
+   "nivel": "coloquial",
+   "temas": [
+    "curso_ingles"
+   ],
+   "consulta": "cuantas faltas tngo en ingles",
+   "esperado": [
+    [
+     "2",
+     "dos"
+    ]
+   ]
+  },
+  {
+   "id": "q-nat-1",
+   "usuario": "a",
+   "nivel": "directa",
+   "temas": [
+    "natacion"
+   ],
+   "consulta": "¿Qué días tengo natación?",
+   "esperado": [
+    [
+     "lunes"
+    ],
+    [
+     "miercoles"
+    ]
+   ]
+  },
+  {
+   "id": "q-nat-2",
+   "usuario": "a",
+   "nivel": "directa",
+   "temas": [
+    "natacion"
+   ],
+   "consulta": "¿Qué necesito llevar a natación?",
+   "esperado": [
+    [
+     "gorra"
+    ],
+    [
+     "goggles",
+     "googles",
+     "lentes"
+    ]
+   ]
+  },
+  {
+   "id": "q-nat-3",
+   "usuario": "a",
+   "nivel": "directa",
+   "temas": [
+    "natacion"
+   ],
+   "consulta": "¿Cuándo pago la mensualidad de natación?",
+   "esperado": [
+    [
+     "10",
+     "diez"
+    ]
+   ]
+  },
+  {
+   "id": "q-nat-4",
+   "usuario": "a",
+   "nivel": "parafraseada",
+   "temas": [
+    "natacion"
+   ],
+   "consulta": "¿A qué hora es mi clase en la alberca?",
+   "esperado": [
+    [
+     "19",
+     "7"
+    ]
+   ]
+  },
+  {
+   "id": "q-nat-5",
+   "usuario": "a",
+   "nivel": "parafraseada",
+   "temas": [
+    "natacion"
+   ],
+   "consulta": "¿Hay clases en el deportivo en diciembre?",
+   "esperado": [
+    [
+     "sin natacion",
+     "no hay",
+     "no tienes",
+     "no habra"
+    ]
+   ]
+  },
+  {
+   "id": "q-nat-6",
+   "usuario": "a",
+   "nivel": "parafraseada",
+   "temas": [
+    "natacion"
+   ],
+   "consulta": "¿Me da tiempo de llegar a nadar después del servicio?",
+   "esperado": [
+    [
+     "19",
+     "7"
+    ]
+   ]
+  },
+  {
+   "id": "q-nat-7",
+   "usuario": "a",
+   "nivel": "vaga",
+   "temas": [
+    "natacion"
+   ],
+   "consulta": "¿Qué me dijo el maestro sobre fin de año?",
+   "esperado": [
+    [
+     "diciembre"
+    ]
+   ]
+  },
+  {
+   "id": "q-nat-8",
+   "usuario": "a",
+   "nivel": "vaga",
+   "temas": [
+    "natacion"
+   ],
+   "consulta": "¿Qué hago para no faltar otra vez a lo del deportivo?",
+   "esperado": [
+    [
+     "10 minutos",
+     "antes",
+     "maleta"
+    ]
+   ]
+  },
+  {
+   "id": "q-nat-9",
+   "usuario": "a",
+   "nivel": "coloquial",
+   "temas": [
+    "natacion"
+   ],
+   "consulta": "a q hora es nata",
+   "esperado": [
+    [
+     "19",
+     "7"
+    ]
+   ]
+  },
+  {
+   "id": "q-nat-10",
+   "usuario": "a",
+   "nivel": "coloquial",
+   "temas": [
+    "natacion"
+   ],
+   "consulta": "q llevo pa nadar",
+   "esperado": [
+    [
+     "gorra"
+    ]
+   ]
+  },
+  {
+   "id": "q-fam-1",
+   "usuario": "a",
+   "nivel": "directa",
+   "temas": [
+    "comida_familiar"
+   ],
+   "consulta": "¿A qué hora es la comida con mis papás?",
+   "esperado": [
+    [
+     "15",
+     "3"
+    ]
+   ]
+  },
+  {
+   "id": "q-fam-2",
+   "usuario": "a",
+   "nivel": "directa",
+   "temas": [
+    "comida_familiar"
+   ],
+   "consulta": "¿Qué me toca llevar a la comida del domingo?",
+   "esperado": [
+    [
+     "postre"
+    ]
+   ]
+  },
+  {
+   "id": "q-fam-3",
+   "usuario": "a",
+   "nivel": "directa",
+   "temas": [
+    "comida_familiar"
+   ],
+   "consulta": "¿Qué domingo no hay comida familiar?",
+   "esperado": [
+    [
+     "25"
+    ]
+   ]
+  },
+  {
+   "id": "q-fam-4",
+   "usuario": "a",
+   "nivel": "parafraseada",
+   "temas": [
+    "comida_familiar"
+   ],
+   "consulta": "¿A qué hora llego para ayudarle a mi mamá a cocinar?",
+   "esperado": [
+    [
+     "13:30",
+     "1:30",
+     "una y media"
+    ]
+   ]
+  },
+  {
+   "id": "q-fam-5",
+   "usuario": "a",
+   "nivel": "parafraseada",
+   "temas": [
+    "comida_familiar"
+   ],
+   "consulta": "¿Cuánto tiempo hago a casa de mis papás?",
+   "esperado": [
+    [
+     "30",
+     "media hora"
+    ]
+   ]
+  },
+  {
+   "id": "q-fam-6",
+   "usuario": "a",
+   "nivel": "parafraseada",
+   "temas": [
+    "comida_familiar"
+   ],
+   "consulta": "¿A qué hora salgo para no llegar tarde con mi familia?",
+   "esperado": [
+    [
+     "14:25",
+     "2:25"
+    ]
+   ]
+  },
+  {
+   "id": "q-fam-7",
+   "usuario": "a",
+   "nivel": "vaga",
+   "temas": [
+    "comida_familiar"
+   ],
+   "consulta": "¿Cuándo no hay reunión con mi familia?",
+   "esperado": [
+    [
+     "25"
+    ]
+   ]
+  },
+  {
+   "id": "q-fam-8",
+   "usuario": "a",
+   "nivel": "vaga",
+   "temas": [
+    "comida_familiar"
+   ],
+   "consulta": "¿Por qué se enoja mi papá?",
+   "esperado": [
+    [
+     "tarde"
+    ]
+   ]
+  },
+  {
+   "id": "q-fam-9",
+   "usuario": "a",
+   "nivel": "coloquial",
+   "temas": [
+    "comida_familiar"
+   ],
+   "consulta": "a q hora como con mis jefes el domingo",
+   "esperado": [
+    [
+     "15",
+     "3"
+    ]
+   ]
+  },
+  {
+   "id": "q-fam-10",
+   "usuario": "a",
+   "nivel": "coloquial",
+   "temas": [
+    "comida_familiar"
+   ],
+   "consulta": "q llevo el domingo a ksa d mis papas",
+   "esperado": [
+    [
+     "postre"
+    ]
+   ]
+  },
+  {
+   "id": "q-ter-1",
+   "usuario": "a",
+   "nivel": "directa",
+   "temas": [
+    "terapia"
+   ],
+   "consulta": "¿Cuándo es mi próxima sesión de terapia?",
+   "esperado": [
+    [
+     "21"
+    ]
+   ]
+  },
+  {
+   "id": "q-ter-2",
+   "usuario": "a",
+   "nivel": "directa",
+   "temas": [
+    "terapia"
+   ],
+   "consulta": "¿Qué tarea me dejó la psicóloga?",
+   "esperado": [
+    [
+     "pospon"
+    ]
+   ]
+  },
+  {
+   "id": "q-ter-3",
+   "usuario": "a",
+   "nivel": "directa",
+   "temas": [
+    "terapia"
+   ],
+   "consulta": "¿Con cuánto tiempo puedo cancelar la terapia?",
+   "esperado": [
+    [
+     "24"
+    ]
+   ]
+  },
+  {
+   "id": "q-ter-4",
+   "usuario": "a",
+   "nivel": "parafraseada",
+   "temas": [
+    "terapia"
+   ],
+   "consulta": "¿Cada cuánto veo a mi psicóloga?",
+   "esperado": [
+    [
+     "15",
+     "quince"
+    ]
+   ]
+  },
+  {
+   "id": "q-ter-5",
+   "usuario": "a",
+   "nivel": "parafraseada",
+   "temas": [
+    "terapia"
+   ],
+   "consulta": "¿La sesión con la psicóloga es presencial?",
+   "esperado": [
+    [
+     "linea",
+     "videollamada"
+    ]
+   ]
+  },
+  {
+   "id": "q-ter-6",
+   "usuario": "a",
+   "nivel": "parafraseada",
+   "temas": [
+    "terapia"
+   ],
+   "consulta": "¿A qué hora repaso lo que quiero platicar en la sesión?",
+   "esperado": [
+    [
+     "17:30",
+     "5:30"
+    ]
+   ]
+  },
+  {
+   "id": "q-ter-7",
+   "usuario": "a",
+   "nivel": "vaga",
+   "temas": [
+    "terapia"
+   ],
+   "consulta": "¿Qué tengo el miércoles 21?",
+   "esperado": [
+    [
+     "terapia",
+     "psicolog",
+     "sesion"
+    ]
+   ]
+  },
+  {
+   "id": "q-ter-8",
+   "usuario": "a",
+   "nivel": "vaga",
+   "temas": [
+    "terapia"
+   ],
+   "consulta": "¿Qué tenía que anotar cada noche?",
+   "esperado": [
+    [
+     "pospon"
+    ]
+   ]
+  },
+  {
+   "id": "q-ter-9",
+   "usuario": "a",
+   "nivel": "coloquial",
+   "temas": [
+    "terapia"
+   ],
+   "consulta": "cuando es mi terapia",
+   "esperado": [
+    [
+     "miercoles"
+    ]
+   ]
+  },
+  {
+   "id": "q-ter-10",
+   "usuario": "a",
+   "nivel": "coloquial",
+   "temas": [
+    "terapia"
+   ],
+   "consulta": "q tarea m dejo la psico",
+   "esperado": [
+    [
+     "pospon"
+    ]
+   ]
+  },
+  {
+   "id": "q-ent-1",
+   "usuario": "a",
+   "nivel": "directa",
+   "temas": [
+    "entrevista_practicas"
+   ],
+   "consulta": "¿Cuándo es la entrevista de prácticas?",
+   "esperado": [
+    [
+     "viernes"
+    ],
+    [
+     "11"
+    ]
+   ]
+  },
+  {
+   "id": "q-ent-2",
+   "usuario": "a",
+   "nivel": "directa",
+   "temas": [
+    "entrevista_practicas"
+   ],
+   "consulta": "¿Qué tengo que llevar a la entrevista?",
+   "esperado": [
+    [
+     "portafolio"
+    ]
+   ]
+  },
+  {
+   "id": "q-ent-3",
+   "usuario": "a",
+   "nivel": "directa",
+   "temas": [
+    "entrevista_practicas"
+   ],
+   "consulta": "¿Dónde es la entrevista de prácticas?",
+   "esperado": [
+    [
+     "santa fe"
+    ]
+   ]
+  },
+  {
+   "id": "q-ent-4",
+   "usuario": "a",
+   "nivel": "parafraseada",
+   "temas": [
+    "entrevista_practicas"
+   ],
+   "consulta": "¿A qué hora salgo para Santa Fe?",
+   "esperado": [
+    [
+     "9:45"
+    ]
+   ]
+  },
+  {
+   "id": "q-ent-5",
+   "usuario": "a",
+   "nivel": "parafraseada",
+   "temas": [
+    "entrevista_practicas"
+   ],
+   "consulta": "¿Qué tengo que actualizar antes de verme con la empresa?",
+   "esperado": [
+    [
+     "cv",
+     "curriculum"
+    ]
+   ]
+  },
+  {
+   "id": "q-ent-6",
+   "usuario": "a",
+   "nivel": "parafraseada",
+   "temas": [
+    "entrevista_practicas"
+   ],
+   "consulta": "¿Qué preguntas practico para que me contraten?",
+   "esperado": [
+    [
+     "hablame de ti",
+     "por que esta empresa",
+     "reto"
+    ]
+   ]
+  },
+  {
+   "id": "q-ent-7",
+   "usuario": "a",
+   "nivel": "vaga",
+   "temas": [
+    "entrevista_practicas",
+    "trabajo"
+   ],
+   "consulta": "¿Qué hago con el turno que choca con lo del viernes?",
+   "esperado": [
+    [
+     "cambi"
+    ]
+   ]
+  },
+  {
+   "id": "q-ent-8",
+   "usuario": "a",
+   "nivel": "vaga",
+   "temas": [
+    "entrevista_practicas",
+    "trabajo"
+   ],
+   "consulta": "¿Qué tengo el viernes a las 11?",
+   "esperado": [
+    [
+     "entrevista"
+    ]
+   ]
+  },
+  {
+   "id": "q-ent-9",
+   "usuario": "a",
+   "nivel": "coloquial",
+   "temas": [
+    "entrevista_practicas"
+   ],
+   "consulta": "a q hora es la entrevista",
+   "esperado": [
+    [
+     "11"
+    ]
+   ]
+  },
+  {
+   "id": "q-ent-10",
+   "usuario": "a",
+   "nivel": "coloquial",
+   "temas": [
+    "entrevista_practicas"
+   ],
+   "consulta": "q llevo a lo d las practicas",
+   "esperado": [
+    [
+     "portafolio"
+    ]
+   ]
+  },
+  {
+   "id": "q-plo-1",
+   "usuario": "a",
+   "nivel": "directa",
+   "temas": [
+    "plomero"
+   ],
+   "consulta": "¿Cuándo viene el plomero?",
+   "esperado": [
+    [
+     "jueves",
+     "martes"
+    ]
+   ]
+  },
+  {
+   "id": "q-plo-2",
+   "usuario": "a",
+   "nivel": "directa",
+   "temas": [
+    "plomero"
+   ],
+   "consulta": "¿Cuánto cobra el plomero?",
+   "esperado": [
+    [
+     "600",
+     "seiscientos"
+    ]
+   ]
+  },
+  {
+   "id": "q-plo-3",
+   "usuario": "a",
+   "nivel": "directa",
+   "temas": [
+    "plomero"
+   ],
+   "consulta": "¿Qué tengo que hacer antes de que venga el plomero?",
+   "esperado": [
+    [
+     "llave"
+    ]
+   ]
+  },
+  {
+   "id": "q-plo-4",
+   "usuario": "a",
+   "nivel": "parafraseada",
+   "temas": [
+    "plomero"
+   ],
+   "consulta": "¿Quién va a recibir al que arregla la fuga?",
+   "esperado": [
+    [
+     "roomie",
+     "companer"
+    ]
+   ]
+  },
+  {
+   "id": "q-plo-5",
+   "usuario": "a",
+   "nivel": "parafraseada",
+   "temas": [
+    "plomero"
+   ],
+   "consulta": "¿A qué día reprogramaron la reparación del baño?",
+   "esperado": [
+    [
+     "jueves"
+    ]
+   ]
+  },
+  {
+   "id": "q-plo-6",
+   "usuario": "a",
+   "nivel": "parafraseada",
+   "temas": [
+    "plomero"
+   ],
+   "consulta": "¿Cuánto efectivo necesito para la reparación?",
+   "esperado": [
+    [
+     "600"
+    ]
+   ]
+  },
+  {
+   "id": "q-plo-7",
+   "usuario": "a",
+   "nivel": "vaga",
+   "temas": [
+    "plomero"
+   ],
+   "consulta": "¿Quién abre la puerta el martes en la mañana?",
+   "esperado": [
+    [
+     "roomie"
+    ]
+   ]
+  },
+  {
+   "id": "q-plo-8",
+   "usuario": "a",
+   "nivel": "vaga",
+   "temas": [
+    "plomero"
+   ],
+   "consulta": "¿Qué pasó con lo de la fuga?",
+   "esperado": [
+    [
+     "jueves",
+     "reprogram",
+     "no llego"
+    ]
+   ]
+  },
+  {
+   "id": "q-plo-9",
+   "usuario": "a",
+   "nivel": "coloquial",
+   "temas": [
+    "plomero"
+   ],
+   "consulta": "cuando viene el plomero",
+   "esperado": [
+    [
+     "jueves",
+     "martes"
+    ]
+   ]
+  },
+  {
+   "id": "q-plo-10",
+   "usuario": "a",
+   "nivel": "coloquial",
+   "temas": [
+    "plomero"
+   ],
+   "consulta": "cuanto le pago al d la fuga",
+   "esperado": [
+    [
+     "600"
+    ]
+   ]
+  },
+  {
+   "id": "q-val-1",
+   "usuario": "a",
+   "nivel": "directa",
+   "temas": [
+    "cumple_valeria"
+   ],
+   "consulta": "¿Cuándo es el cumpleaños de Valeria?",
+   "esperado": [
+    [
+     "24"
+    ]
+   ]
+  },
+  {
+   "id": "q-val-2",
+   "usuario": "a",
+   "nivel": "directa",
+   "temas": [
+    "cumple_valeria"
+   ],
+   "consulta": "¿A qué hora es la fiesta de Valeria?",
+   "esperado": [
+    [
+     "21",
+     "9"
+    ]
+   ]
+  },
+  {
+   "id": "q-val-3",
+   "usuario": "a",
+   "nivel": "directa",
+   "temas": [
+    "cumple_valeria"
+   ],
+   "consulta": "¿Qué le voy a regalar a Valeria?",
+   "esperado": [
+    [
+     "libro"
+    ]
+   ]
+  },
+  {
+   "id": "q-val-4",
+   "usuario": "a",
+   "nivel": "parafraseada",
+   "temas": [
+    "cumple_valeria"
+   ],
+   "consulta": "¿Qué me toca llevar a la fiesta de mi amiga?",
+   "esperado": [
+    [
+     "hielo"
+    ],
+    [
+     "refresco"
+    ]
+   ]
+  },
+  {
+   "id": "q-val-5",
+   "usuario": "a",
+   "nivel": "parafraseada",
+   "temas": [
+    "cumple_valeria"
+   ],
+   "consulta": "¿A qué hora regreso de la fiesta del sábado 24?",
+   "esperado": [
+    [
+     "1:00",
+     "a la 1",
+     "a la una"
+    ]
+   ]
+  },
+  {
+   "id": "q-val-6",
+   "usuario": "a",
+   "nivel": "parafraseada",
+   "temas": [
+    "cumple_valeria"
+   ],
+   "consulta": "¿Me da tiempo de llegar a la fiesta después del curso?",
+   "esperado": [
+    [
+     "21",
+     "9",
+     "12"
+    ]
+   ]
+  },
+  {
+   "id": "q-val-7",
+   "usuario": "a",
+   "nivel": "vaga",
+   "temas": [
+    "cumple_valeria"
+   ],
+   "consulta": "¿Qué tengo el sábado 24 en la noche?",
+   "esperado": [
+    [
+     "fiesta",
+     "valeria"
+    ]
+   ]
+  },
+  {
+   "id": "q-val-8",
+   "usuario": "a",
+   "nivel": "vaga",
+   "temas": [
+    "cumple_valeria"
+   ],
+   "consulta": "¿Qué tengo que comprar antes del viernes?",
+   "esperado": [
+    [
+     "libro"
+    ]
+   ]
+  },
+  {
+   "id": "q-val-9",
+   "usuario": "a",
+   "nivel": "coloquial",
+   "temas": [
+    "cumple_valeria"
+   ],
+   "consulta": "a q hora es lo d vale",
+   "esperado": [
+    [
+     "21",
+     "9"
+    ]
+   ]
+  },
+  {
+   "id": "q-val-10",
+   "usuario": "a",
+   "nivel": "coloquial",
+   "temas": [
+    "cumple_valeria"
+   ],
+   "consulta": "q le regalo a vale",
+   "esperado": [
+    [
+     "libro"
+    ]
+   ]
+  },
+  {
+   "id": "q-lim-1",
+   "usuario": "a",
+   "nivel": "directa",
+   "temas": [
+    "limpieza_roomie"
+   ],
+   "consulta": "¿Qué me toca limpiar los domingos?",
+   "esperado": [
+    [
+     "cocina"
+    ]
+   ]
+  },
+  {
+   "id": "q-lim-2",
+   "usuario": "a",
+   "nivel": "directa",
+   "temas": [
+    "limpieza_roomie"
+   ],
+   "consulta": "¿Qué días sacamos la basura?",
+   "esperado": [
+    [
+     "martes"
+    ],
+    [
+     "jueves"
+    ],
+    [
+     "sabado"
+    ]
+   ]
+  },
+  {
+   "id": "q-lim-3",
+   "usuario": "a",
+   "nivel": "directa",
+   "temas": [
+    "limpieza_roomie"
+   ],
+   "consulta": "¿Qué acordé con mi roomie sobre la limpieza?",
+   "esperado": [
+    [
+     "cocina"
+    ]
+   ]
+  },
+  {
+   "id": "q-lim-4",
+   "usuario": "a",
+   "nivel": "parafraseada",
+   "temas": [
+    "limpieza_roomie"
+   ],
+   "consulta": "¿Cada cuánto me toca la sala?",
+   "esperado": [
+    [
+     "15",
+     "quince"
+    ]
+   ]
+  },
+  {
+   "id": "q-lim-5",
+   "usuario": "a",
+   "nivel": "parafraseada",
+   "temas": [
+    "limpieza_roomie"
+   ],
+   "consulta": "¿Cómo pagamos los productos de limpieza?",
+   "esperado": [
+    [
+     "medias",
+     "mitad"
+    ]
+   ]
+  },
+  {
+   "id": "q-lim-6",
+   "usuario": "a",
+   "nivel": "parafraseada",
+   "temas": [
+    "limpieza_roomie"
+   ],
+   "consulta": "¿A qué hora limpio la cocina el domingo?",
+   "esperado": [
+    [
+     "11"
+    ]
+   ]
+  },
+  {
+   "id": "q-lim-7",
+   "usuario": "a",
+   "nivel": "vaga",
+   "temas": [
+    "limpieza_roomie"
+   ],
+   "consulta": "¿Por qué se molestó mi roomie?",
+   "esperado": [
+    [
+     "cocina"
+    ]
+   ]
+  },
+  {
+   "id": "q-lim-8",
+   "usuario": "a",
+   "nivel": "vaga",
+   "temas": [
+    "limpieza_roomie",
+    "comida_familiar"
+   ],
+   "consulta": "¿Qué hago antes de irme el domingo?",
+   "esperado": [
+    [
+     "cocina"
+    ]
+   ]
+  },
+  {
+   "id": "q-lim-9",
+   "usuario": "a",
+   "nivel": "coloquial",
+   "temas": [
+    "limpieza_roomie"
+   ],
+   "consulta": "q m toca limpiar",
+   "esperado": [
+    [
+     "cocina",
+     "sala"
+    ]
+   ]
+  },
+  {
+   "id": "q-lim-10",
+   "usuario": "a",
+   "nivel": "coloquial",
+   "temas": [
+    "limpieza_roomie"
+   ],
+   "consulta": "q dias se saca la basura",
+   "esperado": [
+    [
+     "martes",
+     "jueves",
+     "sabado"
+    ]
+   ]
+  },
+  {
+   "id": "q-neg-1",
+   "usuario": "a",
+   "nivel": "sin_respuesta",
+   "temas": [],
+   "consulta": "¿Cuándo es mi cita con el dentista?",
+   "esperado": null
+  },
+  {
+   "id": "q-neg-2",
+   "usuario": "a",
+   "nivel": "sin_respuesta",
+   "temas": [],
+   "consulta": "¿A qué hora sale mi vuelo?",
+   "esperado": null
+  },
+  {
+   "id": "q-neg-3",
+   "usuario": "a",
+   "nivel": "sin_respuesta",
+   "temas": [],
+   "consulta": "¿Cuándo vence el seguro del coche?",
+   "esperado": null
+  },
+  {
+   "id": "q-neg-4",
+   "usuario": "a",
+   "nivel": "sin_respuesta",
+   "temas": [],
+   "consulta": "¿Qué día es la boda de mi hermano?",
+   "esperado": null
+  },
+  {
+   "id": "q-neg-5",
+   "usuario": "a",
+   "nivel": "sin_respuesta",
+   "temas": [],
+   "consulta": "¿A qué hora es mi clase de yoga?",
+   "esperado": null
+  },
+  {
+   "id": "q-neg-6",
+   "usuario": "a",
+   "nivel": "sin_respuesta",
+   "temas": [],
+   "consulta": "¿Cuándo tengo que renovar la licencia de manejo?",
+   "esperado": null
+  },
+  {
+   "id": "q-neg-7",
+   "usuario": "a",
+   "nivel": "sin_respuesta",
+   "temas": [],
+   "consulta": "¿Cuándo es la junta de padres de familia?",
+   "esperado": null
+  },
+  {
+   "id": "q-neg-8",
+   "usuario": "a",
+   "nivel": "sin_respuesta",
+   "temas": [],
+   "consulta": "¿A qué hora llega el técnico del gas?",
+   "esperado": null
+  },
+  {
+   "id": "q-neg-9",
+   "usuario": "a",
+   "nivel": "sin_respuesta",
+   "temas": [],
+   "consulta": "¿Cuándo me toca la vacuna de la influenza?",
+   "esperado": null
+  },
+  {
+   "id": "q-neg-10",
+   "usuario": "a",
+   "nivel": "sin_respuesta",
+   "temas": [],
+   "consulta": "¿Qué día es el concierto?",
+   "esperado": null
+  },
+  {
+   "id": "q-neg-11",
+   "usuario": "a",
+   "nivel": "sin_respuesta",
+   "temas": [],
+   "consulta": "¿Cuándo tengo que llevar al gato al veterinario?",
+   "esperado": null
+  },
+  {
+   "id": "q-neg-12",
+   "usuario": "a",
+   "nivel": "sin_respuesta",
+   "temas": [],
+   "consulta": "¿A qué hora es el partido de futbol?",
+   "esperado": null
+  },
+  {
+   "id": "q-neg-13",
+   "usuario": "a",
+   "nivel": "sin_respuesta",
+   "temas": [],
+   "consulta": "¿Cuándo pago el predial?",
+   "esperado": null
+  },
+  {
+   "id": "q-neg-14",
+   "usuario": "a",
+   "nivel": "sin_respuesta",
+   "temas": [],
+   "consulta": "¿Cuándo es mi cita en el SAT?",
+   "esperado": null
+  },
+  {
+   "id": "q-neg-15",
+   "usuario": "a",
+   "nivel": "sin_respuesta",
+   "temas": [],
+   "consulta": "¿Cuándo empieza el curso de verano?",
+   "esperado": null
+  },
+  {
+   "id": "q-neg-16",
+   "usuario": "a",
+   "nivel": "sin_respuesta",
+   "temas": [],
+   "consulta": "¿A qué hora es la graduación de mi primo?",
+   "esperado": null
+  },
+  {
+   "id": "q-neg-17",
+   "usuario": "a",
+   "nivel": "sin_respuesta",
+   "temas": [],
+   "consulta": "¿Cuándo es mi cita para el tatuaje?",
+   "esperado": null
+  },
+  {
+   "id": "q-neg-18",
+   "usuario": "a",
+   "nivel": "sin_respuesta",
+   "temas": [],
+   "consulta": "¿Cuándo es la reunión de exalumnos?",
+   "esperado": null
+  },
+  {
+   "id": "q-neg-19",
+   "usuario": "a",
+   "nivel": "sin_respuesta",
+   "temas": [],
+   "consulta": "¿Cuándo es la mudanza de mi hermana?",
+   "esperado": null
+  },
+  {
+   "id": "q-neg-20",
+   "usuario": "a",
+   "nivel": "sin_respuesta",
+   "temas": [],
+   "consulta": "¿A qué hora es la clase de baile?",
+   "esperado": null
+  }
+ ],
+ "niveles": {
+  "directa": "usa la palabra clave del asunto",
+  "parafraseada": "pregunta lo mismo con otras palabras",
+  "vaga": "referencia implicita o poco especifica",
+  "coloquial": "lenguaje informal, abreviaturas o errores de escritura",
+  "sin_respuesta": "el historial no contiene la respuesta (temas vacio); se mide aparte"
+ },
+ "calificacion": "esperado: lista de grupos; la respuesta es correcta si contiene todos los grupos (basta una alternativa por grupo). Texto normalizado (minusculas, sin acentos ni negritas, 10.30 = 10:30, 4,500 = 4500); las palabras coinciden como prefijo y los numeros completos. esperado null = consulta sin respuesta: se evalua si el agente se abstiene."
+}
