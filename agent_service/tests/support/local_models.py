@@ -12,7 +12,7 @@ import httpx
 from langchain_ollama import ChatOllama, OllamaEmbeddings
 
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
-OLLAMA_CHAT_MODEL = os.getenv("OLLAMA_CHAT_MODEL", "qwen3.5:9b")
+OLLAMA_CHAT_MODEL = os.getenv("OLLAMA_CHAT_MODEL", "qwen3.8")
 OLLAMA_EMBEDDING_MODEL = os.getenv("OLLAMA_EMBEDDING_MODEL", "qwen3-embedding:0.6b")
 OLLAMA_EMBEDDING_SIZE = int(os.getenv("OLLAMA_EMBEDDING_SIZE", "1024"))
 
@@ -36,7 +36,7 @@ def motivo_no_disponible(*modelos: str) -> str | None:
 
 
 def build_chat_model(temperature: float, **kwargs) -> ChatOllama:
-    # Sin razonamiento: qwen3.5 piensa por defecto y eso solo agrega latencia.
+    # Sin razonamiento: qwen3.x piensa por defecto y eso solo agrega latencia.
     return ChatOllama(
         model=OLLAMA_CHAT_MODEL,
         base_url=OLLAMA_BASE_URL,

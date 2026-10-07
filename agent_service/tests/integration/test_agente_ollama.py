@@ -1,4 +1,4 @@
-"""Extremo a extremo con el modelo local (qwen3.5:9b): ruta /agent/chat, grafo,
+"""Extremo a extremo con el modelo local (qwen3.8): ruta /agent/chat, grafo,
 memoria corta en Mongo y RAG en Qdrant reales. Demuestra que un dato que ya
 salio de la ventana corta se recupera de la fuente persistente."""
 

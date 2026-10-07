@@ -35,7 +35,7 @@ asyncio_default_fixture_loop_scope = "function"
 # Las de integracion usan Ollama local y tardan: se corren con `pytest -m ollama`.
 addopts = "-m \"not ollama\""
 markers = [
-    "ollama: requiere Ollama local (qwen3.5:9b y qwen3-embedding:0.6b)",
+    "ollama: requiere Ollama local (qwen3.8 y qwen3-embedding:0.6b)",
 ]
 # El QdrantClient de app/memory/vector_store.py se crea al importar y no hay
 # servidor en las pruebas (usan Qdrant en memoria).

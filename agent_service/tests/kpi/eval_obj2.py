@@ -2,7 +2,7 @@
 latencia de la base vectorial, tokens por operacion de recuperacion y
 precision de los fragmentos recuperados, con N muestras por indicador
 (default 500). Ademas mide la exactitud de respuesta del agente: corre el
-grafo real con qwen3.5 por cada consulta y califica si la respuesta contiene
+grafo real con qwen3.8 por cada consulta y califica si la respuesta contiene
 el dato esperado (se omite con --sin-respuestas; tarda 1-2 h con k=1,3,5).
 
 Siembra el historial sintetico (tests/data) en una coleccion aislada
@@ -14,7 +14,7 @@ Uso, desde agent_service/:
     .venv\\Scripts\\python -m tests.kpi.eval_obj2 --top-k 1,3,5
     .venv\\Scripts\\python -m tests.kpi.eval_obj2 --embeddings gemini   # fiel a produccion (centavos de USD)
 
-Requiere Ollama con qwen3-embedding:0.6b (embeddings) y qwen3.5:9b (conteo de
+Requiere Ollama con qwen3-embedding:0.6b (embeddings) y qwen3.8 (conteo de
 tokens). Para una latencia representativa levanta Qdrant en Docker:
     docker compose up -d qdrant
 """
