@@ -4,6 +4,8 @@ y tests/kpi/eval_obj2.py.
 
 Relevancia: un fragmento recuperado es relevante si pertenece al mismo
 usuario y comparte al menos un tema con la consulta (etiquetas del dataset).
+hit@k: la consulta acierta si al menos uno de los k fragmentos es relevante
+(el dato llega al prompt aunque no sea el primero).
 Respuesta correcta: contiene todos los grupos de `esperado` de la consulta.
 """
 
@@ -73,7 +75,7 @@ def metricas_consulta(recuperados: list[str], consulta: dict, etiquetado: dict[s
     fugas = sum(1 for e in propios if e is None or e.usuario != consulta["usuario"])
     base = {"nivel": consulta.get("nivel"), "fugas": fugas, "devueltos": len(recuperados), "relevantes": relevantes}
     if not temas:
-        return {**base, "sin_respuesta": True, "precision": None, "hit@1": None, "recall": None, "rr": None}
+        return {**base, "sin_respuesta": True, "precision": None, "hit@1": None, "hit@k": None, "recall": None, "rr": None}
     total_relevantes = sum(
         1 for e in etiquetado.values() if e.usuario == consulta["usuario"] and e.temas & temas
     )
@@ -83,6 +85,7 @@ def metricas_consulta(recuperados: list[str], consulta: dict, etiquetado: dict[s
         "sin_respuesta": False,
         "precision": sum(relevantes) / len(recuperados) if recuperados else 0.0,
         "hit@1": bool(relevantes and relevantes[0]),
+        "hit@k": any(relevantes),
         "recall": sum(relevantes) / total_relevantes if total_relevantes else 0.0,
         "rr": 1 / primer_relevante if primer_relevante else 0.0,
     }
@@ -118,6 +121,7 @@ async def evaluar_precision(
     return {
         "precision": statistics.mean(o["precision"] for o in con_respuesta),
         "hit@1": statistics.mean(o["hit@1"] for o in con_respuesta),
+        "hit@k": statistics.mean(o["hit@k"] for o in con_respuesta),
         "recall": statistics.mean(o["recall"] for o in con_respuesta),
         "mrr": statistics.mean(o["rr"] for o in con_respuesta),
         "fugas": sum(o["fugas"] for o in operaciones),

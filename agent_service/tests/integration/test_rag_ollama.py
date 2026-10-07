@@ -51,12 +51,13 @@ async def test_el_fragmento_mas_relevante_sale_primero_y_sin_fugas(dataset):
     assert resultado["hit@1"] >= 0.9, _peores(resultado)
 
 
-async def test_precision_aceptable_en_los_primeros_tres(dataset):
-    # Con top_k fijo y sin umbral de score, la precision baja al crecer k: el
-    # valor con el top_k de produccion lo reporta tests/kpi/eval_obj2.py.
-    resultado = await rag_eval.evaluar_precision(dataset, 3, niveles=NIVELES_CLAROS)
+async def test_el_dato_llega_en_los_top_k(dataset):
+    # Lo que importa es que un fragmento relevante llegue al prompt, aunque no
+    # sea el primero. La precision@k baja al crecer k por construccion (search()
+    # siempre devuelve k fragmentos); la reporta tests/kpi/eval_obj2.py.
+    resultado = await rag_eval.evaluar_precision(dataset, settings.rag_top_k, niveles=NIVELES_CLAROS)
 
-    assert resultado["precision"] >= 0.75, _peores(resultado)
+    assert resultado["hit@k"] >= 0.9, _peores(resultado)
 
 
 async def test_latencia_de_recuperacion_aceptable(dataset):
@@ -66,7 +67,7 @@ async def test_latencia_de_recuperacion_aceptable(dataset):
 
 
 def _peores(resultado: dict) -> str:
-    peores = sorted(resultado["operaciones"], key=lambda c: c["precision"])[:5]
-    return "Consultas con menor precision: " + "; ".join(
-        f"{c['id']}={c['precision']:.0%}" for c in peores
+    peores = sorted(resultado["operaciones"], key=lambda c: (c["hit@k"], c["precision"]))[:5]
+    return "Consultas con peor recuperacion (hit@k, precision): " + "; ".join(
+        f"{c['id']}={'si' if c['hit@k'] else 'no'}/{c['precision']:.0%}" for c in peores
     )

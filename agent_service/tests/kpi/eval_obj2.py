@@ -1,7 +1,8 @@
 """Evaluacion de los KPI del Objetivo 2 (Tabla tab:kpi-obj2 de la tesina):
-latencia de la base vectorial, tokens por operacion de recuperacion y
-precision de los fragmentos recuperados, con N muestras por indicador
-(default 500). Ademas mide la exactitud de respuesta del agente: corre el
+latencia de la base vectorial, tokens por operacion de recuperacion y tasa
+de acierto de la recuperacion (hit@k: % de consultas con al menos un
+fragmento relevante entre los k recuperados), con N muestras por indicador
+(default 500). La precision@k se reporta como complementaria. Ademas mide la exactitud de respuesta del agente: corre el
 grafo real con qwen3.8 por cada consulta y califica si la respuesta contiene
 el dato esperado (se omite con --sin-respuestas; tarda 1-2 h con k=1,3,5).
 
@@ -45,7 +46,7 @@ def clasificar_tokens(tokens: float) -> str:
     return "Óptimo" if tokens < 500 else "Aceptable" if tokens <= 1200 else "No aceptable"
 
 
-def clasificar_precision(porcentaje: float) -> str:
+def clasificar_recuperacion(porcentaje: float) -> str:
     return "Óptimo" if porcentaje >= 90 else "Aceptable" if porcentaje >= 75 else "No aceptable"
 
 
@@ -281,6 +282,7 @@ async def evaluar(args: argparse.Namespace) -> dict:
         sin = [f for f in filas if f["sin_respuesta"]]
         lat = rag_eval.resumen(latencias_bd[k])
         prec = rag_eval.resumen([f["precision"] * 100 for f in con], bootstrap=True)
+        hit = rag_eval.resumen([f["hit@k"] * 100 for f in con], bootstrap=True)
         tok = rag_eval.resumen([f["tokens_total"] for f in filas], bootstrap=True) if tokens else None
         kpis[k] = {
             "latencia_bd_ms": lat,
@@ -289,6 +291,12 @@ async def evaluar(args: argparse.Namespace) -> dict:
             "tokens_contexto": rag_eval.resumen([f["tokens_contexto"] for f in filas], bootstrap=True)
             if tokens
             else None,
+            "hit_k_pct": hit,
+            "hit_k_por_nivel_pct": {
+                nivel: rag_eval.resumen([f["hit@k"] * 100 for f in con if f["nivel"] == nivel], bootstrap=True)
+                for nivel in NIVELES
+                if any(f["nivel"] == nivel for f in con)
+            },
             "precision_pct": prec,
             "precision_por_nivel_pct": {
                 nivel: rag_eval.resumen([f["precision"] * 100 for f in con if f["nivel"] == nivel], bootstrap=True)
@@ -308,7 +316,7 @@ async def evaluar(args: argparse.Namespace) -> dict:
             "clasificacion": {
                 "latencia": clasificar_latencia(lat["p95"]),
                 "tokens": clasificar_tokens(tok["media"]) if tok else None,
-                "precision": clasificar_precision(prec["media"]),
+                "hit_k": clasificar_recuperacion(hit["media"]),
             },
             "respuestas": _resumen_respuestas(filas) if respuestas else None,
         }
@@ -367,6 +375,7 @@ def _por_consulta(operaciones: list[dict]) -> list[dict]:
             "repeticiones": len(ops),
             "precision": media(ops, "precision"),
             "hit@1": media(ops, "hit@1"),
+            "hit@k": media(ops, "hit@k"),
             "recall": media(ops, "recall"),
             "rr": media(ops, "rr"),
             "devueltos": media(ops, "devueltos"),
@@ -444,7 +453,7 @@ def _markdown(reporte: dict) -> str:
         "",
         "## Resultado por KPI",
         "",
-        "| top_k | Latencia BD p95 (ms) | Clase | Tokens por recuperación (media) | Clase | Precisión (%) | Clase |",
+        "| top_k | Latencia BD p95 (ms) | Clase | Tokens por recuperación (media) | Clase | Hit@k (%) | Clase |",
         "|---|---|---|---|---|---|---|",
     ]
     for k, kpi in reporte["kpis"].items():
@@ -452,14 +461,14 @@ def _markdown(reporte: dict) -> str:
         tokens = f"{kpi['tokens_total']['media']:.0f}" if kpi["tokens_total"] else "n/d"
         lineas.append(
             f"| {k} | {kpi['latencia_bd_ms']['p95']:.2f} | {clase['latencia']} | {tokens} | {clase['tokens'] or 'n/d'} "
-            f"| {kpi['precision_pct']['media']:.1f} | {clase['precision']} |"
+            f"| {kpi['hit_k_pct']['media']:.1f} | {clase['hit_k']} |"
         )
     if any(kpi["respuestas"] for kpi in reporte["kpis"].values()):
         lineas += [
             "",
             "## Recuperación contra respuesta del agente",
             "",
-            "| top_k | Precisión de recuperación (%) | Exactitud de respuesta (%) | Se abstiene sin dato (%) "
+            "| top_k | Hit@k de recuperación (%) | Exactitud de respuesta (%) | Se abstiene sin dato (%) "
             "| Tokens por recuperación |",
             "|---|---|---|---|---|",
         ]
@@ -471,7 +480,7 @@ def _markdown(reporte: dict) -> str:
             abstiene = r["abstencion"]["se_abstiene_pct"]
             tokens = f"{kpi['tokens_total']['media']:.0f}" if kpi["tokens_total"] else "n/d"
             lineas.append(
-                f"| {k} | {kpi['precision_pct']['media']:.1f} | {exacta['media']:.1f} "
+                f"| {k} | {kpi['hit_k_pct']['media']:.1f} | {exacta['media']:.1f} "
                 f"({exacta['ic95'][0]:.1f}–{exacta['ic95'][1]:.1f}) "
                 f"| {f'{abstiene:.0f}' if abstiene is not None else 'n/d'} | {tokens} |"
             )
@@ -497,23 +506,25 @@ def _markdown(reporte: dict) -> str:
                 lineas.append(
                     f"| {nombre} | {r['n']} | {_fmt(r, 1)} | {r['p50']:.0f} | {r['p95']:.0f} | {r['min']:.0f} / {r['max']:.0f} |"
                 )
-        prec = kpi["precision_pct"]
+        hit, prec = kpi["hit_k_pct"], kpi["precision_pct"]
         lineas += [
-            f"| Precisión (%), por consulta | {prec['n']} | {_fmt(prec, 1)} | {prec['p50']:.0f} | {prec['p95']:.0f} "
+            f"| Hit@k (%), por consulta | {hit['n']} | {_fmt(hit, 1)} | {hit['p50']:.0f} | {hit['p95']:.0f} "
+            f"| {hit['min']:.0f} / {hit['max']:.0f} |",
+            f"| Precisión@k (%), por consulta | {prec['n']} | {_fmt(prec, 1)} | {prec['p50']:.0f} | {prec['p95']:.0f} "
             f"| {prec['min']:.0f} / {prec['max']:.0f} |",
             "",
-            "Precisión por nivel de dificultad de la consulta:",
+            "Hit@k por nivel de dificultad de la consulta:",
             "",
-            "| Nivel | Consultas | Precisión media (IC 95 %) | Clase |",
+            "| Nivel | Consultas | Hit@k (IC 95 %) | Clase |",
             "|---|---|---|---|",
             *[
                 f"| {nivel} | {r['n']} | {r['media']:.1f} % ({r['ic95'][0]:.1f}–{r['ic95'][1]:.1f}) "
-                f"| {clasificar_precision(r['media'])} |"
-                for nivel, r in kpi["precision_por_nivel_pct"].items()
+                f"| {clasificar_recuperacion(r['media'])} |"
+                for nivel, r in kpi["hit_k_por_nivel_pct"].items()
             ],
             "",
-            f"Complementarias: hit@1 {kpi['hit@1_pct']:.1f} %, recall {kpi['recall_pct']:.1f} %, "
-            f"MRR {kpi['mrr']:.3f}, fugas entre usuarios {kpi['fugas_entre_usuarios']}.",
+            f"Complementarias: precisión@k {prec['media']:.1f} %, hit@1 {kpi['hit@1_pct']:.1f} %, "
+            f"recall {kpi['recall_pct']:.1f} %, MRR {kpi['mrr']:.3f}, fugas entre usuarios {kpi['fugas_entre_usuarios']}.",
             "",
         ]
         sin = kpi["sin_respuesta"]
@@ -532,8 +543,10 @@ def _markdown(reporte: dict) -> str:
         f"p95 {indexado['p95']:.1f} ms.",
         "",
         "Criterios: latencia clasificada por el p95 de la consulta a Qdrant; tokens por la media del total por "
-        "recuperación (todas las consultas); precisión por la media, sobre las consultas con respuesta, del % "
-        "de fragmentos recuperados que son del mismo usuario y del mismo tema que la consulta.",
+        "recuperación (todas las consultas); hit@k por el % de consultas con respuesta en las que al menos uno "
+        "de los k fragmentos recuperados es del mismo usuario y del mismo tema que la consulta (el dato llega "
+        "al prompt aunque no sea el primero). La precisión@k (% de los k fragmentos que son relevantes) es "
+        "complementaria: baja al crecer k porque search() siempre devuelve k fragmentos.",
         "",
         "## Notas",
         "",
@@ -595,7 +608,7 @@ def _latex(reporte: dict) -> str:
     k = str(cfg["top_k_produccion"]) if str(cfg["top_k_produccion"]) in reporte["kpis"] else list(reporte["kpis"])[-1]
     kpi = reporte["kpis"][k]
     clase = kpi["clasificacion"]
-    lat, prec, tok = kpi["latencia_bd_ms"], kpi["precision_pct"], kpi["tokens_total"]
+    lat, hit, tok = kpi["latencia_bd_ms"], kpi["hit_k_pct"], kpi["tokens_total"]
     tokens = f"{tok['media']:.0f} $\\pm$ {tok['desv']:.0f}" if tok else "n/d"
     return "\n".join(
         [
@@ -603,7 +616,7 @@ def _latex(reporte: dict) -> str:
             r"\centering",
             rf"\caption{{Resultados de los indicadores de almacenamiento y recuperación "
             rf"(top-$k$ = {k}; latencia: $n$ = {lat['n']} mediciones; tokens: $n$ = {tok['n'] if tok else 0} "
-            rf"consultas; precisión: $n$ = {prec['n']} consultas con respuesta)}}",
+            rf"consultas; hit@$k$: $n$ = {hit['n']} consultas con respuesta)}}",
             r"\label{tab:kpi-obj2-resultados}",
             r"\footnotesize",
             r"\begin{tabular}{p{3.4cm} p{2.4cm} p{1.9cm}}",
@@ -612,8 +625,8 @@ def _latex(reporte: dict) -> str:
             r"\hline",
             rf"Latencia de consulta a la base vectorial (p95) & {lat['p95']:.2f} ms & {clase['latencia']} \\",
             rf"Consumo de tokens por operación de recuperación (media) & {tokens} & {clase['tokens'] or 'n/d'} \\",
-            rf"Precisión de recuperación (\% de fragmentos relevantes) & {prec['media']:.1f} $\pm$ {prec['desv']:.1f}\% "
-            rf"& {clase['precision']} \\",
+            rf"Tasa de acierto de recuperación (hit@$k$, \% de consultas con un fragmento relevante) "
+            rf"& {hit['media']:.1f}\% ({hit['ic95'][0]:.1f}--{hit['ic95'][1]:.1f}) & {clase['hit_k']} \\",
             r"\hline",
             r"\end{tabular}",
             r"\end{table}",
@@ -636,7 +649,7 @@ def _latex_respuestas(reporte: dict) -> list[str]:
         r"\footnotesize",
         r"\begin{tabular}{p{1.2cm} p{2.6cm} p{2.6cm} p{2.2cm}}",
         r"\hline",
-        r"\textbf{top-$k$} & \textbf{Precisión de recuperación} & \textbf{Exactitud de respuesta} "
+        r"\textbf{top-$k$} & \textbf{Hit@$k$ de recuperación} & \textbf{Exactitud de respuesta} "
         r"& \textbf{Se abstiene sin dato} \\",
         r"\hline",
     ]
@@ -645,7 +658,7 @@ def _latex_respuestas(reporte: dict) -> list[str]:
         abstiene = kpi["respuestas"]["abstencion"]["se_abstiene_pct"]
         abstiene_txt = rf"{abstiene:.0f}\%" if abstiene is not None else "n/d"
         lineas.append(
-            rf"{k} & {kpi['precision_pct']['media']:.1f}\% & {exacta['media']:.1f}\% "
+            rf"{k} & {kpi['hit_k_pct']['media']:.1f}\% & {exacta['media']:.1f}\% "
             rf"({exacta['ic95'][0]:.1f}--{exacta['ic95'][1]:.1f}) & {abstiene_txt} \\"
         )
     return [*lineas, r"\hline", r"\end{tabular}", r"\end{table}"]

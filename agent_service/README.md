@@ -49,7 +49,7 @@ pip install -e ".[dev]"
 python -m pytest                 # unitarias, sin red (~1 s)
 python -m pytest -m ollama -v    # integracion con qwen3.8 y qwen3-embedding:0.6b (~1 min)
 
-# KPIs del Objetivo 2 (latencia, tokens y precision de la recuperacion) y
+# KPIs del Objetivo 2 (latencia, tokens y tasa de acierto hit@k de la recuperacion) y
 # exactitud de respuesta del agente. Para latencia representativa:
 # docker compose up -d qdrant
 python -m tests.kpi.eval_obj2 --top-k 1,3,5 [--embeddings gemini] [--sin-respuestas]
