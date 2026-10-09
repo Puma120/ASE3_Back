@@ -47,7 +47,8 @@ class TaskSummary(BaseModel):
 
 class TaskCreate(BaseModel):
     title: str
-    notes: str = ""
+    # El modelo a veces manda notes: null; se acepta y se trata como vacio.
+    notes: str | None = ""
 
 
 class SubtasksCreate(BaseModel):
