@@ -37,3 +37,25 @@ Esqueleto inicial, grafo sin implementar todavia.
 pip install -e .
 uvicorn app.main:app --reload --port 8003
 ```
+
+## Pruebas
+
+Todo vive en `tests/` (la imagen de Docker solo copia `app/`). Las pruebas
+nunca llaman a Gemini ni a Railway: Mongo y Qdrant corren en memoria y el
+modelo es local (Ollama).
+
+```bash
+pip install -e ".[dev]"
+python -m pytest                 # unitarias, sin red (~1 s)
+python -m pytest -m ollama -v    # integracion con qwen3.8 y qwen3-embedding:0.6b (~1 min)
+
+# KPIs del Objetivo 2 (latencia, tokens y tasa de acierto hit@k de la recuperacion) y
+# exactitud de respuesta del agente. Para latencia representativa:
+# docker compose up -d qdrant
+python -m tests.kpi.eval_obj2 --top-k 1,3,5 [--embeddings gemini] [--sin-respuestas]
+```
+
+La corrida completa tarda unas 1.5-2.5 h; la mayor parte es la exactitud de
+respuesta (qwen3.8 responde las 220 consultas por cada top_k). Con
+`--sin-respuestas` baja a unos 15-20 min. El reporte (Markdown, JSON con cada
+respuesta calificada y tablas LaTeX) queda en `tests/kpi/resultados/`.
