@@ -73,7 +73,7 @@ def _aislar_grafo() -> None:
     from tests.support.entorno import CONTEXTO_USUARIO_FIJO
     from tests.support.local_models import get_llm_local
 
-    async def contexto_fijo(bearer_token: str) -> str:
+    async def contexto_fijo(bearer_token: str, device_tz: str | None = None) -> str:
         return CONTEXTO_USUARIO_FIJO
 
     async def tool_vacia(tool_name: str, payload: dict, bearer_token: str) -> dict:

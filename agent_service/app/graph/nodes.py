@@ -40,6 +40,10 @@ SYSTEM_PROMPT = (
     "la tool en vez de solo describirlo, pero solo lo que el usuario pidio de "
     "forma explicita en esta conversacion.\n"
     "- Puedes llamar varias tools en una misma ronda si son independientes.\n"
+    "- Tarea con fecha u hora ('a las 6 hoy', 'manana a las 9'): crea la tarea con create_task "
+    "mandando due (ISO con offset de la zona del usuario) y, en la misma ronda, un create_reminder "
+    "a esa hora para que le suene. Nunca digas que una hora ya paso sin compararla con la hora "
+    "actual del usuario; si de verdad ya paso, ofrece manana a esa hora.\n"
     "- Para llegar a tiempo a un evento con lugar: calcula el traslado "
     "(get_travel_time) y programa recordatorios (create_reminder) para 'prepararse' "
     "y 'salir'.\n"
@@ -88,7 +92,7 @@ async def retrieve_context(state: AgentState) -> AgentState:
             log.exception("RAG no disponible")
             return []
 
-    context, user_context = await asyncio.gather(rag(), build_user_context(state["bearer_token"]))
+    context, user_context = await asyncio.gather(rag(), build_user_context(state["bearer_token"], state.get("timezone")))
     return {**state, "rag_context": context, "user_context": user_context, "rounds": 0}
 
 

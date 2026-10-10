@@ -44,7 +44,13 @@ async def chat(
     messages = history + [{"role": "user", "content": body.message}]
 
     result = await agent_graph.ainvoke(
-        {"user_id": user_id, "bearer_token": bearer_token, "messages": messages, "params": params.model_dump()}
+        {
+            "user_id": user_id,
+            "bearer_token": bearer_token,
+            "messages": messages,
+            "params": params.model_dump(),
+            "timezone": body.timezone or "",
+        }
     )
 
     await append_exchange(user_id, body.message, result["response"])

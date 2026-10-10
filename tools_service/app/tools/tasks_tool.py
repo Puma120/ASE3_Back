@@ -5,6 +5,7 @@ correspondiente (Cap. 3 del PDF: paralisis por analisis en TDAH).
 """
 
 import uuid
+from datetime import datetime
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -14,9 +15,15 @@ from app.integrations.google_auth import get_user_credentials
 from app.models.activity_log import build_activity_log
 
 
-async def create_task(db: AsyncSession, user_id: uuid.UUID, title: str, notes: str = "") -> dict:
+async def create_task(
+    db: AsyncSession, user_id: uuid.UUID, title: str, notes: str = "", due: datetime | None = None
+) -> dict:
+    if due is not None:
+        # La API no conserva la hora: queda legible en las notas.
+        hora = f"Hora: {due:%H:%M}"
+        notes = f"{notes}\n{hora}" if notes else hora
     credentials = await get_user_credentials(db, user_id)
-    task = tasks_client.create_task(credentials, title, notes)
+    task = tasks_client.create_task(credentials, title, notes, due)
     await activity_logs.insert_one(
         build_activity_log(str(user_id), "task_created", {"title": title})
     )

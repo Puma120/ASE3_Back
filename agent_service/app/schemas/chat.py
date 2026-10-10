@@ -8,6 +8,8 @@ from pydantic import BaseModel
 
 class ChatMessageRequest(BaseModel):
     message: str
+    # Zona IANA del dispositivo (ej. America/Mexico_City); manda sobre la de Ajustes.
+    timezone: str | None = None
 
 
 class DeviceCommand(BaseModel):

@@ -8,7 +8,7 @@ WORKDIR /app
 RUN pip install --no-cache-dir \
     "fastapi>=0.115" "uvicorn[standard]>=0.32" "pydantic-settings>=2.6" \
     "langgraph>=0.2" "langchain-core>=0.3" "langchain-google-genai>=2.0" \
-    "qdrant-client>=1.12" "motor>=3.6" "httpx>=0.27" "pyjwt>=2.9"
+    "qdrant-client>=1.12" "motor>=3.6" "httpx>=0.27" "pyjwt>=2.9" "tzdata>=2024.1"
 
 COPY app ./app
 

@@ -59,7 +59,7 @@ def externos_falsos(monkeypatch):
     las pruebas: contexto de usuario fijo y tools con respuesta vacia."""
     llamadas: list[tuple[str, dict]] = []
 
-    async def contexto_fijo(bearer_token: str) -> str:
+    async def contexto_fijo(bearer_token: str, device_tz: str | None = None) -> str:
         return CONTEXTO_USUARIO_FIJO
 
     async def tool_vacia(tool_name: str, payload: dict, bearer_token: str) -> dict:

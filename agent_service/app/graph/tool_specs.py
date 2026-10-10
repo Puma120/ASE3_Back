@@ -41,10 +41,17 @@ TOOL_SPECS = [
         "type": "function",
         "function": {
             "name": "create_task",
-            "description": "Crea una tarea simple en Google Tasks.",
+            "description": "Crea una tarea simple en Google Tasks. Con due queda fechada (la hora se guarda en las notas).",
             "parameters": {
                 "type": "object",
-                "properties": {"title": {"type": "string"}, "notes": {"type": "string"}},
+                "properties": {
+                    "title": {"type": "string"},
+                    "notes": {"type": "string"},
+                    "due": {
+                        "type": "string",
+                        "description": "ISO datetime con offset de la fecha/hora limite (opcional)",
+                    },
+                },
                 "required": ["title"],
             },
         },

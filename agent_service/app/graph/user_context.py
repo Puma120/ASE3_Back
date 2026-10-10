@@ -11,17 +11,14 @@ from app.clients.tools_client import fetch_json
 _DAYS = ["lunes", "martes", "miercoles", "jueves", "viernes", "sabado", "domingo"]
 
 
-async def build_user_context(bearer_token: str) -> str:
+async def build_user_context(bearer_token: str, device_tz: str | None = None) -> str:
     profile, settings, location = await asyncio.gather(
         fetch_json("auth", "/auth/users/me", bearer_token),
         fetch_json("auth", "/auth/users/me/settings", bearer_token),
         fetch_json("proactive", "/proactive/location", bearer_token),
     )
     settings = settings or {}
-    try:
-        tz = ZoneInfo(settings.get("timezone") or "UTC")
-    except Exception:
-        tz = ZoneInfo("UTC")
+    tz = _zone(device_tz) or _zone(settings.get("timezone")) or ZoneInfo("UTC")
     now = datetime.now(timezone.utc).astimezone(tz)
 
     lines = [
@@ -45,6 +42,14 @@ async def build_user_context(bearer_token: str) -> str:
     else:
         lines.append("Ubicacion actual: desconocida. Si necesitas un origen, preguntalo.")
     return "\n".join(lines)
+
+
+def _zone(name: str | None) -> ZoneInfo | None:
+    """La zona del dispositivo manda sobre la de Ajustes; si es invalida, se ignora."""
+    try:
+        return ZoneInfo(name) if name else None
+    except Exception:
+        return None
 
 
 def _age(iso: str) -> str:

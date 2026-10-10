@@ -15,6 +15,7 @@ class AgentState(TypedDict, total=False):
     bearer_token: str  # reenviado a tools_service/proactive_service en call_tool
     messages: list[dict[str, str]]  # [{"role": "user"|"assistant", "content": str}, ...]
     rag_context: list[str]
+    timezone: str  # zona IANA del dispositivo en este turno (opcional)
     user_context: str  # perfil, fecha/hora local, ubicacion; se inyecta en el prompt
     pending_calls: list[dict[str, Any]]  # tool_calls de la ronda actual: {"id","name","arguments"}
     tool_exchange: list[Any]  # AIMessage/ToolMessage ya intercambiados en este turno

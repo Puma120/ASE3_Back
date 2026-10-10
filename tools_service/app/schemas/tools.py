@@ -49,6 +49,7 @@ class TaskCreate(BaseModel):
     title: str
     # El modelo a veces manda notes: null; se acepta y se trata como vacio.
     notes: str | None = ""
+    due: datetime | None = None
 
 
 class SubtasksCreate(BaseModel):

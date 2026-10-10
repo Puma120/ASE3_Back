@@ -95,7 +95,7 @@ async def create_task(
     user_id: uuid.UUID = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db),
 ):
-    return await tasks_tool.create_task(db, user_id, body.title, body.notes or "")
+    return await tasks_tool.create_task(db, user_id, body.title, body.notes or "", body.due)
 
 
 @router.post("/tasks/subtasks")
