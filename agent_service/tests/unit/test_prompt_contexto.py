@@ -13,7 +13,6 @@ FRAGMENTO = "Usuario: Mi consulta en el IMSS es el jueves a las 10:30\nAsistente
 def _estado(**extra):
     return {
         "user_id": USUARIO_A,
-        "bearer_token": "token",
         "messages": [
             {"role": "user", "content": "hola"},
             {"role": "assistant", "content": "hola, en que te ayudo"},

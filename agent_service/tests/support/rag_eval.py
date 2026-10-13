@@ -211,7 +211,6 @@ async def evaluar_respuestas(dataset: dict, top_k: int) -> list[dict]:
             estado = await agent_graph.ainvoke(
                 {
                     "user_id": user_id,
-                    "bearer_token": "evaluacion-local",
                     "messages": [{"role": "user", "content": consulta["consulta"]}],
                     "params": {"rag_top_k": top_k, "llm_temperature": 0.0, "short_term_memory_window": 10},
                 }

@@ -18,6 +18,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 
 from app.clients.tools_client import UNTRUSTED_TOOLS, WRITE_TOOLS
 from app.clients.tools_client import call_tool as invoke_tool
+from app.core import session
 from app.core.config import settings
 from app.db.mongo import activity_logs
 from app.graph.state import AgentState
@@ -92,7 +93,7 @@ async def retrieve_context(state: AgentState) -> AgentState:
             log.exception("RAG no disponible")
             return []
 
-    context, user_context = await asyncio.gather(rag(), build_user_context(state["bearer_token"], state.get("timezone")))
+    context, user_context = await asyncio.gather(rag(), build_user_context(session.bearer_token.get(), state.get("timezone")))
     return {**state, "rag_context": context, "user_context": user_context, "rounds": 0}
 
 
@@ -174,7 +175,7 @@ async def call_tool(state: AgentState) -> AgentState:
                 "error": "Accion bloqueada: en este turno se leyeron correos u otro contenido "
                 "externo. Pidele al usuario que lo confirme en un mensaje nuevo."
             }
-        return await invoke_tool(call["name"], call["arguments"], state["bearer_token"])
+        return await invoke_tool(call["name"], call["arguments"], session.bearer_token.get())
 
     results = await asyncio.gather(*(run(c) for c in calls))
 

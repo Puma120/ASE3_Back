@@ -8,6 +8,7 @@ import uuid
 
 from fastapi import APIRouter, Depends, Query, Request
 
+from app.core import session
 from app.core.deps import get_current_user_id
 from app.graph.builder import agent_graph
 from app.memory import params as params_store
@@ -37,7 +38,8 @@ async def chat(
     request: Request,
     user_id: uuid.UUID = Depends(get_current_user_id),
 ) -> ChatMessageResponse:
-    bearer_token = request.headers["Authorization"].removeprefix("Bearer ")
+    # Fuera del estado del grafo para que no quede en las trazas (app/core/session.py).
+    session.bearer_token.set(request.headers["Authorization"].removeprefix("Bearer "))
 
     params = await params_store.get_params(user_id)
     history = await get_history(user_id, params.short_term_memory_window)
@@ -46,7 +48,6 @@ async def chat(
     result = await agent_graph.ainvoke(
         {
             "user_id": user_id,
-            "bearer_token": bearer_token,
             "messages": messages,
             "params": params.model_dump(),
             "timezone": body.timezone or "",

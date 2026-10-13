@@ -12,7 +12,6 @@ from uuid import UUID
 
 class AgentState(TypedDict, total=False):
     user_id: UUID
-    bearer_token: str  # reenviado a tools_service/proactive_service en call_tool
     messages: list[dict[str, str]]  # [{"role": "user"|"assistant", "content": str}, ...]
     rag_context: list[str]
     timezone: str  # zona IANA del dispositivo en este turno (opcional)
