@@ -16,10 +16,10 @@ from app.middleware.session import validate_session
 
 router = APIRouter()
 
-# Rutas de auth_service que no requieren sesion previa (el login es solo con
-# Google). "google/login" y "google/callback" son pre-login: el usuario todavia no tiene JWT
-# propio cuando Google lo redirige de vuelta aqui.
-PUBLIC_AUTH_PATHS = {"google/login", "google/callback"}
+# Rutas de auth_service que no requieren sesion previa: son pre-login, el
+# usuario todavia no tiene JWT propio (Google lo redirige de vuelta a
+# "google/callback"; "register" y "login" son el acceso con email/password).
+PUBLIC_AUTH_PATHS = {"google/login", "google/callback", "register", "login"}
 
 # Railway a veces tarda unos segundos en levantar el DNS/socket interno de un
 # servicio recien redeployado o "dormido" (cold start / red privada) -> se
