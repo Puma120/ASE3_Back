@@ -32,6 +32,32 @@ def create_access_token(subject: str, expires_minutes: int | None = None) -> str
     return jwt.encode(payload, settings.jwt_secret_key, algorithm=settings.jwt_algorithm)
 
 
+def create_email_verification_token(email: str, hashed_password: str, full_name: str) -> str:
+    """Token firmado con los datos del registro pendiente: la cuenta no existe
+    en la BD hasta que el dueno del correo abre el enlace. Lleva el hash bcrypt
+    (nunca la contrasena) y solo viaja al correo que se esta verificando."""
+    expire = datetime.now(timezone.utc) + timedelta(
+        hours=settings.email_verification_expire_hours
+    )
+    payload = {
+        "typ": "verify_email",
+        "email": email,
+        "pwd": hashed_password,
+        "name": full_name,
+        "exp": expire,
+    }
+    return jwt.encode(payload, settings.jwt_secret_key, algorithm=settings.jwt_algorithm)
+
+
+def verify_email_verification_token(token: str) -> dict:
+    """Devuelve el payload o lanza jwt.PyJWTError (invalido, expirado, o un JWT
+    de otro tipo, p. ej. un token de sesion)."""
+    payload = jwt.decode(token, settings.jwt_secret_key, algorithms=[settings.jwt_algorithm])
+    if payload.get("typ") != "verify_email":
+        raise jwt.InvalidTokenError("tipo de token incorrecto")
+    return payload
+
+
 def create_oauth_state_token(platform: str) -> str:
     """Firma un token de corta duracion que viaja como "state" en el flujo
     OAuth de Google - evita CSRF (que /auth/google/callback solo acepte un

@@ -19,7 +19,7 @@ router = APIRouter()
 # Rutas de auth_service que no requieren sesion previa: son pre-login, el
 # usuario todavia no tiene JWT propio (Google lo redirige de vuelta a
 # "google/callback"; "register" y "login" son el acceso con email/password).
-PUBLIC_AUTH_PATHS = {"google/login", "google/callback", "register", "login"}
+PUBLIC_AUTH_PATHS = {"google/login", "google/callback", "register", "login", "verify-email"}
 
 # Railway a veces tarda unos segundos en levantar el DNS/socket interno de un
 # servicio recien redeployado o "dormido" (cold start / red privada) -> se

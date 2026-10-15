@@ -6,7 +6,15 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.security import create_access_token, hash_password, verify_password
+import jwt
+
+from app.core.security import (
+    create_access_token,
+    create_email_verification_token,
+    hash_password,
+    verify_email_verification_token,
+    verify_password,
+)
 from app.models.google_credential import GoogleCredential
 from app.models.user import User
 from app.models.user_settings import UserSettings
@@ -20,31 +28,46 @@ class InvalidCredentials(Exception):
     pass
 
 
+class InvalidVerification(Exception):
+    pass
+
+
 # Hash de relleno: si el correo no existe se verifica igual contra este, para
 # que el tiempo de respuesta no delate que cuentas existen.
 _dummy_hash: str | None = None
 
 
-async def register_with_password(
+async def start_registration(
     db: AsyncSession, email: str, password: str, full_name: str
 ) -> str:
-    """Crea una cuenta con email/password y emite el JWT de sesion. Es el
-    acceso alterno a Google (no conecta Calendar/Tasks/Gmail: eso sigue
-    requiriendo el consentimiento de Google)."""
+    """Primer paso del registro con email/password (acceso alterno a Google; no
+    conecta Calendar/Tasks/Gmail). No crea la cuenta: devuelve el token de
+    verificacion que se manda por correo. La cuenta nace en `confirm_registration`
+    solo cuando el dueno del correo abre el enlace."""
     email = email.strip().lower()
     if await db.scalar(select(User.id).where(User.email == email)):
         raise EmailTaken
     hashed = await asyncio.to_thread(hash_password, password)
-    user = User(email=email, full_name=full_name.strip(), hashed_password=hashed)
+    return create_email_verification_token(email, hashed, full_name.strip())
+
+
+async def confirm_registration(db: AsyncSession, token: str) -> None:
+    """Crea la cuenta del token de verificacion. Lanza InvalidVerification si el
+    token es invalido/expirado y EmailTaken si la cuenta ya existe (enlace
+    abierto dos veces)."""
+    try:
+        data = verify_email_verification_token(token)
+    except jwt.PyJWTError:
+        raise InvalidVerification
+    user = User(email=data["email"], full_name=data["name"], hashed_password=data["pwd"])
     db.add(user)
     try:
         await db.flush()
-    except IntegrityError:  # registro simultaneo del mismo correo
+    except IntegrityError:
         await db.rollback()
         raise EmailTaken
     db.add(UserSettings(user_id=user.id))
     await db.commit()
-    return create_access_token(subject=str(user.id))
 
 
 async def login_with_password(db: AsyncSession, email: str, password: str) -> str:

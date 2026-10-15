@@ -1,3 +1,5 @@
+from urllib.parse import urlsplit
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -25,6 +27,19 @@ class Settings(BaseSettings):
     # no esta URL.
     pwa_base_url: str = "http://localhost:5173"
     google_oauth_mobile_scheme: str = "ase3agentetdah"
+
+    # Verificacion de correo (registro con contrasena). Sin RESEND_API_KEY el
+    # registro responde 503: no se crean cuentas sin confirmar el correo.
+    resend_api_key: str = ""
+    mail_from: str = "Oportuno <onboarding@resend.dev>"
+    email_verification_expire_hours: int = 24
+
+    @property
+    def public_base_url(self) -> str:
+        """Origen publico (gateway) para armar enlaces de correo; sale de la
+        redirect URI de Google, que ya apunta al gateway."""
+        parts = urlsplit(self.google_oauth_redirect_uri)
+        return f"{parts.scheme}://{parts.netloc}"
 
 
 settings = Settings()
