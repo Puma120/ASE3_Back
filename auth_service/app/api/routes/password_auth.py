@@ -24,7 +24,12 @@ from app.services.auth_service import (
     login_with_password,
     start_registration,
 )
-from app.services.mailer import MailNotConfigured, MailSendFailed, send_verification_email
+from app.services.mailer import (
+    MailNotConfigured,
+    MailSendFailed,
+    mail_configured,
+    send_verification_email,
+)
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -60,7 +65,7 @@ async def register(
     wait = rate_limit.retry_after(ip_key, REGISTER_MAX_PER_IP, REGISTER_WINDOW)
     if wait:
         raise _too_many(wait)
-    if not settings.resend_api_key:
+    if not mail_configured():
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="El registro con correo no esta disponible por ahora",

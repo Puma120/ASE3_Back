@@ -16,3 +16,6 @@ venv/
 
 # Docker volumes locales, si se llegan a montar como bind mounts
 docker-data/
+
+# Credenciales locales de proveedores (nunca commitear)
+*.credentials

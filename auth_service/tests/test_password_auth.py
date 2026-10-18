@@ -22,7 +22,8 @@ TOKENS = {"access_token": "a", "scope": ""}
 @pytest.fixture(autouse=True)
 def _aislar(monkeypatch):
     rate_limit.clear_all()
-    monkeypatch.setattr(settings, "resend_api_key", "test-key")
+    for campo in ("service_id", "template_id", "public_key", "private_key"):
+        monkeypatch.setattr(settings, f"emailjs_{campo}", "test")
     monkeypatch.setattr(
         settings, "google_oauth_redirect_uri", "https://gw.test/auth/google/callback"
     )
@@ -122,7 +123,7 @@ async def test_token_invalido_o_de_sesion_no_crea_cuenta(client, sessions):
 
 
 async def test_registro_sin_proveedor_de_correo_da_503(client, monkeypatch):
-    monkeypatch.setattr(settings, "resend_api_key", "")
+    monkeypatch.setattr(settings, "emailjs_private_key", "")
     assert (await client.post("/auth/register", json=NUEVO)).status_code == 503
 
 

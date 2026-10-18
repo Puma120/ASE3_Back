@@ -28,10 +28,13 @@ class Settings(BaseSettings):
     pwa_base_url: str = "http://localhost:5173"
     google_oauth_mobile_scheme: str = "ase3agentetdah"
 
-    # Verificacion de correo (registro con contrasena). Sin RESEND_API_KEY el
-    # registro responde 503: no se crean cuentas sin confirmar el correo.
-    resend_api_key: str = ""
-    mail_from: str = "Oportuno <onboarding@resend.dev>"
+    # Verificacion de correo (registro con contrasena) por EmailJS. Sin estas
+    # cuatro variables el registro responde 503: no se crean cuentas sin
+    # confirmar el correo.
+    emailjs_service_id: str = ""
+    emailjs_template_id: str = ""
+    emailjs_public_key: str = ""
+    emailjs_private_key: str = ""
     email_verification_expire_hours: int = 24
 
     @property
