@@ -62,6 +62,13 @@ def create_event(
     return service.events().insert(calendarId="primary", body=event).execute()
 
 
+def move_event(credentials: Credentials, event_id: str, start: datetime, end: datetime) -> dict:
+    body = {"start": {"dateTime": start.isoformat()}, "end": {"dateTime": end.isoformat()}}
+    return (
+        _service(credentials).events().patch(calendarId="primary", eventId=event_id, body=body).execute()
+    )
+
+
 def list_events(credentials: Credentials, window_start: datetime, window_end: datetime) -> list[dict]:
     """Eventos del calendario principal en [window_start, window_end], por hora de inicio."""
     service = _service(credentials)

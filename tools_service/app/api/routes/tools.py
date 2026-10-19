@@ -23,6 +23,7 @@ from app.schemas.tools import (
     SetFocusModeRequest,
     SubtasksCreate,
     TaskCreate,
+    TaskReschedule,
     TaskSummary,
     TravelTimeRequest,
     TravelTimeResponse,
@@ -95,7 +96,7 @@ async def create_task(
     user_id: uuid.UUID = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db),
 ):
-    return await tasks_tool.create_task(db, user_id, body.title, body.notes or "", body.due)
+    return await tasks_tool.create_task(db, user_id, body.title, body.notes or "", body.start, body.end)
 
 
 @router.post("/tasks/subtasks")
@@ -104,7 +105,7 @@ async def create_subtasks(
     user_id: uuid.UUID = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db),
 ):
-    return await tasks_tool.create_subtasks(db, user_id, body.parent_title, body.subtasks)
+    return await tasks_tool.create_subtasks(db, user_id, body.parent_title, body.subtasks, body.start, body.end)
 
 
 @router.get("/tasks", response_model=list[TaskSummary])
@@ -114,10 +115,35 @@ async def list_tasks(
 ):
     tasks = await tasks_tool.list_pending_tasks(db, user_id)
     return [
-        TaskSummary(id=t["id"], title=t.get("title", ""), notes=t.get("notes", ""), due=t.get("due"))
+        TaskSummary(
+            id=t["id"],
+            title=t.get("title", ""),
+            notes=t.get("notes", ""),
+            due=t.get("due"),
+            start=t.get("start"),
+            end=t.get("end"),
+        )
         for t in tasks
         if t.get("title")
     ]
+
+
+@router.get("/tasks/overdue")
+async def overdue_tasks(
+    user_id: uuid.UUID = Depends(get_current_user_id),
+    db: AsyncSession = Depends(get_db),
+):
+    return await tasks_tool.overdue_tasks(db, user_id)
+
+
+@router.post("/tasks/{task_id}/reschedule")
+async def reschedule_task(
+    task_id: str,
+    body: TaskReschedule,
+    user_id: uuid.UUID = Depends(get_current_user_id),
+    db: AsyncSession = Depends(get_db),
+):
+    return await tasks_tool.reschedule_task(db, user_id, task_id, body.start, body.end)
 
 
 @router.post("/tasks/{task_id}/complete")

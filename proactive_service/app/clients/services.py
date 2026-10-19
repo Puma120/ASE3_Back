@@ -63,3 +63,8 @@ async def travel_time(user_id: str, origin: str, destination: str, event_start: 
     except (httpx.HTTPError, KeyError, ValueError) as exc:
         log.warning("travel_time fallo (%s -> %s): %s", origin, destination, exc)
         return None
+
+
+async def overdue_tasks(user_id: str) -> list[dict]:
+    """Tareas con fin vencido que siguen pendientes."""
+    return await _get(settings.tools_service_url, "/tools/tasks/overdue", user_id)

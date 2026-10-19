@@ -79,3 +79,17 @@ def reopen_task(credentials: Credentials, task_id: str) -> dict:
         )
         .execute()
     )
+
+
+def get_task(credentials: Credentials, task_id: str) -> dict:
+    return _service(credentials).tasks().get(tasklist=DEFAULT_TASKLIST, task=task_id).execute()
+
+
+def set_due(credentials: Credentials, task_id: str, due: datetime, notes: str | None = None) -> dict:
+    """Mueve la fecha limite (solo guarda el dia) y opcionalmente reescribe las notas."""
+    body = {"due": f"{due.date().isoformat()}T00:00:00.000Z"}
+    if notes is not None:
+        body["notes"] = notes
+    return (
+        _service(credentials).tasks().patch(tasklist=DEFAULT_TASKLIST, task=task_id, body=body).execute()
+    )

@@ -155,3 +155,24 @@ def briefing_alert(
         "Hoy tienes " + " y ".join(parts) + ".",
         f"briefing:{local.date().isoformat()}",
     )
+
+
+def overdue_task_alert(task: dict, tz: ZoneInfo, now: datetime) -> Alert:
+    """La tarea llego a su hora de fin sin completarse: se pregunta si se reagenda.
+    El dedupe lleva el fin y el dia: al reagendar se avisa de nuevo y, si el usuario no
+    responde, se vuelve a preguntar una vez al dia hasta que la cierre o la mueva."""
+    end = parse_dt(task["end"])
+    local_end = end.astimezone(tz)
+    when = _hhmm(end, tz)
+    if local_end.date() != now.astimezone(tz).date():
+        when = f"{local_end:%d/%m} a las {when}"
+    else:
+        when = f"hoy a las {when}"
+    return Alert(
+        "task_overdue",
+        "Tarea sin terminar",
+        f"«{task['title']}» debía terminar {when} y sigue pendiente. "
+        "¿La reagendamos? Abre el chat y dime para cuándo.",
+        f"task_overdue:{task['task_id']}:{task['end']}:{now.astimezone(tz).date().isoformat()}",
+        {"task_id": task["task_id"], "action": "reschedule"},
+    )

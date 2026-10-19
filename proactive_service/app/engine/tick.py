@@ -110,8 +110,11 @@ async def evaluate_user(user_id: str, now: datetime) -> int:
             elif (soon := rules.soon_alert(event, now, tz)) is not None:
                 alerts.append(soon)
 
+        for task in await services.overdue_tasks(user_id):
+            alerts.append(rules.overdue_task_alert(task, tz, now))
+
         local = now.astimezone(tz)
-        work_start = user_settings.get("work_start_hour", 9)
+        work_start =user_settings.get("work_start_hour", 9)
         if work_start <= local.hour < work_start + 3:
             day_start = local.replace(hour=0, minute=0, second=0, microsecond=0)
             day_events = await services.list_events(

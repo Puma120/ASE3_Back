@@ -13,3 +13,5 @@ mongo_client = AsyncIOMotorClient(settings.mongo_uri)
 mongo_db = mongo_client[settings.mongo_db_name]
 
 activity_logs: AsyncIOMotorCollection = mongo_db["activity_logs"]
+
+scheduled_tasks: AsyncIOMotorCollection = mongo_db["scheduled_tasks"]  # tarea -> evento de calendario

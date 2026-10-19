@@ -2,7 +2,7 @@
 
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, model_validator
 
 
 # --- Calendar ---
@@ -43,18 +43,36 @@ class TaskSummary(BaseModel):
     title: str
     notes: str = ""
     due: str | None = None
+    start: str | None = None
+    end: str | None = None
 
 
-class TaskCreate(BaseModel):
+class _Window(BaseModel):
+    """Toda tarea va contra calendario: inicio y fin obligatorios."""
+
+    start: datetime
+    end: datetime
+
+    @model_validator(mode="after")
+    def _end_after_start(self):
+        if self.end <= self.start:
+            raise ValueError("end debe ser posterior a start")
+        return self
+
+
+class TaskCreate(_Window):
     title: str
     # El modelo a veces manda notes: null; se acepta y se trata como vacio.
     notes: str | None = ""
-    due: datetime | None = None
 
 
-class SubtasksCreate(BaseModel):
+class SubtasksCreate(_Window):
     parent_title: str
     subtasks: list[str]
+
+
+class TaskReschedule(_Window):
+    pass
 
 
 # --- Maps ---

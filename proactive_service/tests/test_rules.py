@@ -92,3 +92,17 @@ def test_quiet_hours_wraps_midnight():
 
 def test_quiet_hours_empty_range():
     assert not any(rules.in_quiet_hours(h, 9, 9) for h in range(24))
+
+
+def test_overdue_task_alert_asks_to_reschedule():
+    task = {"task_id": "t1", "title": "Entregar informe", "end": START.isoformat()}  # 17:00 local
+    same_day = START + timedelta(minutes=30)
+    a = rules.overdue_task_alert(task, TZ, same_day)
+    assert a.kind == "task_overdue"
+    assert "Entregar informe" in a.body and "hoy a las 17:00" in a.body and "reagend" in a.body
+    assert a.data == {"task_id": "t1", "action": "reschedule"}
+
+    next_day = START + timedelta(days=1)
+    b = rules.overdue_task_alert(task, TZ, next_day)
+    assert "01/06 a las 17:00" in b.body
+    assert b.dedupe_key != a.dedupe_key  # se vuelve a preguntar cada dia
