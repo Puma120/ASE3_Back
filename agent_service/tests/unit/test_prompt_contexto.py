@@ -47,7 +47,7 @@ def test_sin_contexto_recuperado_no_hay_bloque():
 async def test_retrieve_context_busca_el_ultimo_mensaje_con_el_top_k_del_usuario(monkeypatch):
     llamadas = []
 
-    async def search_falso(user_id, query, top_k=None):
+    async def search_falso(user_id, query, top_k=None, **kwargs):
         llamadas.append((user_id, query, top_k))
         return [FRAGMENTO]
 

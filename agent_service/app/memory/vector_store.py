@@ -5,6 +5,8 @@ index_document()/search() miden contra los KPI de latencia/precision de la
 Tabla 2.1 del PDF de tesina (latencia <300ms, tokens<500, precision>=90%).
 """
 
+import re
+import time
 import uuid
 
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
@@ -44,6 +46,22 @@ def ensure_collection() -> None:
         )
 
 
+_SMALL_TALK = {
+    "hola", "buenas", "buenos", "buenas", "dias", "tardes", "noches", "gracias", "ok", "okay", "vale",
+    "si", "no", "claro", "listo", "perfecto", "genial", "bien", "bueno", "entiendo", "ya", "va",
+    "adios", "hasta", "luego", "chao", "muchas", "por", "favor", "que", "tal", "como", "estas",
+}
+
+
+def is_worth_indexing(user_message: str, response: str) -> bool:
+    """Descarta saludos, acuses y respuestas vacias: indexarlos solo mete ruido
+    que luego compite con los recuerdos utiles en la busqueda."""
+    words = re.findall(r"\w+", user_message.lower())
+    if not response.strip() or not words:
+        return False
+    return not all(w in _SMALL_TALK for w in words)
+
+
 async def index_document(user_id: str, text: str) -> None:
     """Embebe `text` y lo guarda asociado a `user_id` para recuperacion futura."""
     ensure_collection()
@@ -54,23 +72,50 @@ async def index_document(user_id: str, text: str) -> None:
             qmodels.PointStruct(
                 id=str(uuid.uuid4()),
                 vector=vector,
-                payload={"user_id": user_id, "text": text},
+                payload={"user_id": user_id, "text": text, "created_at": time.time()},
             )
         ],
     )
 
 
-async def search(user_id: str, query: str, top_k: int | None = None) -> list[str]:
-    """Devuelve los `top_k` fragmentos mas relevantes para `query`, filtrados
-    al historial de `user_id`."""
+def purge_expired() -> None:
+    """Borra los fragmentos mas viejos que rag_retention_days (0 = desactivado).
+    Los puntos sin `created_at` (anteriores a este campo) nunca coinciden."""
+    if not settings.rag_retention_days or not qdrant_client.collection_exists(settings.qdrant_collection_name):
+        return
+    limite = time.time() - settings.rag_retention_days * 86400
+    qdrant_client.delete(
+        collection_name=settings.qdrant_collection_name,
+        points_selector=qmodels.FilterSelector(
+            filter=qmodels.Filter(must=[qmodels.FieldCondition(key="created_at", range=qmodels.Range(lt=limite))])
+        ),
+    )
+
+
+async def search(
+    user_id: str,
+    query: str,
+    top_k: int | None = None,
+    min_score: float | None = None,
+    exclude_user_messages: list[str] | None = None,
+) -> list[str]:
+    """Devuelve hasta `top_k` fragmentos de `user_id` con similitud >= `min_score`.
+    Omite los intercambios cuyo mensaje de usuario esta en `exclude_user_messages`
+    (los que ya van literales en la ventana corta)."""
     ensure_collection()
+    top_k = top_k or settings.rag_top_k
+    min_score = settings.rag_min_score if min_score is None else min_score
+    excluidos = {f"Usuario: {m}\n" for m in (exclude_user_messages or [])}
     vector = await _get_embeddings().aembed_query(query)
     results = qdrant_client.query_points(
         collection_name=settings.qdrant_collection_name,
         query=vector,
-        limit=top_k or settings.rag_top_k,
+        # Margen para que descartar los de la ventana no deje el top-k corto.
+        limit=top_k + len(excluidos),
+        score_threshold=min_score,
         query_filter=qmodels.Filter(
             must=[qmodels.FieldCondition(key="user_id", match=qmodels.MatchValue(value=user_id))]
         ),
     )
-    return [point.payload["text"] for point in results.points]
+    textos = [p.payload["text"] for p in results.points if not any(p.payload["text"].startswith(e) for e in excluidos)]
+    return textos[:top_k]

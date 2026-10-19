@@ -41,6 +41,10 @@ def configurar_entorno(
         # Defaults de config.py, explicitos para no heredar valores del .env local.
         "SHORT_TERM_MEMORY_WINDOW": "10",
         "RAG_TOP_K": "5",
+        # Los embeddings falsos dan similitudes bajas o 0: piso del coseno = sin umbral.
+        "RAG_MIN_SCORE": "-1",
+        "RAG_RETENTION_DAYS": "0",
+        "COMPACTION_THRESHOLD": "30",
         "LLM_TEMPERATURE": "0.3",
         "MAX_TOOL_ROUNDS": "6",
     }

@@ -33,7 +33,8 @@ async def test_index_document_guarda_usuario_y_texto(fake_embeddings, qdrant):
     await vector_store.index_document(str(USUARIO_A), DOCUMENTOS[0])
 
     puntos, _ = qdrant.scroll(settings.qdrant_collection_name, with_payload=True)
-    assert [p.payload for p in puntos] == [{"user_id": str(USUARIO_A), "text": DOCUMENTOS[0]}]
+    assert [(p.payload["user_id"], p.payload["text"]) for p in puntos] == [(str(USUARIO_A), DOCUMENTOS[0])]
+    assert puntos[0].payload["created_at"] > 0
 
 
 async def test_el_fragmento_relevante_sale_primero(fake_embeddings):

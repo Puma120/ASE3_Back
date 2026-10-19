@@ -24,7 +24,9 @@ from app.db.mongo import activity_logs
 from app.graph.state import AgentState
 from app.graph.tool_specs import TOOL_SPECS
 from app.graph.user_context import build_user_context
+from app.memory import summary as summary_store
 from app.memory import vector_store
+from app.memory import workflow
 
 log = logging.getLogger("agent.nodes")
 
@@ -41,10 +43,16 @@ SYSTEM_PROMPT = (
     "la tool en vez de solo describirlo, pero solo lo que el usuario pidio de "
     "forma explicita en esta conversacion.\n"
     "- Puedes llamar varias tools en una misma ronda si son independientes.\n"
-    "- Tarea con fecha u hora ('a las 6 hoy', 'manana a las 9'): crea la tarea con create_task "
-    "mandando due (ISO con offset de la zona del usuario) y, en la misma ronda, un create_reminder "
-    "a esa hora para que le suene. Nunca digas que una hora ya paso sin compararla con la hora "
-    "actual del usuario; si de verdad ya paso, ofrece manana a esa hora.\n"
+    "- Toda tarea lleva inicio y fin contra calendario: create_task y create_subtasks exigen "
+    "start y end (ISO con offset de la zona del usuario). Si el usuario no da la hora, no la "
+    "inventes a ciegas: busca un hueco con find_free_slots segun la duracion razonable de la tarea "
+    "(si no la sabes, 30 min para algo simple y 60 para algo mediano) y proponlo o usalo si ya lo "
+    "pidio. Luego, en la misma ronda, un create_reminder al inicio para que le suene. "
+    "Nunca digas que una hora ya paso sin compararla con la hora actual del usuario; si de verdad "
+    "ya paso, ofrece manana a esa hora.\n"
+    "- Si una tarea llega a su fin sin completarse, la app avisa al usuario y le pregunta si la "
+    "reagenda. Cuando te responda (o pida mover una tarea): list_tasks para ubicarla, "
+    "find_free_slots para un hueco nuevo y reschedule_task. Si dice que ya la hizo, complete_task.\n"
     "- Para llegar a tiempo a un evento con lugar: calcula el traslado "
     "(get_travel_time) y programa recordatorios (create_reminder) para 'prepararse' "
     "y 'salir'.\n"
@@ -86,21 +94,48 @@ async def retrieve_context(state: AgentState) -> AgentState:
 
     async def rag() -> list[str]:
         try:
+            in_window = [m["content"] for m in state["messages"] if m["role"] == "user"]
             return await vector_store.search(
-                str(state["user_id"]), last_message, state.get("params", {}).get("rag_top_k")
+                str(state["user_id"]),
+                last_message,
+                state.get("params", {}).get("rag_top_k"),
+                exclude_user_messages=in_window,
             )
         except Exception:
             log.exception("RAG no disponible")
             return []
 
-    context, user_context = await asyncio.gather(rag(), build_user_context(session.bearer_token.get(), state.get("timezone")))
-    return {**state, "rag_context": context, "user_context": user_context, "rounds": 0}
+    async def optional(coro, default):
+        try:
+            return await coro
+        except Exception:
+            log.exception("Memoria no disponible")
+            return default
+
+    context, user_context, summary, pending = await asyncio.gather(
+        rag(),
+        build_user_context(session.bearer_token.get(), state.get("timezone")),
+        optional(summary_store.get_summary(state["user_id"]), ""),
+        optional(workflow.get_pending(state["user_id"]), []),
+    )
+    return {
+        **state,
+        "rag_context": context,
+        "user_context": user_context,
+        "summary": summary,
+        "pending_actions": workflow.format_pending(pending),
+        "rounds": 0,
+    }
 
 
 def _to_langchain_messages(state: AgentState) -> list:
     messages = [SystemMessage(content=SYSTEM_PROMPT)]
     if state.get("user_context"):
         messages.append(SystemMessage(content=state["user_context"]))
+    if state.get("summary"):
+        messages.append(SystemMessage(content=f"Resumen de la conversacion anterior con el usuario:\n{state['summary']}"))
+    if state.get("pending_actions"):
+        messages.append(SystemMessage(content=state["pending_actions"]))
     if state.get("rag_context"):
         context_text = "\n".join(f"- {fragment}" for fragment in state["rag_context"])
         messages.append(SystemMessage(content=f"Contexto relevante del historial del usuario:\n{context_text}"))
@@ -171,6 +206,10 @@ async def call_tool(state: AgentState) -> AgentState:
 
     async def run(call: dict) -> dict:
         if untrusted and call["name"] in WRITE_TOOLS:
+            try:
+                await workflow.add_pending(state["user_id"], call["name"], call["arguments"])
+            except Exception:
+                log.exception("No se pudo guardar la accion pendiente")
             return {
                 "error": "Accion bloqueada: en este turno se leyeron correos u otro contenido "
                 "externo. Pidele al usuario que lo confirme en un mensaje nuevo."
@@ -178,6 +217,14 @@ async def call_tool(state: AgentState) -> AgentState:
         return await invoke_tool(call["name"], call["arguments"], session.bearer_token.get())
 
     results = await asyncio.gather(*(run(c) for c in calls))
+
+    # Una escritura que si se ejecuto cierra su pendiente (el usuario la confirmo).
+    done = [c["name"] for c, r in zip(calls, results) if c["name"] in WRITE_TOOLS and "error" not in r]
+    if done:
+        try:
+            await workflow.clear_pending(state["user_id"], done)
+        except Exception:
+            log.exception("No se pudo limpiar la accion pendiente")
 
     exchange = list(state.get("tool_exchange", []))
     commands = list(state.get("device_commands", []))

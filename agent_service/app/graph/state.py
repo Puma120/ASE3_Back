@@ -14,6 +14,8 @@ class AgentState(TypedDict, total=False):
     user_id: UUID
     messages: list[dict[str, str]]  # [{"role": "user"|"assistant", "content": str}, ...]
     rag_context: list[str]
+    summary: str  # memoria corta compactada: resumen de lo que ya salio de la ventana
+    pending_actions: str  # estado operativo: acciones bloqueadas pendientes de confirmar
     timezone: str  # zona IANA del dispositivo en este turno (opcional)
     user_context: str  # perfil, fecha/hora local, ubicacion; se inyecta en el prompt
     pending_calls: list[dict[str, Any]]  # tool_calls de la ronda actual: {"id","name","arguments"}

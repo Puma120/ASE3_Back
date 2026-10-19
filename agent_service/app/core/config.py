@@ -28,7 +28,15 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
 
     short_term_memory_window: int = 10
+    # Compactacion: al pasar de este numero de mensajes sin resumir, los mas
+    # viejos se funden en un resumen y solo la ventana reciente va literal.
+    compaction_threshold: int = 30
     rag_top_k: int = 5
+    # Similitud coseno minima para inyectar un fragmento; por debajo es ruido.
+    # Calibrar con tests/kpi/eval_obj2.py contra gemini-embedding-001.
+    rag_min_score: float = 0.5
+    # Dias que se conserva un fragmento en Qdrant; 0 = nunca se purga.
+    rag_retention_days: int = 0
     llm_temperature: float = 0.3
     # Tope de rondas LLM -> tools por mensaje (evita bucles).
     max_tool_rounds: int = 6

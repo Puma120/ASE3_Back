@@ -1,15 +1,22 @@
+import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
 from app.api.routes.agent import router as agent_router
 from app.api.routes.chat import router as chat_router
+from app.memory import vector_store, workflow
 from app.memory.short_term import ensure_indexes
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     await ensure_indexes()
+    await workflow.ensure_indexes()
+    try:
+        vector_store.purge_expired()
+    except Exception:
+        logging.getLogger("agent.main").exception("No se pudo purgar Qdrant")
     yield
 
 app = FastAPI(

@@ -41,18 +41,21 @@ TOOL_SPECS = [
         "type": "function",
         "function": {
             "name": "create_task",
-            "description": "Crea una tarea simple en Google Tasks. Con due queda fechada (la hora se guarda en las notas).",
+            "description": (
+                "Crea una tarea contra calendario: queda en Google Tasks y bloquea start-end en el "
+                "calendario. TODA tarea necesita inicio y fin; si el usuario no los dio, elige un "
+                "hueco con find_free_slots antes de crearla. Si llega a su fin sin completarse, "
+                "la app le pregunta si la reagenda."
+            ),
             "parameters": {
                 "type": "object",
                 "properties": {
                     "title": {"type": "string"},
                     "notes": {"type": "string"},
-                    "due": {
-                        "type": "string",
-                        "description": "ISO datetime con offset de la fecha/hora limite (opcional)",
-                    },
+                    "start": {"type": "string", "description": "ISO datetime con offset de cuando empieza"},
+                    "end": {"type": "string", "description": "ISO datetime con offset de cuando debe terminar"},
                 },
-                "required": ["title"],
+                "required": ["title", "start", "end"],
             },
         },
     },
@@ -60,14 +63,16 @@ TOOL_SPECS = [
         "type": "function",
         "function": {
             "name": "create_subtasks",
-            "description": "Subdivide una tarea grande/abrumadora en subtareas accionables mas pequenas.",
+            "description": "Subdivide una tarea grande/abrumadora en subtareas accionables mas pequenas. El conjunto lleva su ventana start-end en el calendario.",
             "parameters": {
                 "type": "object",
                 "properties": {
                     "parent_title": {"type": "string"},
                     "subtasks": {"type": "array", "items": {"type": "string"}},
+                    "start": {"type": "string", "description": "ISO datetime con offset de cuando empieza el conjunto"},
+                    "end": {"type": "string", "description": "ISO datetime con offset de cuando debe quedar terminado"},
                 },
-                "required": ["parent_title", "subtasks"],
+                "required": ["parent_title", "subtasks", "start", "end"],
             },
         },
     },
@@ -158,6 +163,26 @@ TOOL_SPECS = [
                 "type": "object",
                 "properties": {"task_id": {"type": "string"}},
                 "required": ["task_id"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "reschedule_task",
+            "description": (
+                "Mueve una tarea (y su bloque de calendario) a una nueva ventana start-end. "
+                "Usala cuando el usuario acepta reagendar una tarea vencida o pide cambiarla de hora. "
+                "Usa el id que devolvio list_tasks y busca antes un hueco con find_free_slots."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "task_id": {"type": "string"},
+                    "start": {"type": "string", "description": "ISO datetime con offset del nuevo inicio"},
+                    "end": {"type": "string", "description": "ISO datetime con offset del nuevo fin"},
+                },
+                "required": ["task_id", "start", "end"],
             },
         },
     },

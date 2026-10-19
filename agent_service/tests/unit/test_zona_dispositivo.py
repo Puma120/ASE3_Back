@@ -41,7 +41,9 @@ def test_chat_request_acepta_zona_opcional():
     assert ChatMessageRequest(message="hola", timezone="America/Bogota").timezone == "America/Bogota"
 
 
-def test_create_task_expone_due():
-    spec = next(t for t in TOOL_SPECS if t["function"]["name"] == "create_task")
-    assert "due" in spec["function"]["parameters"]["properties"]
-    assert spec["function"]["parameters"]["required"] == ["title"]
+def test_create_task_exige_inicio_y_fin():
+    for nombre in ("create_task", "create_subtasks", "reschedule_task"):
+        spec = next(t for t in TOOL_SPECS if t["function"]["name"] == nombre)
+        params = spec["function"]["parameters"]
+        assert {"start", "end"} <= set(params["required"])
+        assert {"start", "end"} <= set(params["properties"])

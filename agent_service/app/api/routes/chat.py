@@ -12,6 +12,7 @@ from app.core import session
 from app.core.deps import get_current_user_id
 from app.graph.builder import agent_graph
 from app.memory import params as params_store
+from app.memory import summary as summary_store
 from app.memory import vector_store
 from app.memory.short_term import append_exchange, get_history, get_recent_messages
 from app.schemas.chat import ChatMessageRequest, ChatMessageResponse, DeviceCommand, HistoryMessage
@@ -25,11 +26,17 @@ _background: set[asyncio.Task] = set()
 
 
 async def _index_exchange(user_id: str, user_message: str, response: str) -> None:
-    """Alimenta el RAG con el intercambio (sin bloquear la respuesta)."""
+    """Alimenta el RAG con el intercambio y compacta la memoria corta si ya
+    se acumulo (sin bloquear la respuesta)."""
     try:
-        await vector_store.index_document(user_id, f"Usuario: {user_message}\nAsistente: {response}")
+        if vector_store.is_worth_indexing(user_message, response):
+            await vector_store.index_document(user_id, f"Usuario: {user_message}\nAsistente: {response}")
     except Exception:
         log.exception("No se pudo indexar el intercambio en Qdrant")
+    try:
+        await summary_store.maybe_compact(uuid.UUID(user_id))
+    except Exception:
+        log.exception("No se pudo compactar la memoria corta")
 
 
 @router.post("/chat", response_model=ChatMessageResponse)
