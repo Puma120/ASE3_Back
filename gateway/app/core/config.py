@@ -1,3 +1,6 @@
+import os
+
+from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -15,6 +18,16 @@ class Settings(BaseSettings):
 
     jwt_secret_key: str = "change-me"
     jwt_algorithm: str = "HS256"
+
+    @model_validator(mode="after")
+    def _exigir_secreto_jwt_en_produccion(self) -> "Settings":
+        """En Railway se rechaza arrancar con el secreto por defecto o uno corto
+        (cualquiera podria firmar tokens). En local/tests se permite."""
+        if os.getenv("RAILWAY_ENVIRONMENT") and (
+            self.jwt_secret_key == "change-me" or len(self.jwt_secret_key) < 32
+        ):
+            raise ValueError("JWT_SECRET_KEY debe tener al menos 32 caracteres en produccion")
+        return self
 
 
 settings = Settings()

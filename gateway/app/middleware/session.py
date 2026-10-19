@@ -1,9 +1,8 @@
 """Validacion de sesion (JWT) antes de enrutar hacia los microservicios internos.
 
-TODO: decidir estrategia final de validacion (decodificar localmente con
-JWT_SECRET_KEY compartido vs. llamar a auth_service /validate en cada request).
-Por ahora se deja el esqueleto de decodificacion local, mas rapido pero acopla
-el secreto de firma entre gateway y auth_service.
+El JWT se decodifica localmente con el JWT_SECRET_KEY compartido (sin llamar a
+auth_service en cada request): mas rapido, a costa de compartir el secreto de
+firma entre los servicios.
 """
 
 from fastapi import Request, HTTPException, status

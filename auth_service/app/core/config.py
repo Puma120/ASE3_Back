@@ -1,5 +1,7 @@
+import os
 from urllib.parse import urlsplit
 
+from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -43,6 +45,16 @@ class Settings(BaseSettings):
         redirect URI de Google, que ya apunta al gateway."""
         parts = urlsplit(self.google_oauth_redirect_uri)
         return f"{parts.scheme}://{parts.netloc}"
+
+    @model_validator(mode="after")
+    def _exigir_secreto_jwt_en_produccion(self) -> "Settings":
+        """En Railway se rechaza arrancar con el secreto por defecto o uno corto
+        (cualquiera podria firmar tokens). En local/tests se permite."""
+        if os.getenv("RAILWAY_ENVIRONMENT") and (
+            self.jwt_secret_key == "change-me" or len(self.jwt_secret_key) < 32
+        ):
+            raise ValueError("JWT_SECRET_KEY debe tener al menos 32 caracteres en produccion")
+        return self
 
 
 settings = Settings()

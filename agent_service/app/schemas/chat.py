@@ -3,11 +3,12 @@
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class ChatMessageRequest(BaseModel):
-    message: str
+    # Tope por mensaje: cada uno entra al prompt del LLM y al RAG.
+    message: str = Field(min_length=1, max_length=4000)
     # Zona IANA del dispositivo (ej. America/Mexico_City); manda sobre la de Ajustes.
     timezone: str | None = None
 

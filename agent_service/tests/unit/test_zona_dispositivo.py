@@ -47,3 +47,16 @@ def test_create_task_exige_inicio_y_fin():
         params = spec["function"]["parameters"]
         assert {"start", "end"} <= set(params["required"])
         assert {"start", "end"} <= set(params["properties"])
+
+
+def test_mensaje_de_chat_tiene_tope_de_largo():
+    import pytest
+    from pydantic import ValidationError
+
+    from app.schemas.chat import ChatMessageRequest
+
+    assert ChatMessageRequest(message="a" * 4000).message
+    with pytest.raises(ValidationError):
+        ChatMessageRequest(message="a" * 4001)
+    with pytest.raises(ValidationError):
+        ChatMessageRequest(message="")
