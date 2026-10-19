@@ -84,3 +84,26 @@ def test_produccion_rechaza_secreto_jwt_por_defecto_o_corto(monkeypatch):
     with pytest.raises(ValueError):
         Settings(jwt_secret_key="corto")
     assert Settings(jwt_secret_key="x" * 32).jwt_secret_key == "x" * 32
+
+
+def test_cors_solo_permite_origenes_configurados():
+    c = _client(lambda r: httpx.Response(200, json={}))
+    ok = c.options(
+        "/tools/tasks",
+        headers={"Origin": "https://ase3-front-pwa.vercel.app", "Access-Control-Request-Method": "GET"},
+    )
+    assert ok.headers.get("access-control-allow-origin") == "https://ase3-front-pwa.vercel.app"
+    ajeno = c.options(
+        "/tools/tasks",
+        headers={"Origin": "https://evil.example", "Access-Control-Request-Method": "GET"},
+    )
+    assert "access-control-allow-origin" not in ajeno.headers
+
+
+def test_limitador_libera_claves_inactivas(monkeypatch):
+    monkeypatch.setattr(rate_limit, "_PURGE_EVERY", 1)
+    rate_limit.hit("viejo", 5, 0.0001)
+    import time as _t
+    _t.sleep(0.01)
+    rate_limit.hit("nuevo", 5, 0.0001)
+    assert "viejo" not in rate_limit._hits

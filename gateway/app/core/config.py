@@ -19,6 +19,17 @@ class Settings(BaseSettings):
     jwt_secret_key: str = "change-me"
     jwt_algorithm: str = "HS256"
 
+    # Origenes web permitidos por CORS (separados por coma). La app nativa no usa CORS.
+    # Por defecto: el PWA en Vercel y los servidores de desarrollo locales.
+    cors_origins: str = (
+        "https://ase3-front-pwa.vercel.app,"
+        "http://localhost:8081,http://localhost:19006,http://localhost:5173"
+    )
+
+    @property
+    def cors_origin_list(self) -> list[str]:
+        return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
+
     @model_validator(mode="after")
     def _exigir_secreto_jwt_en_produccion(self) -> "Settings":
         """En Railway se rechaza arrancar con el secreto por defecto o uno corto
