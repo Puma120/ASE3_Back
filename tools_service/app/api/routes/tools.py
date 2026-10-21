@@ -7,7 +7,8 @@ solo moveria el dispatch de FastAPI a codigo propio sin ganar nada.
 
 import uuid
 
-from fastapi import APIRouter, Depends
+import httpx
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import AwareDatetime
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -18,6 +19,7 @@ from app.schemas.tools import (
     EventSummary,
     FreeSlot,
     FreeSlotsRequest,
+    PlacesSearchRequest,
     RecentEmailsRequest,
     SetAlarmRequest,
     SetFocusModeRequest,
@@ -179,13 +181,27 @@ async def routines_summary(user_id: uuid.UUID = Depends(get_current_user_id)):
 
 @router.post("/maps/travel-time", response_model=TravelTimeResponse)
 async def travel_time(body: TravelTimeRequest):
-    travel, prepare_by = await maps_tool.get_prepare_by_time(
-        body.origin, body.destination, body.event_start
-    )
+    try:
+        travel, prepare_by = await maps_tool.get_prepare_by_time(
+            body.origin, body.destination, body.event_start
+        )
+    except (ValueError, httpx.HTTPError) as exc:
+        raise HTTPException(status_code=502, detail=f"Maps no pudo calcular la ruta: {exc}") from exc
     return TravelTimeResponse(
         travel_seconds=int(travel.total_seconds()),
         prepare_by=prepare_by,
     )
+
+
+@router.post("/maps/places")
+async def search_places(
+    body: PlacesSearchRequest, user_id: uuid.UUID = Depends(get_current_user_id)
+):
+    try:
+        places = await maps_tool.find_places(body.query, body.lat, body.lng, body.at)
+    except (ValueError, httpx.HTTPError) as exc:
+        raise HTTPException(status_code=502, detail=f"No se pudo buscar lugares: {exc}") from exc
+    return {"places": places}
 
 
 # --- Gmail ---

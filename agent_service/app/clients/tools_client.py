@@ -23,6 +23,7 @@ TOOL_ROUTES = {
     "reschedule_task": ("tools", "POST", "/tools/tasks/{task_id}/reschedule"),
     "get_routine_summary": ("tools", "GET", "/tools/routines/summary"),
     "get_travel_time": ("tools", "POST", "/tools/maps/travel-time"),
+    "search_places": ("tools", "POST", "/tools/maps/places"),
     "read_recent_emails": ("tools", "POST", "/tools/gmail/recent-emails"),
     "set_alarm": ("tools", "POST", "/tools/device/alarm"),
     "set_focus_mode": ("tools", "POST", "/tools/device/focus-mode"),

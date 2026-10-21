@@ -91,6 +91,14 @@ class TravelTimeResponse(BaseModel):
     prepare_by: datetime | None = None
 
 
+class PlacesSearchRequest(BaseModel):
+    query: str
+    lat: float | None = None
+    lng: float | None = None
+    # Hora a la que el usuario pretende llegar; con offset para compararla con el horario del lugar.
+    at: AwareDatetime | None = None
+
+
 # --- Gmail ---
 
 

@@ -95,6 +95,23 @@ TOOL_SPECS = [
     {
         "type": "function",
         "function": {
+            "name": "search_places",
+            "description": "Busca lugares REALES (direccion, horario semanal, si estan abiertos) cerca del usuario con Google Maps. Usala siempre que pregunten donde ir a hacer algo, o a que hora abre/cierra un lugar; nunca inventes lugares ni horarios.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "query": {"type": "string", "description": "Que buscar, p. ej. 'modulo de pago CFE' o 'farmacia 24 horas'"},
+                    "lat": {"type": "number", "description": "Latitud de la ubicacion del usuario, si la conoces"},
+                    "lng": {"type": "number", "description": "Longitud de la ubicacion del usuario, si la conoces"},
+                    "at": {"type": "string", "description": "ISO datetime con offset de cuando planea llegar; la tool indica si el lugar estara abierto a esa hora"},
+                },
+                "required": ["query"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
             "name": "read_recent_emails",
             "description": "Lee los correos mas recientes de la bandeja de entrada del usuario para resumirlos o extraer pendientes.",
             "parameters": {
