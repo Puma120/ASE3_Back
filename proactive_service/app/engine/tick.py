@@ -21,6 +21,7 @@ log = logging.getLogger("proactive.tick")
 
 ACTIVE_DAYS = 14
 CONCURRENCY = 5
+REMINDER_MAX_ATTEMPTS = 5
 
 # (user_id, event_id, start) -> (consultado_en, segundos). Evita pegarle a
 # Maps en cada tick: se refresca mas seguido solo cerca de la hora de salida.
@@ -57,14 +58,26 @@ async def fire_due_reminders(now: datetime) -> int:
         )
         if doc is None:
             return fired
-        await deliver(
-            doc["user_id"],
-            "reminder",
-            doc.get("title") or "Recordatorio",
-            doc["message"],
-            f"reminder:{doc['_id']}",
-            {"reminder_id": str(doc["_id"])},
-        )
+        try:
+            await deliver(
+                doc["user_id"],
+                "reminder",
+                doc.get("title") or "Recordatorio",
+                doc["message"],
+                f"reminder:{doc['_id']}",
+                {"reminder_id": str(doc["_id"])},
+            )
+        except Exception:
+            # No se pierde ni aborta el tick: vuelve a pendiente para el siguiente
+            # minuto (deliver es idempotente por dedupe_key) hasta REMINDER_MAX_ATTEMPTS.
+            attempts = doc.get("attempts", 0) + 1
+            log.exception("recordatorio %s fallo (intento %d)", doc["_id"], attempts)
+            retry = {"status": "pending", "fire_at": now + timedelta(minutes=1)}
+            await reminders.update_one(
+                {"_id": doc["_id"]},
+                {"$set": retry if attempts < REMINDER_MAX_ATTEMPTS else {"status": "failed"}, "$inc": {"attempts": 1}},
+            )
+            continue
         fired += 1
 
 

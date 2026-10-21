@@ -12,8 +12,8 @@ TOOL_SPECS = [
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "window_start": {"type": "string", "description": "ISO datetime de inicio de la ventana"},
-                    "window_end": {"type": "string", "description": "ISO datetime de fin de la ventana"},
+                    "window_start": {"type": "string", "description": "ISO datetime con offset de inicio de la ventana"},
+                    "window_end": {"type": "string", "description": "ISO datetime con offset de fin de la ventana"},
                     "duration_minutes": {"type": "integer", "description": "Duracion minima del hueco en minutos"},
                 },
                 "required": ["window_start", "window_end", "duration_minutes"],
@@ -29,8 +29,8 @@ TOOL_SPECS = [
                 "type": "object",
                 "properties": {
                     "summary": {"type": "string"},
-                    "start": {"type": "string", "description": "ISO datetime de inicio"},
-                    "end": {"type": "string", "description": "ISO datetime de fin"},
+                    "start": {"type": "string", "description": "ISO datetime con offset de inicio"},
+                    "end": {"type": "string", "description": "ISO datetime con offset de fin"},
                     "description": {"type": "string"},
                 },
                 "required": ["summary", "start", "end"],
@@ -86,7 +86,7 @@ TOOL_SPECS = [
                 "properties": {
                     "origin": {"type": "string", "description": "Direccion o coordenadas lat,lng (usa la ubicacion actual del usuario si la conoces)"},
                     "destination": {"type": "string"},
-                    "event_start": {"type": "string", "description": "ISO datetime del evento destino"},
+                    "event_start": {"type": "string", "description": "ISO datetime con offset del evento destino"},
                 },
                 "required": ["origin", "destination", "event_start"],
             },

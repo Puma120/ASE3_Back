@@ -9,7 +9,7 @@ un registro, sin logica de analisis - eso vive en agent_service.
 Documento tipico:
 {
     "user_id": str(uuid),
-    "kind": "task_created" | "task_completed" | "task_postponed"
+    "kind": "task_created" | "task_completed" | "task_rescheduled"
             | "event_scheduled" | "email_summarized" | "device_command_sent",
     "payload": {...datos especificos de la tool...},
     "created_at": datetime,
@@ -22,7 +22,7 @@ from typing import Any, Literal
 ActivityKind = Literal[
     "task_created",
     "task_completed",
-    "task_postponed",
+    "task_rescheduled",
     "event_scheduled",
     "email_summarized",
     "device_command_sent",

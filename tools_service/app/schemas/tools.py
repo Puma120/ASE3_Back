@@ -2,15 +2,17 @@
 
 from datetime import datetime
 
-from pydantic import BaseModel, model_validator
+from pydantic import AwareDatetime, BaseModel, model_validator
 
 
 # --- Calendar ---
 
 
+# Fechas con zona horaria obligatoria: Calendar rechaza las que no la traen y el
+# servidor (UTC) las leeria con otra hora. 422 hace que el modelo reintente con offset.
 class FreeSlotsRequest(BaseModel):
-    window_start: datetime
-    window_end: datetime
+    window_start: AwareDatetime
+    window_end: AwareDatetime
     duration_minutes: int
 
 
@@ -21,8 +23,8 @@ class FreeSlot(BaseModel):
 
 class EventCreate(BaseModel):
     summary: str
-    start: datetime
-    end: datetime
+    start: AwareDatetime
+    end: AwareDatetime
     description: str = ""
 
 
@@ -50,8 +52,8 @@ class TaskSummary(BaseModel):
 class _Window(BaseModel):
     """Toda tarea va contra calendario: inicio y fin obligatorios."""
 
-    start: datetime
-    end: datetime
+    start: AwareDatetime
+    end: AwareDatetime
 
     @model_validator(mode="after")
     def _end_after_start(self):
@@ -81,7 +83,7 @@ class TaskReschedule(_Window):
 class TravelTimeRequest(BaseModel):
     origin: str
     destination: str
-    event_start: datetime
+    event_start: AwareDatetime
 
 
 class TravelTimeResponse(BaseModel):

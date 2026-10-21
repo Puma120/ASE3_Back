@@ -75,6 +75,24 @@ def test_rutas_publicas_de_auth_no_piden_token():
     assert c.post("/auth/login", json={}).status_code == 200
 
 
+def test_rutas_publicas_de_auth_se_limitan_por_ip(monkeypatch):
+    monkeypatch.setattr(router_mod, "PUBLIC_AUTH_LIMIT", 2)
+    c = _client(lambda r: httpx.Response(200, json={}))
+    ip = {"x-forwarded-for": "9.9.9.9, 1.1.1.1"}
+    estados = [c.post("/auth/login", headers=ip, json={}).status_code for _ in range(3)]
+    assert estados == [200, 200, 429]
+    # El tramo falseable (izquierda) no cuenta: lo que importa es el ultimo (el del proxy).
+    assert c.post("/auth/login", headers={"x-forwarded-for": "7.7.7.7, 1.1.1.1"}, json={}).status_code == 429
+    assert c.post("/auth/login", headers={"x-forwarded-for": "7.7.7.7, 2.2.2.2"}, json={}).status_code == 200
+
+
+def test_chat_tiene_tope_por_hora(monkeypatch):
+    monkeypatch.setattr(router_mod, "AGENT_HOURLY_LIMIT", 2)
+    c = _client(lambda r: httpx.Response(200, json={}))
+    estados = [c.post("/agent/chat", headers=_token("a"), json={}).status_code for _ in range(3)]
+    assert estados == [200, 200, 429]
+
+
 def test_produccion_rechaza_secreto_jwt_por_defecto_o_corto(monkeypatch):
     from app.core.config import Settings
 

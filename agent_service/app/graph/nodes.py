@@ -256,7 +256,7 @@ async def proactive_suggestion_text(user_id: str) -> str:
     since = datetime.now(timezone.utc) - timedelta(days=14)
     cursor = activity_logs.find({"user_id": user_id, "created_at": {"$gte": since}})
     kinds = Counter([doc["kind"] async for doc in cursor])
-    return SUGGESTION_TEXT if kinds.get("task_postponed", 0) >= 3 else ""
+    return SUGGESTION_TEXT if kinds.get("task_rescheduled", 0) >= 3 else ""
 
 
 async def generate_proactive_suggestion(state: AgentState) -> AgentState:

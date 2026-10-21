@@ -2,6 +2,7 @@
 agent_service via LLM, esta tool solo trae y registra el contenido crudo).
 """
 
+import asyncio
 import uuid
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -14,7 +15,7 @@ from app.models.activity_log import build_activity_log
 
 async def read_recent_emails(db: AsyncSession, user_id: uuid.UUID, max_results: int = 10) -> list[dict]:
     credentials = await get_user_credentials(db, user_id)
-    emails = gmail_client.read_recent_emails(credentials, max_results)
+    emails = await asyncio.to_thread(gmail_client.read_recent_emails, credentials, max_results)
     await activity_logs.insert_one(
         build_activity_log(
             str(user_id), "email_summarized", {"count": len(emails)}

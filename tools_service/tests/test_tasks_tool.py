@@ -191,3 +191,34 @@ async def test_complete_cierra_el_seguimiento(env, monkeypatch):
     await tasks_tool.complete_task(None, USER, "t1")
 
     assert scheduled.docs[0]["status"] == "done"
+
+
+async def test_overdue_un_error_de_google_no_tumba_las_demas(env, monkeypatch):
+    scheduled, google = env
+    await tasks_tool.create_task(None, USER, "Falla", "", *_window(-3))
+    await tasks_tool.create_task(None, USER, "Vencida", "", *_window(-3))
+    original = google.get_task
+
+    def get_task(c, task_id):
+        if task_id == "t1":
+            raise HttpError(type("R", (), {"status": 503, "reason": "unavailable"})(), b"")
+        return original(c, task_id)
+
+    monkeypatch.setattr(tasks_tool.tasks_client, "get_task", get_task)
+
+    assert [t["title"] for t in await tasks_tool.overdue_tasks(None, USER)] == ["Vencida"]
+    assert scheduled.docs[0]["status"] == "active"  # se reintenta en el siguiente tick
+
+
+def test_fechas_sin_zona_horaria_se_rechazan():
+    from pydantic import ValidationError
+
+    from app.schemas.tools import EventCreate, TaskCreate
+
+    with pytest.raises(ValidationError):
+        TaskCreate(title="x", start="2026-06-01T10:00:00", end="2026-06-01T11:00:00")
+    with pytest.raises(ValidationError):
+        EventCreate(summary="x", start="2026-06-01T10:00:00", end="2026-06-01T11:00:00")
+    ok = TaskCreate(title="x", start="2026-06-01T10:00:00-06:00", end="2026-06-01T11:00:00-06:00")
+    assert ok.start.utcoffset() is not None
+

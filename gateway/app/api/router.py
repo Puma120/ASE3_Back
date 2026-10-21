@@ -34,19 +34,42 @@ PROXY_TIMEOUT_SECONDS = 90.0
 RATE_WINDOW_SECONDS = 60.0
 RATE_LIMITS = {"agent": 30, "tools": 120, "proactive": 120, "auth": 120}
 
+# Tope de gasto del LLM por usuario y hora (30 por minuto sostenidos serian 1800/h).
+AGENT_HOURLY_LIMIT = 300
+HOUR_SECONDS = 3600.0
+
+# Rutas publicas de auth (login, registro, correo de verificacion): sin JWT no
+# hay usuario, se limita por IP contra fuerza bruta y envio masivo de correos.
+PUBLIC_AUTH_LIMIT = 20
+
+
+def _too_many(wait: int) -> HTTPException:
+    return HTTPException(
+        status_code=429,
+        detail="Demasiadas solicitudes, espera unos segundos",
+        headers={"Retry-After": str(wait)},
+    )
+
+
+def _client_ip(request: Request) -> str:
+    # Railway agrega la IP real al final de X-Forwarded-For; lo anterior lo
+    # manda el cliente y se puede falsear.
+    forwarded = request.headers.get("x-forwarded-for", "")
+    if forwarded:
+        return forwarded.split(",")[-1].strip()
+    return request.client.host if request.client else "unknown"
+
 
 def _authorize(request: Request, group: str) -> None:
     """Valida el JWT y aplica el limite por usuario; 429 con Retry-After si lo excede."""
     payload = validate_session(request)
-    wait = rate_limit.hit(
-        f"{group}:{payload.get('sub')}", RATE_LIMITS[group], RATE_WINDOW_SECONDS
-    )
-    if wait:
-        raise HTTPException(
-            status_code=429,
-            detail="Demasiadas solicitudes, espera unos segundos",
-            headers={"Retry-After": str(wait)},
-        )
+    user = payload.get("sub")
+    if wait := rate_limit.hit(f"{group}:{user}", RATE_LIMITS[group], RATE_WINDOW_SECONDS):
+        raise _too_many(wait)
+    if group == "agent" and (
+        wait := rate_limit.hit(f"agent-hour:{user}", AGENT_HOURLY_LIMIT, HOUR_SECONDS)
+    ):
+        raise _too_many(wait)
 
 
 async def _proxy(base_url: str, path: str, request: Request) -> Response:
@@ -90,7 +113,10 @@ async def _proxy(base_url: str, path: str, request: Request) -> Response:
 
 @router.api_route("/auth/{path:path}", methods=["GET", "POST", "PUT", "PATCH", "DELETE"])
 async def proxy_auth(path: str, request: Request) -> Response:
-    if path not in PUBLIC_AUTH_PATHS:
+    if path in PUBLIC_AUTH_PATHS:
+        if wait := rate_limit.hit(f"public:{_client_ip(request)}", PUBLIC_AUTH_LIMIT, RATE_WINDOW_SECONDS):
+            raise _too_many(wait)
+    else:
         _authorize(request, "auth")
     return await _proxy(settings.auth_service_url, f"auth/{path}", request)
 

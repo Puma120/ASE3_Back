@@ -44,7 +44,8 @@ WRITE_TOOLS = {
 }
 
 # Tools cuyo resultado contiene texto escrito por terceros.
-UNTRUSTED_TOOLS = {"read_recent_emails"}
+# list_events: titulo y lugar de invitaciones de desconocidos llegan al calendario.
+UNTRUSTED_TOOLS = {"read_recent_emails", "list_events"}
 
 _BASES = {
     "tools": lambda: settings.tools_service_url,

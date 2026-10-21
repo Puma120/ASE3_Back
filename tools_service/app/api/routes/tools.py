@@ -6,9 +6,9 @@ solo moveria el dispatch de FastAPI a codigo propio sin ganar nada.
 """
 
 import uuid
-from datetime import datetime
 
 from fastapi import APIRouter, Depends
+from pydantic import AwareDatetime
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.deps import get_current_user_id
@@ -57,8 +57,8 @@ async def free_slots(
 
 @router.get("/calendar/events")
 async def list_calendar_events(
-    window_start: datetime,
-    window_end: datetime,
+    window_start: AwareDatetime,
+    window_end: AwareDatetime,
     user_id: uuid.UUID = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db),
 ):

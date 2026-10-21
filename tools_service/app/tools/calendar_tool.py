@@ -4,6 +4,7 @@ Envuelve app/integrations/calendar_client.py con la escritura del
 activity_log correspondiente (Objetivo 4 del PDF).
 """
 
+import asyncio
 import uuid
 from datetime import datetime
 
@@ -23,7 +24,7 @@ async def find_free_slots(
     duration_minutes: int,
 ) -> list[tuple[datetime, datetime]]:
     credentials = await get_user_credentials(db, user_id)
-    return calendar_client.find_free_slots(credentials, window_start, window_end, duration_minutes)
+    return await asyncio.to_thread(calendar_client.find_free_slots, credentials, window_start, window_end, duration_minutes)
 
 
 async def create_event(
@@ -35,7 +36,7 @@ async def create_event(
     description: str = "",
 ) -> dict:
     credentials = await get_user_credentials(db, user_id)
-    event = calendar_client.create_event(credentials, summary, start, end, description)
+    event = await asyncio.to_thread(calendar_client.create_event, credentials, summary, start, end, description)
     await activity_logs.insert_one(
         build_activity_log(
             str(user_id),
@@ -50,4 +51,4 @@ async def list_events(
     db: AsyncSession, user_id: uuid.UUID, window_start: datetime, window_end: datetime
 ) -> list[dict]:
     credentials = await get_user_credentials(db, user_id)
-    return calendar_client.list_events(credentials, window_start, window_end)
+    return await asyncio.to_thread(calendar_client.list_events, credentials, window_start, window_end)
