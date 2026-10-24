@@ -60,3 +60,28 @@ def test_mensaje_de_chat_tiene_tope_de_largo():
         ChatMessageRequest(message="a" * 4001)
     with pytest.raises(ValidationError):
         ChatMessageRequest(message="")
+
+
+async def test_ubicacion_del_telefono_manda_sobre_la_guardada(monkeypatch):
+    llamadas = []
+
+    async def fetch_json(service, path, token):
+        llamadas.append(path)
+        if path.endswith("/location"):
+            return {"location": {"lat": 1.0, "lng": 2.0, "updated_at": "2026-01-01T00:00:00+00:00"}}
+        return None
+
+    monkeypatch.setattr(user_context, "fetch_json", fetch_json)
+    texto = await user_context.build_user_context("t", None, {"lat": 19.43, "lng": -99.13})
+    assert "19.43,-99.13" in texto
+    assert "1.0,2.0" not in texto
+    assert "/proactive/location" not in llamadas
+
+
+def test_chat_request_valida_rango_de_ubicacion():
+    import pytest
+    from pydantic import ValidationError
+
+    assert ChatMessageRequest(message="hola", lat=19.4, lng=-99.1).lat == 19.4
+    with pytest.raises(ValidationError):
+        ChatMessageRequest(message="hola", lat=120, lng=0)

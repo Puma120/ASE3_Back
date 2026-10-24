@@ -84,6 +84,7 @@ async def register_device(
                 "user_id": str(user_id),
                 "platform": body.platform,
                 "sound": body.sound,
+                "bubble": body.bubble,
                 "updated_at": _now(),
             }
         },

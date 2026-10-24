@@ -121,7 +121,7 @@ async def retrieve_context(state: AgentState) -> AgentState:
 
     context, user_context, summary, pending = await asyncio.gather(
         rag(),
-        build_user_context(session.bearer_token.get(), state.get("timezone")),
+        build_user_context(session.bearer_token.get(), state.get("timezone"), state.get("location")),
         optional(summary_store.get_summary(state["user_id"]), ""),
         optional(workflow.get_pending(state["user_id"]), []),
     )

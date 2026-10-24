@@ -50,6 +50,7 @@ async def deliver(
             body,
             {"kind": kind, "notification_id": str(result.inserted_id)},
             channel_id=fcm.CHANNEL_SOUND if device.get("sound") else fcm.CHANNEL_SILENT,
+            bubble=bool(device.get("bubble")),
         )
         if status == "invalid_token":
             await devices.delete_one({"_id": device["_id"]})

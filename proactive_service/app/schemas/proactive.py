@@ -7,6 +7,7 @@ class DeviceRegister(BaseModel):
     token: str = Field(min_length=10, max_length=4096)
     platform: str = Field(default="android", pattern="^(android|ios|web)$")
     sound: bool = False  # canal con sonido o silencioso (ver push/fcm.py)
+    bubble: bool = False  # el telefono muestra los avisos como burbuja de chat (Android 11+)
 
 
 class DeviceUnregister(BaseModel):

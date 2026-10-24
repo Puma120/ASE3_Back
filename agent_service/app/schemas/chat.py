@@ -11,6 +11,10 @@ class ChatMessageRequest(BaseModel):
     message: str = Field(min_length=1, max_length=4000)
     # Zona IANA del dispositivo (ej. America/Mexico_City); manda sobre la de Ajustes.
     timezone: str | None = None
+    # Posicion GPS del telefono en este mensaje (solo si el usuario activo
+    # "Usar mi ubicacion en el chat"); manda sobre la ultima guardada.
+    lat: float | None = Field(default=None, ge=-90, le=90)
+    lng: float | None = Field(default=None, ge=-180, le=180)
 
 
 class DeviceCommand(BaseModel):

@@ -11,11 +11,14 @@ from app.clients.tools_client import fetch_json
 _DAYS = ["lunes", "martes", "miercoles", "jueves", "viernes", "sabado", "domingo"]
 
 
-async def build_user_context(bearer_token: str, device_tz: str | None = None) -> str:
+async def build_user_context(
+    bearer_token: str, device_tz: str | None = None, device_location: dict | None = None
+) -> str:
     profile, settings, location = await asyncio.gather(
         fetch_json("auth", "/auth/users/me", bearer_token),
         fetch_json("auth", "/auth/users/me/settings", bearer_token),
-        fetch_json("proactive", "/proactive/location", bearer_token),
+        # Con GPS del telefono en este turno no hace falta la ultima guardada.
+        asyncio.sleep(0) if device_location else fetch_json("proactive", "/proactive/location", bearer_token),
     )
     settings = settings or {}
     tz = _zone(device_tz) or _zone(settings.get("timezone")) or ZoneInfo("UTC")
@@ -34,7 +37,13 @@ async def build_user_context(bearer_token: str, device_tz: str | None = None) ->
             "No agendes cosas proactivas fuera de ese horario."
         )
     loc = (location or {}).get("location")
-    if loc:
+    if device_location:
+        lines.append(
+            f"Ubicacion actual del usuario (GPS del telefono, ahora mismo; lat,lng): "
+            f"{device_location['lat']},{device_location['lng']}. Usala como origin para traslados y como "
+            "referencia al buscar lugares cercanos; no se la pidas al usuario."
+        )
+    elif loc:
         lines.append(
             f"Ultima ubicacion conocida (lat,lng): {loc['lat']},{loc['lng']} (hace {_age(loc['updated_at'])}). "
             "Usala como origin para calcular traslados."
