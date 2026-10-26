@@ -1,6 +1,8 @@
 """Esquemas Pydantic (request/response) del Tools Service, uno por tool."""
 
-from datetime import datetime
+from datetime import date, datetime
+from typing import Literal
+from zoneinfo import ZoneInfo
 
 from pydantic import AwareDatetime, BaseModel, model_validator
 
@@ -26,6 +28,26 @@ class EventCreate(BaseModel):
     start: AwareDatetime
     end: AwareDatetime
     description: str = ""
+    # Evento recurrente (rutina): se repite cada semana en `weekdays` (MO..SU;
+    # vacio = el dia de `start`) hasta `until` inclusive. Pedir uno implica el otro,
+    # y Calendar exige la zona IANA para que "a las 8" siga siendo las 8 tras un cambio de horario.
+    weekdays: list[Literal["MO", "TU", "WE", "TH", "FR", "SA", "SU"]] | None = None
+    until: date | None = None
+    timezone: str | None = None
+
+    @model_validator(mode="after")
+    def _recurrence(self):
+        if not (self.weekdays or self.until):
+            return self
+        if not self.until:
+            raise ValueError("Un evento recurrente necesita `until` (fecha en que deja de repetirse)")
+        if self.until < self.start.date():
+            raise ValueError("`until` no puede ser anterior al inicio del evento")
+        try:
+            ZoneInfo(self.timezone or "")
+        except Exception:
+            raise ValueError("Un evento recurrente necesita `timezone` IANA valida (ej. America/Mexico_City)")
+        return self
 
 
 class EventSummary(BaseModel):

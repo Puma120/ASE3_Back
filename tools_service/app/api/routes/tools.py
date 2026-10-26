@@ -85,7 +85,7 @@ async def create_calendar_event(
     db: AsyncSession = Depends(get_db),
 ):
     return await calendar_tool.create_event(
-        db, user_id, body.summary, body.start, body.end, body.description
+        db, user_id, body.summary, body.start, body.end, body.description, body.weekdays, body.until, body.timezone
     )
 
 

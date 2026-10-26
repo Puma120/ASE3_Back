@@ -42,6 +42,8 @@ WRITE_TOOLS = {
     "set_alarm",
     "set_focus_mode",
     "create_reminder",
+    "save_routine_fact",
+    "finish_onboarding",
 }
 
 # Tools cuyo resultado contiene texto escrito por terceros.

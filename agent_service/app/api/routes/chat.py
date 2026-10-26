@@ -58,6 +58,7 @@ async def chat(
             "messages": messages,
             "params": params.model_dump(),
             "timezone": body.timezone or "",
+            "onboarding": body.onboarding,
             "location": {"lat": body.lat, "lng": body.lng} if body.lat is not None and body.lng is not None else {},
         }
     )
@@ -70,6 +71,7 @@ async def chat(
     return ChatMessageResponse(
         response=result["response"],
         device_commands=[DeviceCommand(**c) for c in result.get("device_commands", [])],
+        onboarding_done=result.get("onboarding_done", False),
     )
 
 

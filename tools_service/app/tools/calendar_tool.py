@@ -6,7 +6,7 @@ activity_log correspondiente (Objetivo 4 del PDF).
 
 import asyncio
 import uuid
-from datetime import datetime
+from datetime import date, datetime
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -34,9 +34,14 @@ async def create_event(
     start: datetime,
     end: datetime,
     description: str = "",
+    weekdays: list[str] | None = None,
+    until: date | None = None,
+    tz_name: str | None = None,
 ) -> dict:
     credentials = await get_user_credentials(db, user_id)
-    event = await asyncio.to_thread(calendar_client.create_event, credentials, summary, start, end, description)
+    event = await asyncio.to_thread(
+        calendar_client.create_event, credentials, summary, start, end, description, weekdays, until, tz_name
+    )
     await activity_logs.insert_one(
         build_activity_log(
             str(user_id),

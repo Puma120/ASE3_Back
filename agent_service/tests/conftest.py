@@ -16,7 +16,7 @@ from qdrant_client import QdrantClient  # noqa: E402
 from app.core.config import settings  # noqa: E402
 from app.graph import nodes  # noqa: E402
 from app.memory import params as params_store  # noqa: E402
-from app.memory import short_term, summary, vector_store, workflow  # noqa: E402
+from app.memory import profile, short_term, summary, vector_store, workflow  # noqa: E402
 from tests.support import local_models  # noqa: E402
 from tests.support.entorno import CONTEXTO_USUARIO_FIJO, verificar_entorno  # noqa: E402
 from tests.support.fake_embeddings import HashingEmbeddings, SinEmbeddings  # noqa: E402
@@ -38,6 +38,7 @@ def mongo(monkeypatch):
     monkeypatch.setattr(summary, "chat_history", db["chat_history"])
     monkeypatch.setattr(summary, "chat_summaries", db["chat_summaries"])
     monkeypatch.setattr(workflow, "agent_state", db["agent_state"])
+    monkeypatch.setattr(profile, "user_profile", db["user_profile"])
     return db
 
 

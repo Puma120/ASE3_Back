@@ -9,7 +9,7 @@ RUN pip install --no-cache-dir \
     "fastapi>=0.115" "uvicorn[standard]>=0.32" "pydantic-settings>=2.6" \
     "sqlalchemy[asyncio]>=2.0" "asyncpg>=0.30" "motor>=3.6" \
     "google-api-python-client>=2.150" "google-auth-oauthlib>=1.2" \
-    "httpx>=0.27" "pyjwt>=2.9"
+    "httpx>=0.27" "pyjwt>=2.9" "tzdata>=2024.1"
 
 COPY app ./app
 

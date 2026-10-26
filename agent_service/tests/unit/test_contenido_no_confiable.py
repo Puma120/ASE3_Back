@@ -2,6 +2,7 @@
 tools de escritura quedan bloqueadas en ese turno."""
 
 from app.clients.tools_client import TOOL_ROUTES, UNTRUSTED_TOOLS, WRITE_TOOLS
+from app.memory.profile import LOCAL_TOOLS
 
 
 def test_correos_e_invitaciones_son_no_confiables():
@@ -10,4 +11,4 @@ def test_correos_e_invitaciones_son_no_confiables():
 
 def test_las_listas_solo_nombran_tools_reales():
     assert UNTRUSTED_TOOLS <= set(TOOL_ROUTES)
-    assert WRITE_TOOLS <= set(TOOL_ROUTES)
+    assert WRITE_TOOLS <= set(TOOL_ROUTES) | LOCAL_TOOLS

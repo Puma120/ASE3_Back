@@ -24,14 +24,25 @@ TOOL_SPECS = [
         "type": "function",
         "function": {
             "name": "create_event",
-            "description": "Crea un evento en el calendario del usuario (agendado proactivo).",
+            "description": (
+                "Crea un evento en el calendario del usuario (agendado proactivo). Para un horario que "
+                "se repite cada semana (clases, trabajo, gimnasio) manda weekdays + until + timezone: "
+                "crea UN evento recurrente, no uno por dia."
+            ),
             "parameters": {
                 "type": "object",
                 "properties": {
                     "summary": {"type": "string"},
-                    "start": {"type": "string", "description": "ISO datetime con offset de inicio"},
-                    "end": {"type": "string", "description": "ISO datetime con offset de fin"},
+                    "start": {"type": "string", "description": "ISO datetime con offset de inicio (de la primera ocurrencia)"},
+                    "end": {"type": "string", "description": "ISO datetime con offset de fin (misma fecha que start)"},
                     "description": {"type": "string"},
+                    "weekdays": {
+                        "type": "array",
+                        "items": {"type": "string", "enum": ["MO", "TU", "WE", "TH", "FR", "SA", "SU"]},
+                        "description": "Dias de la semana en que se repite (solo eventos recurrentes)",
+                    },
+                    "until": {"type": "string", "description": "Ultimo dia en que se repite, YYYY-MM-DD (obligatorio si es recurrente)"},
+                    "timezone": {"type": "string", "description": "Zona IANA del usuario (obligatorio si es recurrente)"},
                 },
                 "required": ["summary", "start", "end"],
             },
@@ -225,6 +236,34 @@ TOOL_SPECS = [
                 },
                 "required": ["message", "fire_at"],
             },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "save_routine_fact",
+            "description": (
+                "Guarda en tu memoria un dato fijo de la rutina del usuario (hora de despertar, horario de "
+                "clases o trabajo, horas ocupadas, habitos) para recordarlo todo el tiempo que el diga. "
+                "Mismo key = reemplaza el dato anterior."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "key": {"type": "string", "description": "Nombre corto y estable, p. ej. despertar_entre_semana, clases, gimnasio"},
+                    "text": {"type": "string", "description": "El dato completo con dias y horas, p. ej. 'Lunes a viernes 8:00-14:00 clases'"},
+                    "until": {"type": "string", "description": "YYYY-MM-DD hasta cuando es valido el dato; omitelo si no caduca"},
+                },
+                "required": ["key", "text"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "finish_onboarding",
+            "description": "Cierra la configuracion inicial de la rutina. Solo al terminar todas las preguntas y haber resumido lo guardado.",
+            "parameters": {"type": "object", "properties": {}, "required": []},
         },
     },
     {

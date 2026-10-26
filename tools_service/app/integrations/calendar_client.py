@@ -5,7 +5,8 @@ espacios libres del calendario del usuario (Objetivo 4 del PDF: sugerencias
 proactivas de organizacion).
 """
 
-from datetime import datetime, timedelta
+from datetime import date, datetime, time, timedelta, timezone
+from zoneinfo import ZoneInfo
 
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
@@ -45,12 +46,34 @@ def find_free_slots(
     return free_slots
 
 
+_WEEKDAYS = ["MO", "TU", "WE", "TH", "FR", "SA", "SU"]
+
+
+def build_recurring(
+    start: datetime, end: datetime, weekdays: list[str], until: date, tz_name: str
+) -> tuple[datetime, datetime, list[str]]:
+    """Primera ocurrencia (en la zona del usuario) y RRULE semanal hasta `until`.
+    Calendar cuenta DTSTART aunque no caiga en BYDAY, asi que se adelanta a un dia que si."""
+    tz = ZoneInfo(tz_name)
+    local_start, local_end = start.astimezone(tz), end.astimezone(tz)
+    days = weekdays or [_WEEKDAYS[local_start.weekday()]]
+    shift = next(n for n in range(7) if _WEEKDAYS[(local_start.weekday() + n) % 7] in days)
+    local_start, local_end = local_start + timedelta(days=shift), local_end + timedelta(days=shift)
+    # UNTIL de un evento con hora va en UTC: fin del ultimo dia, en la zona del usuario.
+    last_instant = datetime.combine(until, time(23, 59, 59), tzinfo=tz).astimezone(timezone.utc)
+    rule = f"RRULE:FREQ=WEEKLY;BYDAY={','.join(days)};UNTIL={last_instant:%Y%m%dT%H%M%SZ}"
+    return local_start, local_end, [rule]
+
+
 def create_event(
     credentials: Credentials,
     summary: str,
     start: datetime,
     end: datetime,
     description: str = "",
+    weekdays: list[str] | None = None,
+    until: date | None = None,
+    tz_name: str | None = None,
 ) -> dict:
     service = _service(credentials)
     event = {
@@ -59,6 +82,10 @@ def create_event(
         "start": {"dateTime": start.isoformat()},
         "end": {"dateTime": end.isoformat()},
     }
+    if until:
+        start, end, event["recurrence"] = build_recurring(start, end, weekdays or [], until, tz_name)
+        event["start"] = {"dateTime": start.isoformat(), "timeZone": tz_name}
+        event["end"] = {"dateTime": end.isoformat(), "timeZone": tz_name}
     return service.events().insert(calendarId="primary", body=event).execute()
 
 

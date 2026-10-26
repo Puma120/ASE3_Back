@@ -18,6 +18,9 @@ class AgentState(TypedDict, total=False):
     pending_actions: str  # estado operativo: acciones bloqueadas pendientes de confirmar
     timezone: str  # zona IANA del dispositivo en este turno (opcional)
     location: dict[str, float]  # {"lat","lng"} del GPS del telefono en este turno (opcional)
+    onboarding: bool  # configuracion inicial de la rutina: el agente conduce la entrevista
+    onboarding_done: bool  # el agente la cerro en este turno (finish_onboarding)
+    routine: str  # datos fijos de rutina vigentes (memory/profile.py), formateados
     user_context: str  # perfil, fecha/hora local, ubicacion; se inyecta en el prompt
     pending_calls: list[dict[str, Any]]  # tool_calls de la ronda actual: {"id","name","arguments"}
     tool_exchange: list[Any]  # AIMessage/ToolMessage ya intercambiados en este turno

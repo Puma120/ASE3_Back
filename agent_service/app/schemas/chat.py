@@ -15,6 +15,8 @@ class ChatMessageRequest(BaseModel):
     # "Usar mi ubicacion en el chat"); manda sobre la ultima guardada.
     lat: float | None = Field(default=None, ge=-90, le=90)
     lng: float | None = Field(default=None, ge=-180, le=180)
+    # El cliente esta en la configuracion inicial: el agente conduce la entrevista de rutina.
+    onboarding: bool = False
 
 
 class DeviceCommand(BaseModel):
@@ -27,6 +29,12 @@ class DeviceCommand(BaseModel):
 class ChatMessageResponse(BaseModel):
     response: str
     device_commands: list[DeviceCommand] = []
+    # El agente cerro la configuracion inicial en este turno.
+    onboarding_done: bool = False
+
+
+class OnboardingStatus(BaseModel):
+    status: Literal["pending", "done", "skipped"]
 
 
 class HistoryMessage(BaseModel):

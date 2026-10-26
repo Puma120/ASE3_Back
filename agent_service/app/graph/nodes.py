@@ -24,6 +24,7 @@ from app.db.mongo import activity_logs
 from app.graph.state import AgentState
 from app.graph.tool_specs import TOOL_SPECS
 from app.graph.user_context import build_user_context
+from app.memory import profile
 from app.memory import summary as summary_store
 from app.memory import vector_store
 from app.memory import workflow
@@ -75,6 +76,28 @@ SYSTEM_PROMPT = (
     "- Termina con el siguiente paso concreto o una sola pregunta."
 )
 
+ONBOARDING_PROMPT = (
+    "MODO CONFIGURACION INICIAL. Conduces una entrevista corta para conocer la rutina del usuario y "
+    "recordarla. Reglas:\n"
+    "- UNA pregunta por mensaje, breve. Sin listas de preguntas.\n"
+    "- Orden: (1) por cuanto tiempo guardar esta rutina (1 mes, un semestre, 1 ano, lo que quiera; "
+    "con eso calculas la fecha `until` = hoy + ese plazo); (2) hora de despertar entre semana y en fin "
+    "de semana; (3) dias y horario de clases o trabajo (de que hora a que hora; uno por uno si son varios); "
+    "(4) otras horas ocupadas fijas (gimnasio, traslados, comidas, cuidar a alguien); (5) hora de dormir; "
+    "(6) algo mas que deba recordar (medicinas, habitos). Si no aplica algo, pasa a lo siguiente.\n"
+    "- Tras cada respuesta, guardala YA con save_routine_fact (key estable, texto con dias y horas, "
+    "until del plazo elegido).\n"
+    "- Clases, trabajo y demas horas ocupadas ademas se agendan en el calendario con UN create_event "
+    "recurrente por bloque (weekdays, until, timezone del usuario, start/end de la primera ocurrencia, "
+    "titulo claro como 'Clases' o 'Gimnasio'). Solo cuando tengas dias, hora de inicio y hora de fin; "
+    "nunca inventes horas. La hora de despertar y dormir solo se guardan, no se agendan.\n"
+    "- Si create_event falla (por ejemplo Google no esta conectado), conserva lo guardado con "
+    "save_routine_fact, dile en una frase que conecte Google en Ajustes para agendarlo y sigue.\n"
+    "- Si el usuario no sabe una hora exacta, acepta un aproximado y dilo en el dato guardado.\n"
+    "- Al terminar: resume en una lista corta lo guardado y agendado, llama a finish_onboarding y "
+    "despidete en una frase. No llames a finish_onboarding antes de resumir."
+)
+
 _llms: dict[tuple[float, bool], Any] = {}
 
 
@@ -119,11 +142,12 @@ async def retrieve_context(state: AgentState) -> AgentState:
             log.exception("Memoria no disponible")
             return default
 
-    context, user_context, summary, pending = await asyncio.gather(
+    context, user_context, summary, pending, facts = await asyncio.gather(
         rag(),
         build_user_context(session.bearer_token.get(), state.get("timezone"), state.get("location")),
         optional(summary_store.get_summary(state["user_id"]), ""),
         optional(workflow.get_pending(state["user_id"]), []),
+        optional(profile.get_facts(state["user_id"]), {}),
     )
     return {
         **state,
@@ -131,6 +155,7 @@ async def retrieve_context(state: AgentState) -> AgentState:
         "user_context": user_context,
         "summary": summary,
         "pending_actions": workflow.format_pending(pending),
+        "routine": profile.format_facts(facts),
         "rounds": 0,
     }
 
@@ -139,6 +164,10 @@ def _to_langchain_messages(state: AgentState) -> list:
     messages = [SystemMessage(content=SYSTEM_PROMPT)]
     if state.get("user_context"):
         messages.append(SystemMessage(content=state["user_context"]))
+    if state.get("routine"):
+        messages.append(SystemMessage(content=state["routine"]))
+    if state.get("onboarding"):
+        messages.append(SystemMessage(content=ONBOARDING_PROMPT))
     if state.get("summary"):
         messages.append(SystemMessage(content=f"Resumen de la conversacion anterior con el usuario:\n{state['summary']}"))
     if state.get("pending_actions"):
@@ -221,6 +250,8 @@ async def call_tool(state: AgentState) -> AgentState:
                 "error": "Accion bloqueada: en este turno se leyeron correos u otro contenido "
                 "externo. Pidele al usuario que lo confirme en un mensaje nuevo."
             }
+        if call["name"] in profile.LOCAL_TOOLS:
+            return await profile.run_tool(call["name"], call["arguments"], state["user_id"])
         return await invoke_tool(call["name"], call["arguments"], session.bearer_token.get())
 
     results = await asyncio.gather(*(run(c) for c in calls))
@@ -240,8 +271,10 @@ async def call_tool(state: AgentState) -> AgentState:
         if isinstance(result, dict) and "command" in result and "error" not in result:
             commands.append({"command": result["command"], "payload": result.get("payload", {})})
 
+    finished = any(c["name"] == "finish_onboarding" and "error" not in r for c, r in zip(calls, results))
     return {
         **state,
+        "onboarding_done": state.get("onboarding_done", False) or finished,
         "tool_exchange": exchange,
         "device_commands": commands,
         "untrusted_seen": untrusted,
