@@ -62,5 +62,6 @@ async def deliver(
         push = "no_device"
     else:
         push = statuses[0]
+    log.info("push %s user=%s kind=%s devices=%d", push, user_id, kind, len(statuses))
     await notifications.update_one({"_id": result.inserted_id}, {"$set": {"push": push}})
     return True
