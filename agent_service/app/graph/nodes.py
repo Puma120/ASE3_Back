@@ -51,6 +51,8 @@ SYSTEM_PROMPT = (
     "pidio. Luego, en la misma ronda, un create_reminder al inicio para que le suene. "
     "Nunca digas que una hora ya paso sin compararla con la hora actual del usuario; si de verdad "
     "ya paso, ofrece manana a esa hora.\n"
+    "- Recordatorios relativos ('en 5 minutos', 'en una hora'): create_reminder con in_minutes, "
+    "nunca calcules tu el fire_at; confirma diciendo 'en N minutos'.\n"
     "- Si una tarea llega a su fin sin completarse, la app avisa al usuario y le pregunta si la "
     "reagenda. Cuando te responda (o pida mover una tarea): list_tasks para ubicarla, "
     "find_free_slots para un hueco nuevo y reschedule_task. Si dice que ya la hizo, complete_task.\n"

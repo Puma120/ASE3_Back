@@ -6,6 +6,8 @@ que el servicio destino identifique al usuario igual que si lo llamara el
 gateway directamente.
 """
 
+from datetime import datetime, timedelta, timezone
+
 import httpx
 
 from app.core.config import settings
@@ -61,6 +63,10 @@ async def call_tool(tool_name: str, payload: dict, bearer_token: str) -> dict:
         return {"error": f"Tool desconocida: {tool_name}"}
     service, method, path = TOOL_ROUTES[tool_name]
     payload = dict(payload or {})
+    if tool_name == "create_reminder" and "in_minutes" in payload:
+        error = _resolve_in_minutes(payload)
+        if error:
+            return {"error": error}
     try:
         path = path.format(**{k: payload.pop(k) for k in _placeholders(path)})
     except KeyError as exc:
@@ -86,6 +92,20 @@ async def call_tool(tool_name: str, payload: dict, bearer_token: str) -> dict:
             return data if isinstance(data, dict) else {"items": data}
         except Exception as exc:
             return {"error": f"No se pudo conectar con el servicio de herramientas: {str(exc)}"}
+
+
+def _resolve_in_minutes(payload: dict) -> str | None:
+    """"En 5 minutos" -> fire_at con el reloj del servidor. El LLM falla al
+    sumar minutos a una hora con offset (redondea a la hora en punto), asi
+    que para tiempos relativos solo da los minutos. Devuelve el error, si hay."""
+    try:
+        minutes = float(payload.pop("in_minutes"))
+    except (TypeError, ValueError):
+        return "in_minutes debe ser un numero de minutos"
+    if minutes <= 0:
+        return "in_minutes debe ser mayor que 0"
+    payload["fire_at"] = (datetime.now(timezone.utc) + timedelta(minutes=minutes)).isoformat()
+    return None
 
 
 def _placeholders(path: str) -> list[str]:

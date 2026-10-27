@@ -231,10 +231,17 @@ TOOL_SPECS = [
                 "type": "object",
                 "properties": {
                     "message": {"type": "string", "description": "Texto breve y accionable de la notificacion"},
-                    "fire_at": {"type": "string", "description": "ISO datetime, con zona horaria, en que debe sonar"},
+                    "fire_at": {
+                        "type": "string",
+                        "description": "ISO datetime, con zona horaria, en que debe sonar. Solo para horas concretas ('a las 6').",
+                    },
+                    "in_minutes": {
+                        "type": "number",
+                        "description": "Minutos desde ahora para tiempos relativos ('en 5 minutos', 'en media hora' = 30). Usalo en vez de fire_at; no calcules la hora tu.",
+                    },
                     "title": {"type": "string"},
                 },
-                "required": ["message", "fire_at"],
+                "required": ["message"],
             },
         },
     },
