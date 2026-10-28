@@ -10,6 +10,9 @@ from app.memory import profile
 from tests.support.historial import USUARIO_A, USUARIO_B
 
 
+HORARIO = {"wake_weekday": "6:30", "sleep_weekday": "23:00", "wake_weekend": "09:00", "sleep_weekend": "01:00"}
+
+
 def _estado(**extra):
     return {"user_id": USUARIO_A, "messages": [{"role": "user", "content": "hola"}], **extra}
 
@@ -72,6 +75,7 @@ async def test_las_tools_de_perfil_no_salen_al_servicio_de_tools(externos_falsos
     estado = _estado(
         pending_calls=[
             llamada("save_routine_fact", {"key": "gimnasio", "text": "Martes y jueves 18:00-19:00"}),
+            llamada("save_sleep_schedule", HORARIO),
             llamada("finish_onboarding", {}),
         ]
     )
@@ -122,3 +126,60 @@ async def test_chat_pasa_el_modo_y_devuelve_si_se_cerro(client, auth_headers, mo
 
     assert r.json()["onboarding_done"] is True
     assert recibido["onboarding"] is True
+
+
+async def test_horario_de_vigilia_se_guarda_normalizado_y_se_mezcla():
+    r = await profile.save_schedule(USUARIO_A, {"wake_weekday": "6:30", "sleep_weekday": "23:00"}, "America/Mexico_City")
+    assert r == {"saved": {"wake_weekday": "06:30", "sleep_weekday": "23:00"}}
+
+    await profile.save_schedule(USUARIO_A, {"wake_weekend": "09:00"}, None)
+
+    doc = await profile.user_profile.find_one({"_id": str(USUARIO_A)})
+    assert doc["schedule"] == {
+        "wake_weekday": "06:30",
+        "sleep_weekday": "23:00",
+        "wake_weekend": "09:00",
+        "timezone": "America/Mexico_City",
+    }
+    assert await profile.missing_schedule(USUARIO_A) == ["sleep_weekend"]
+
+
+async def test_horario_de_vigilia_rechaza_horas_invalidas_y_vacio():
+    assert "error" in await profile.save_schedule(USUARIO_A, {"wake_weekday": "25:00"}, None)
+    assert "error" in await profile.save_schedule(USUARIO_A, {"sleep_weekday": "tarde"}, None)
+    assert "error" in await profile.save_schedule(USUARIO_A, {}, None)
+    assert await profile.missing_schedule(USUARIO_A) == list(profile.SCHEDULE_KEYS)
+
+
+async def test_no_se_cierra_la_platica_sin_las_horas_de_despertar_y_dormir():
+    r = await profile.run_tool("finish_onboarding", {}, USUARIO_A)
+
+    assert "save_sleep_schedule" in r["error"]
+    assert await profile.get_onboarding(USUARIO_A) == profile.PENDING
+
+    await profile.save_schedule(USUARIO_A, HORARIO, None)
+    assert await profile.run_tool("finish_onboarding", {}, USUARIO_A) == {"ok": True}
+
+
+async def test_la_zona_horaria_del_estado_llega_al_horario_y_a_los_huecos(externos_falsos):
+    llamada = lambda nombre, args: {"id": nombre, "name": nombre, "arguments": args}  # noqa: E731
+    estado = _estado(
+        timezone="America/Mexico_City",
+        pending_calls=[
+            llamada("save_sleep_schedule", {"wake_weekday": "07:00"}),
+            llamada("find_free_slots", {"window_start": "a", "window_end": "b", "duration_minutes": 25}),
+        ],
+    )
+
+    await nodes.call_tool(estado)
+
+    doc = await profile.user_profile.find_one({"_id": str(USUARIO_A)})
+    assert doc["schedule"]["timezone"] == "America/Mexico_City"
+    assert externos_falsos == [
+        ("find_free_slots", {"window_start": "a", "window_end": "b", "duration_minutes": 25, "timezone": "America/Mexico_City"})
+    ]
+
+
+def test_la_platica_inicial_cubre_todos_los_bloques():
+    for tema in ("fin de semana", "pasatiempos", "ejercicio", "fecha en que termina", "save_sleep_schedule"):
+        assert tema in nodes.ONBOARDING_PROMPT

@@ -73,7 +73,7 @@ class _LlmFalso:
 
 async def test_chat_de_punta_a_punta_pasa_el_token_a_la_tool(client, auth_headers, monkeypatch):
     llm = _LlmFalso()
-    monkeypatch.setattr(nodes, "_get_llm", lambda temperature, with_tools=True: llm)
+    monkeypatch.setattr(nodes, "_get_llm", lambda temperature, with_tools=True, client="": llm)
     vistos: list[str] = []
 
     async def tool_que_registra(tool_name: str, payload: dict, bearer_token: str) -> dict:

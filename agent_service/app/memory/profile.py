@@ -19,7 +19,11 @@ MAX_TEXT = 300
 PENDING, DONE, SKIPPED = "pending", "done", "skipped"
 
 # Tools que no salen a otro servicio: leen/escriben el perfil del propio agente.
-LOCAL_TOOLS = {"save_routine_fact", "finish_onboarding"}
+LOCAL_TOOLS = {"save_routine_fact", "save_sleep_schedule", "finish_onboarding"}
+
+# Horas de vigilia: tools_service las lee de `user_profile.schedule` para no ofrecer huecos de madrugada.
+SCHEDULE_KEYS = ("wake_weekday", "sleep_weekday", "wake_weekend", "sleep_weekend")
+_HM = re.compile(r"^([01]?\d|2[0-3]):([0-5]\d)$")
 
 
 def _key(raw: str) -> str:
@@ -46,6 +50,32 @@ async def save_fact(user_id: UUID, key: str, text: str, until: str | None = None
         upsert=True,
     )
     return {"saved": key, "until": until or None}
+
+
+async def save_schedule(user_id: UUID, values: dict, tz_name: str | None) -> dict:
+    """Guarda (mezclando con lo previo) a que hora despierta y duerme el usuario."""
+    clean = {}
+    for key in SCHEDULE_KEYS:
+        raw = values.get(key)
+        if raw in (None, ""):
+            continue
+        m = _HM.match(str(raw).strip())
+        if not m:
+            return {"error": f"{key} debe ser una hora HH:MM de 24 h"}
+        clean[key] = f"{int(m[1]):02d}:{m[2]}"
+    if not clean:
+        return {"error": "Indica al menos una hora (wake_weekday, sleep_weekday, wake_weekend, sleep_weekend)"}
+    update = {f"schedule.{k}": v for k, v in clean.items()}
+    if tz_name:
+        update["schedule.timezone"] = tz_name
+    await user_profile.update_one({"_id": str(user_id)}, {"$set": update}, upsert=True)
+    return {"saved": clean}
+
+
+async def missing_schedule(user_id: UUID) -> list[str]:
+    doc = await user_profile.find_one({"_id": str(user_id)}) or {}
+    schedule = doc.get("schedule", {})
+    return [k for k in SCHEDULE_KEYS if k not in schedule]
 
 
 async def get_facts(user_id: UUID) -> dict[str, dict]:
@@ -77,10 +107,15 @@ async def set_onboarding(user_id: UUID, status: str) -> None:
     await user_profile.update_one({"_id": str(user_id)}, {"$set": {"onboarding": status}}, upsert=True)
 
 
-async def run_tool(name: str, arguments: dict, user_id: UUID) -> dict:
+async def run_tool(name: str, arguments: dict, user_id: UUID, tz_name: str | None = None) -> dict:
+    if name == "save_sleep_schedule":
+        return await save_schedule(user_id, arguments, tz_name)
     if name == "save_routine_fact":
         return await save_fact(user_id, arguments.get("key", ""), arguments.get("text", ""), arguments.get("until"))
     if name == "finish_onboarding":
+        missing = await missing_schedule(user_id)
+        if missing:
+            return {"error": "Aun falta guardar con save_sleep_schedule: " + ", ".join(missing)}
         await set_onboarding(user_id, DONE)
         return {"ok": True}
     return {"error": f"Tool desconocida: {name}"}

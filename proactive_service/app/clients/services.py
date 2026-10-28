@@ -65,6 +65,11 @@ async def travel_time(user_id: str, origin: str, destination: str, event_start: 
         return None
 
 
+async def focus_now(user_id: str) -> list[dict]:
+    """Tareas de enfoque (estudiar, meditar...) cuya ventana esta en curso."""
+    return await _get(settings.tools_service_url, "/tools/tasks/focus-now", user_id)
+
+
 async def overdue_tasks(user_id: str) -> list[dict]:
     """Tareas con fin vencido que siguen pendientes."""
     return await _get(settings.tools_service_url, "/tools/tasks/overdue", user_id)

@@ -6,7 +6,7 @@ activity_log correspondiente (Objetivo 4 del PDF).
 
 import asyncio
 import uuid
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -14,6 +14,7 @@ from app.db.mongo import activity_logs
 from app.integrations import calendar_client
 from app.integrations.google_auth import get_user_credentials
 from app.models.activity_log import build_activity_log
+from app.tools import waking_hours
 
 
 async def find_free_slots(
@@ -22,9 +23,17 @@ async def find_free_slots(
     window_start: datetime,
     window_end: datetime,
     duration_minutes: int,
+    tz_name: str | None = None,
 ) -> list[tuple[datetime, datetime]]:
+    window_start = waking_hours.earliest_start(datetime.now(window_start.tzinfo), window_start)
+    if window_end - window_start < timedelta(minutes=duration_minutes):
+        return []
     credentials = await get_user_credentials(db, user_id)
-    return await asyncio.to_thread(calendar_client.find_free_slots, credentials, window_start, window_end, duration_minutes)
+    slots = await asyncio.to_thread(
+        calendar_client.find_free_slots, credentials, window_start, window_end, duration_minutes
+    )
+    schedule = await waking_hours.load_schedule(user_id)
+    return waking_hours.clip_to_waking_hours(slots, schedule, tz_name, duration_minutes)
 
 
 async def create_event(

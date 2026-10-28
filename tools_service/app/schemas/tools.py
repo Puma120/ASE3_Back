@@ -4,7 +4,7 @@ from datetime import date, datetime
 from typing import Literal
 from zoneinfo import ZoneInfo
 
-from pydantic import AwareDatetime, BaseModel, model_validator
+from pydantic import AwareDatetime, BaseModel, field_validator, model_validator
 
 
 # --- Calendar ---
@@ -16,6 +16,14 @@ class FreeSlotsRequest(BaseModel):
     window_start: AwareDatetime
     window_end: AwareDatetime
     duration_minutes: int
+    timezone: str | None = None  # solo si el usuario aun no guardo su horario de vigilia
+
+    @field_validator("timezone")
+    @classmethod
+    def _valid_timezone(cls, value: str | None) -> str | None:
+        if value:
+            ZoneInfo(value)  # ZoneInfoNotFoundError es ValueError -> 422
+        return value or None
 
 
 class FreeSlot(BaseModel):
@@ -88,11 +96,14 @@ class TaskCreate(_Window):
     title: str
     # El modelo a veces manda notes: null; se acepta y se trata como vacio.
     notes: str | None = ""
+    # Actividad que pide concentracion (estudiar, tarea, meditar): activa No molestar en su ventana.
+    focus: bool = False
 
 
 class SubtasksCreate(_Window):
     parent_title: str
     subtasks: list[str]
+    focus: bool = False
 
 
 class TaskReschedule(_Window):

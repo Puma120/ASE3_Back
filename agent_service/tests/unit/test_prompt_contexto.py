@@ -28,11 +28,12 @@ def test_el_prompt_incluye_el_bloque_de_contexto_recuperado_en_orden():
     )
 
     assert [type(m) for m in mensajes] == [
-        SystemMessage, SystemMessage, SystemMessage, HumanMessage, AIMessage, HumanMessage
+        SystemMessage, SystemMessage, SystemMessage, SystemMessage, HumanMessage, AIMessage, HumanMessage
     ]
     assert mensajes[0].content == nodes.SYSTEM_PROMPT
-    assert mensajes[1].content == CONTEXTO_USUARIO_FIJO
-    assert mensajes[2].content == (
+    assert mensajes[1].content.startswith("Capacidades reales")
+    assert mensajes[2].content == CONTEXTO_USUARIO_FIJO
+    assert mensajes[3].content == (
         f"Contexto relevante del historial del usuario:\n- {FRAGMENTO}\n- otro fragmento"
     )
     assert mensajes[-1].content == "a que hora es mi consulta?"

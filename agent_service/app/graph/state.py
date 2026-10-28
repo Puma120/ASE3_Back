@@ -18,6 +18,7 @@ class AgentState(TypedDict, total=False):
     pending_actions: str  # estado operativo: acciones bloqueadas pendientes de confirmar
     timezone: str  # zona IANA del dispositivo en este turno (opcional)
     location: dict[str, float]  # {"lat","lng"} del GPS del telefono en este turno (opcional)
+    client: str  # plataforma del cliente (android/ios/web; "" si no la informo)
     onboarding: bool  # configuracion inicial de la rutina: el agente conduce la entrevista
     onboarding_done: bool  # el agente la cerro en este turno (finish_onboarding)
     routine: str  # datos fijos de rutina vigentes (memory/profile.py), formateados

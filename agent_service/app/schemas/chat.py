@@ -17,6 +17,8 @@ class ChatMessageRequest(BaseModel):
     lng: float | None = Field(default=None, ge=-180, le=180)
     # El cliente esta en la configuracion inicial: el agente conduce la entrevista de rutina.
     onboarding: bool = False
+    # Plataforma del cliente (android / ios / web): define que capacidades puede prometer el agente.
+    client: str | None = Field(default=None, max_length=20)
 
 
 class DeviceCommand(BaseModel):

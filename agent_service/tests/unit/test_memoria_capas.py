@@ -129,6 +129,7 @@ def test_el_prompt_incluye_resumen_y_pendientes_antes_del_rag():
 
     textos = [m.content for m in nodes._to_langchain_messages(estado)]
 
-    assert textos[1] == "Resumen de la conversacion anterior con el usuario:\n- beca cierra 20 oct"
-    assert textos[2] == "Acciones pendientes: create_task"
-    assert textos[3].startswith("Contexto relevante")
+    assert textos[1].startswith("Capacidades reales")
+    assert textos[2] == "Resumen de la conversacion anterior con el usuario:\n- beca cierra 20 oct"
+    assert textos[3] == "Acciones pendientes: create_task"
+    assert textos[4].startswith("Contexto relevante")

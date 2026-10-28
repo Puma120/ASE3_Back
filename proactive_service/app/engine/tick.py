@@ -13,9 +13,10 @@ import httpx
 
 from app.clients import services
 from app.core.config import settings
-from app.db.mongo import reminders, user_state
+from app.db.mongo import devices, reminders, user_state
 from app.engine import rules
 from app.notify import deliver
+from app.push import fcm
 
 log = logging.getLogger("proactive.tick")
 
@@ -81,6 +82,33 @@ async def fire_due_reminders(now: datetime) -> int:
         fired += 1
 
 
+async def sync_focus(user_id: str, user_settings: dict) -> None:
+    """No molestar automatico: prende al empezar una tarea de enfoque y apaga al
+    terminar, mandando un mensaje solo-datos a los Android del usuario. El estado
+    (`focus_on`) solo avanza si algun telefono lo recibio; si no, se reintenta en el
+    siguiente tick para no dejar No molestar atorado."""
+    want = False
+    if user_settings.get("focus_mode_enabled"):
+        try:
+            want = bool(await services.focus_now(user_id))
+        except httpx.HTTPError as exc:
+            log.warning("ventanas de enfoque de %s no disponibles: %s", user_id, exc)
+            return
+    state = await user_state.find_one({"_id": user_id}) or {}
+    if want == bool(state.get("focus_on")):
+        return
+    statuses: list[str] = []
+    async for device in devices.find({"user_id": user_id, "platform": {"$nin": ["web", "ios"]}}):
+        status = await fcm.send_focus(device["token"], want)
+        if status == "invalid_token":
+            await devices.delete_one({"_id": device["_id"]})
+        statuses.append(status)
+    if statuses and "sent" not in statuses:
+        return
+    await user_state.update_one({"_id": user_id}, {"$set": {"focus_on": want}}, upsert=True)
+    log.info("focus %s user=%s devices=%d", "on" if want else "off", user_id, len(statuses))
+
+
 async def evaluate_user(user_id: str, now: datetime) -> int:
     """Evalua las reglas de un usuario. Devuelve cuantas notificaciones nuevas entrego."""
     try:
@@ -88,6 +116,10 @@ async def evaluate_user(user_id: str, now: datetime) -> int:
     except httpx.HTTPError as exc:
         log.warning("settings de %s no disponibles: %s", user_id, exc)
         return 0
+    try:
+        await sync_focus(user_id, user_settings)
+    except Exception:
+        log.exception("sync de enfoque fallo para %s", user_id)
     if not user_settings.get("proactive_suggestions_enabled", True):
         return 0
 

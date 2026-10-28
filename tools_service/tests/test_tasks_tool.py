@@ -26,6 +26,8 @@ class FakeCollection:
             if isinstance(cond, dict):
                 if "$lte" in cond and not value <= cond["$lte"]:
                     return False
+                if "$gt" in cond and not value > cond["$gt"]:
+                    return False
             elif value != cond:
                 return False
         return True
@@ -222,3 +224,24 @@ def test_fechas_sin_zona_horaria_se_rechazan():
     ok = TaskCreate(title="x", start="2026-06-01T10:00:00-06:00", end="2026-06-01T11:00:00-06:00")
     assert ok.start.utcoffset() is not None
 
+
+async def test_focus_now_solo_tareas_de_enfoque_en_curso(env):
+    scheduled, _ = env
+    await tasks_tool.create_task(None, USER, "Estudiar", "", *_window(-0.5), focus=True)
+    await tasks_tool.create_task(None, USER, "Llamar", "", *_window(-0.5))
+    await tasks_tool.create_task(None, USER, "Leer", "", *_window(2), focus=True)
+    assert [t["title"] for t in await tasks_tool.focus_now(USER)] == ["Estudiar"]
+
+
+async def test_reagendar_conserva_el_enfoque(env):
+    scheduled, _ = env
+    created = await tasks_tool.create_task(None, USER, "Estudiar", "", *_window(3), focus=True)
+    await tasks_tool.reschedule_task(None, USER, created["id"], *_window(-0.5))
+    assert [t["title"] for t in await tasks_tool.focus_now(USER)] == ["Estudiar"]
+
+
+async def test_completar_apaga_el_enfoque(env, monkeypatch):
+    scheduled, _ = env
+    created = await tasks_tool.create_task(None, USER, "Estudiar", "", *_window(-0.5), focus=True)
+    scheduled.docs[0]["status"] = "done"
+    assert await tasks_tool.focus_now(USER) == [] and created

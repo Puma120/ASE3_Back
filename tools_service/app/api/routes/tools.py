@@ -52,7 +52,7 @@ async def free_slots(
     db: AsyncSession = Depends(get_db),
 ):
     slots = await calendar_tool.find_free_slots(
-        db, user_id, body.window_start, body.window_end, body.duration_minutes
+        db, user_id, body.window_start, body.window_end, body.duration_minutes, body.timezone
     )
     return [FreeSlot(start=start, end=end) for start, end in slots]
 
@@ -98,7 +98,9 @@ async def create_task(
     user_id: uuid.UUID = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db),
 ):
-    return await tasks_tool.create_task(db, user_id, body.title, body.notes or "", body.start, body.end)
+    return await tasks_tool.create_task(
+        db, user_id, body.title, body.notes or "", body.start, body.end, body.focus
+    )
 
 
 @router.post("/tasks/subtasks")
@@ -107,7 +109,9 @@ async def create_subtasks(
     user_id: uuid.UUID = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db),
 ):
-    return await tasks_tool.create_subtasks(db, user_id, body.parent_title, body.subtasks, body.start, body.end)
+    return await tasks_tool.create_subtasks(
+        db, user_id, body.parent_title, body.subtasks, body.start, body.end, body.focus
+    )
 
 
 @router.get("/tasks", response_model=list[TaskSummary])
@@ -128,6 +132,12 @@ async def list_tasks(
         for t in tasks
         if t.get("title")
     ]
+
+
+@router.get("/tasks/focus-now")
+async def focus_now(user_id: uuid.UUID = Depends(get_current_user_id)):
+    """Tareas de enfoque cuya ventana esta en curso (insumo de No molestar automatico)."""
+    return await tasks_tool.focus_now(user_id)
 
 
 @router.get("/tasks/overdue")

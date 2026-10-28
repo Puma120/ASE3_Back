@@ -59,6 +59,7 @@ async def chat(
             "params": params.model_dump(),
             "timezone": body.timezone or "",
             "onboarding": body.onboarding,
+            "client": body.client or "",
             "location": {"lat": body.lat, "lng": body.lng} if body.lat is not None and body.lng is not None else {},
         }
     )

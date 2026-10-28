@@ -15,3 +15,5 @@ mongo_db = mongo_client[settings.mongo_db_name]
 activity_logs: AsyncIOMotorCollection = mongo_db["activity_logs"]
 
 scheduled_tasks: AsyncIOMotorCollection = mongo_db["scheduled_tasks"]  # tarea -> evento de calendario
+
+user_profile: AsyncIOMotorCollection = mongo_db["user_profile"]  # lo escribe agent_service (solo lectura aqui)

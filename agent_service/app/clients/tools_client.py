@@ -45,6 +45,7 @@ WRITE_TOOLS = {
     "set_focus_mode",
     "create_reminder",
     "save_routine_fact",
+    "save_sleep_schedule",
     "finish_onboarding",
 }
 

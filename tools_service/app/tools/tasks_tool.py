@@ -40,7 +40,7 @@ def _utc_iso(value: datetime) -> str:
 
 
 async def _track(
-    user_id: uuid.UUID, task_id: str, event_id: str, title: str, start: datetime, end: datetime
+    user_id: uuid.UUID, task_id: str, event_id: str, title: str, start: datetime, end: datetime, focus: bool | None = None
 ) -> None:
     await scheduled_tasks.update_one(
         {"user_id": str(user_id), "task_id": task_id},
@@ -51,6 +51,8 @@ async def _track(
                 "start": start.astimezone(timezone.utc),
                 "end": end.astimezone(timezone.utc),
                 "status": "active",
+                # None = reagendado: conserva lo que ya tenia la tarea.
+                **({} if focus is None else {"focus": focus}),
             },
             "$setOnInsert": {"created_at": datetime.now(timezone.utc)},
         },
@@ -59,11 +61,11 @@ async def _track(
 
 
 async def _schedule(
-    credentials, user_id: uuid.UUID, task: dict, title: str, start: datetime, end: datetime
+    credentials, user_id: uuid.UUID, task: dict, title: str, start: datetime, end: datetime, focus: bool = False
 ) -> dict:
     """Bloquea el rango en el calendario y registra la tarea para vigilar su vencimiento."""
     event = await asyncio.to_thread(calendar_client.create_event, credentials, f"Tarea: {title}", start, end, "Creado por Oportuno")
-    await _track(user_id, task["id"], event["id"], title, start, end)
+    await _track(user_id, task["id"], event["id"], title, start, end, focus)
     return {**task, "event_id": event["id"], "start": start.isoformat(), "end": end.isoformat()}
 
 
@@ -74,12 +76,13 @@ async def create_task(
     notes: str = "",
     start: datetime | None = None,
     end: datetime | None = None,
+    focus: bool = False,
 ) -> dict:
     if start is None or end is None:
         raise ValueError("Toda tarea necesita inicio y fin")
     credentials = await get_user_credentials(db, user_id)
     task = await asyncio.to_thread(tasks_client.create_task, credentials, title, _with_note(notes, start, end), end)
-    result = await _schedule(credentials, user_id, task, title, start, end)
+    result = await _schedule(credentials, user_id, task, title, start, end, focus)
     await activity_logs.insert_one(
         build_activity_log(
             str(user_id),
@@ -97,12 +100,13 @@ async def create_subtasks(
     subtasks: list[str],
     start: datetime,
     end: datetime,
+    focus: bool = False,
 ) -> list[dict]:
     """La tarea padre lleva la ventana de calendario; las subtareas cuelgan de ella."""
     credentials = await get_user_credentials(db, user_id)
     created = await asyncio.to_thread(tasks_client.create_subtasks, credentials, parent_title, subtasks)
     await asyncio.to_thread(tasks_client.set_due, credentials, created[0]["id"], end, _window_note(start, end))
-    created[0] = await _schedule(credentials, user_id, created[0], parent_title, start, end)
+    created[0] = await _schedule(credentials, user_id, created[0], parent_title, start, end, focus)
     await activity_logs.insert_one(
         build_activity_log(
             str(user_id),
@@ -232,3 +236,15 @@ async def overdue_tasks(db: AsyncSession, user_id: uuid.UUID) -> list[dict]:
             }
         )
     return overdue
+
+
+async def focus_now(user_id: uuid.UUID) -> list[dict]:
+    """Tareas con `focus` activas cuya ventana [start, end) incluye ahora. Solo lee
+    el seguimiento local: no toca Google, asi que funciona sin cuenta conectada."""
+    now = datetime.now(timezone.utc)
+    return [
+        {"task_id": d["task_id"], "title": d["title"], "end": _utc_iso(d["end"])}
+        async for d in scheduled_tasks.find(
+            {"user_id": str(user_id), "status": "active", "focus": True, "start": {"$lte": now}, "end": {"$gt": now}}
+        )
+    ]

@@ -20,3 +20,9 @@ def test_bubble_message_is_data_only():
 def test_bubble_message_silent_flag():
     msg = fcm.build_message("t" * 12, "Hola", "Cuerpo", None, fcm.CHANNEL_SILENT, True)["message"]
     assert msg["data"]["sound"] == "0"
+
+
+def test_focus_message_is_data_only():
+    msg = fcm.build_focus_message("t" * 12, True)["message"]
+    assert msg["data"] == {"focus": "on"} and "notification" not in msg
+    assert fcm.build_focus_message("t" * 12, False)["message"]["data"] == {"focus": "off"}

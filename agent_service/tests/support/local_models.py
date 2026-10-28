@@ -53,7 +53,7 @@ def get_llm_local():
 
     modelos = {}
 
-    def get_llm(temperature: float, with_tools: bool = True):
+    def get_llm(temperature: float, with_tools: bool = True, client: str = ""):
         if with_tools not in modelos:
             llm = build_chat_model(temperature=0.0)
             modelos[with_tools] = llm.bind_tools(TOOL_SPECS) if with_tools else llm
