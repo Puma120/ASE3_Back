@@ -6,7 +6,8 @@ import asyncio
 import logging
 import uuid
 
-from fastapi import APIRouter, Depends, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from langchain_core.exceptions import ModelAPIError, ModelRateLimitError
 
 from app.core import session
 from app.core.deps import get_current_user_id
@@ -52,17 +53,27 @@ async def chat(
     history = await get_history(user_id, params.short_term_memory_window)
     messages = history + [{"role": "user", "content": body.message}]
 
-    result = await agent_graph.ainvoke(
-        {
-            "user_id": user_id,
-            "messages": messages,
-            "params": params.model_dump(),
-            "timezone": body.timezone or "",
-            "onboarding": body.onboarding,
-            "client": body.client or "",
-            "location": {"lat": body.lat, "lng": body.lng} if body.lat is not None and body.lng is not None else {},
-        }
-    )
+    try:
+        result = await agent_graph.ainvoke(
+            {
+                "user_id": user_id,
+                "messages": messages,
+                "params": params.model_dump(),
+                "timezone": body.timezone or "",
+                "onboarding": body.onboarding,
+                "client": body.client or "",
+                "location": {"lat": body.lat, "lng": body.lng} if body.lat is not None and body.lng is not None else {},
+            }
+        )
+    except (ModelRateLimitError, ModelAPIError):
+        # Gemini sigue sin responder tras los reintentos (cuota o caida): 503 con
+        # mensaje legible en vez de un 500 generico; el cliente ofrece Reintentar.
+        log.exception("Gemini no disponible tras reintentos")
+        raise HTTPException(
+            status_code=503,
+            detail="El asistente esta saturado, intenta de nuevo en unos segundos",
+            headers={"Retry-After": "15"},
+        )
 
     await append_exchange(user_id, body.message, result["response"])
     task = asyncio.create_task(_index_exchange(str(user_id), body.message, result["response"]))

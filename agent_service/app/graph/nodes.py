@@ -138,6 +138,8 @@ def _get_llm(temperature: float, with_tools: bool = True, client: str = ""):
             model=settings.gemini_chat_model,
             google_api_key=settings.gemini_api_key,
             temperature=temperature,
+            max_retries=settings.llm_max_retries,
+            timeout=settings.llm_timeout_seconds,
         )
         _llms[key] = llm.bind_tools(specs_for(client)) if with_tools else llm
     return _llms[key]

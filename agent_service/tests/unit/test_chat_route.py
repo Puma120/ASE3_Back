@@ -93,3 +93,20 @@ async def test_history_devuelve_los_ultimos_mensajes_con_fecha(client, auth_head
     cuerpo = respuesta.json()
     assert [m["content"] for m in cuerpo] == ["pregunta 11", "respuesta 11", "pregunta 12", "respuesta 12"]
     assert all("created_at" in m for m in cuerpo)
+
+
+async def test_responde_503_si_gemini_agota_los_reintentos(client, auth_headers, monkeypatch):
+    from langchain_core.exceptions import ModelRateLimitError
+
+    class GrafoSaturado:
+        async def ainvoke(self, estado):
+            raise ModelRateLimitError("429 RESOURCE_EXHAUSTED")
+
+    monkeypatch.setattr(chat, "agent_graph", GrafoSaturado())
+
+    respuesta = await client.post("/agent/chat", json={"message": "hola"}, headers=auth_headers(USUARIO_A))
+
+    assert respuesta.status_code == 503
+    assert respuesta.headers["retry-after"] == "15"
+    assert "saturado" in respuesta.json()["detail"]
+    assert await short_term.get_history(USUARIO_A) == []

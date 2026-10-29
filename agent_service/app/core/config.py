@@ -41,6 +41,10 @@ class Settings(BaseSettings):
     # Dias que se conserva un fragmento en Qdrant; 0 = nunca se purga.
     rag_retention_days: int = 0
     llm_temperature: float = 0.3
+    # Gemini: reintentos con backoff exponencial ante 429 (cuota) y 5xx, y tope por
+    # intento. 5 x 15 s + ~15 s de esperas cabe en el timeout de 90 s del gateway.
+    llm_max_retries: int = 5
+    llm_timeout_seconds: float = 15.0
     # Tope de rondas LLM -> tools por mensaje (evita bucles).
     max_tool_rounds: int = 6
 
