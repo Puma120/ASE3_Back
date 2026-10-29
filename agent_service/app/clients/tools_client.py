@@ -18,6 +18,7 @@ TOOL_ROUTES = {
     "find_free_slots": ("tools", "POST", "/tools/calendar/free-slots"),
     "create_event": ("tools", "POST", "/tools/calendar/events"),
     "list_events": ("tools", "GET", "/tools/calendar/events"),
+    "delete_event": ("tools", "DELETE", "/tools/calendar/events/{event_id}"),
     "create_task": ("tools", "POST", "/tools/tasks"),
     "create_subtasks": ("tools", "POST", "/tools/tasks/subtasks"),
     "list_tasks": ("tools", "GET", "/tools/tasks"),
@@ -37,6 +38,7 @@ TOOL_ROUTES = {
 # confiable (correos) quedan bloqueadas en ese turno: ver nodes.call_tool.
 WRITE_TOOLS = {
     "create_event",
+    "delete_event",
     "create_task",
     "create_subtasks",
     "complete_task",

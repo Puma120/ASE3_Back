@@ -193,6 +193,23 @@ TOOL_SPECS = [
     {
         "type": "function",
         "function": {
+            "name": "delete_event",
+            "description": (
+                "Borra un evento del calendario del usuario. Es irreversible: antes confirma con el usuario cual "
+                "borrar (titulo y horario). Para quitar TODA una serie recurrente (clases, trabajo, gimnasio) usa "
+                "el recurring_event_id que devuelve list_events; con el id normal solo se borra esa ocurrencia. "
+                "Busca primero el evento con list_events."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {"event_id": {"type": "string", "description": "id del evento, o recurring_event_id para toda la serie"}},
+                "required": ["event_id"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
             "name": "list_tasks",
             "description": "Lista las tareas pendientes del usuario en Google Tasks.",
             "parameters": {"type": "object", "properties": {}, "required": []},
@@ -342,7 +359,7 @@ def specs_for(client: str) -> list[dict]:
 
 _COMMON_CAPS = (
     "- Calendario de Google (requiere Google conectado en Ajustes): find_free_slots, create_event "
-    "(tambien recurrente), list_events.\n"
+    "(tambien recurrente), list_events, delete_event (ocurrencia o serie completa).\n"
     "- Tareas y rutina: create_task, create_subtasks, list_tasks, complete_task, reschedule_task, "
     "get_routine_summary; ademas recuerdas la rutina fija que el usuario te conto.\n"
     "- Recordatorios con aviso a la hora: create_reminder, list_reminders.\n"

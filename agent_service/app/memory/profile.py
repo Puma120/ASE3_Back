@@ -85,13 +85,25 @@ async def get_facts(user_id: UUID) -> dict[str, dict]:
     return {k: v for k, v in doc.get("facts", {}).items() if not v.get("until") or v["until"] >= today}
 
 
-def format_facts(facts: dict[str, dict]) -> str:
-    if not facts:
-        return ""
+async def get_schedule(user_id: UUID) -> dict:
+    doc = await user_profile.find_one({"_id": str(user_id)}) or {}
+    return doc.get("schedule") or {}
+
+
+def format_facts(facts: dict[str, dict], schedule: dict | None = None) -> str:
     lines = [
         f"- {k}: {v['text']}" + (f" (vigente hasta {v['until']})" if v.get("until") else "")
         for k, v in facts.items()
     ]
+    labels = {
+        "wake_weekday": "despierta entre semana",
+        "sleep_weekday": "se acuesta entre semana",
+        "wake_weekend": "despierta en fin de semana",
+        "sleep_weekend": "se acuesta en fin de semana",
+    }
+    lines += [f"- {label}: {schedule[k]}" for k, label in labels.items() if schedule and schedule.get(k)]
+    if not lines:
+        return ""
     return (
         "Rutina y datos fijos que el usuario te dio (vigentes). Dalos por sabidos: no se los vuelvas a "
         "preguntar, y no agendes nada proactivo encima de sus horas ocupadas:\n" + "\n".join(lines)

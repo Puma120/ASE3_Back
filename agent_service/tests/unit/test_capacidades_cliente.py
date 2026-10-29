@@ -50,3 +50,12 @@ def test_create_task_y_subtasks_aceptan_focus():
         spec = next(s["function"] for s in TOOL_SPECS if s["function"]["name"] == nombre)
         assert spec["parameters"]["properties"]["focus"]["type"] == "boolean"
         assert "focus" not in spec["parameters"]["required"]
+
+
+def test_delete_event_se_ofrece_en_todos_los_clientes_y_es_de_escritura():
+    from app.clients.tools_client import TOOL_ROUTES, WRITE_TOOLS
+
+    for client in ("android", "ios", "web", ""):
+        assert "delete_event" in {s["function"]["name"] for s in specs_for(client)}
+    assert "delete_event" in WRITE_TOOLS
+    assert TOOL_ROUTES["delete_event"] == ("tools", "DELETE", "/tools/calendar/events/{event_id}")

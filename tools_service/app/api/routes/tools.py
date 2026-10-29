@@ -73,6 +73,7 @@ async def list_calendar_events(
             end=e["end"].get("dateTime") or e["end"].get("date"),
             all_day="date" in e["start"],
             location=e.get("location"),
+            recurring_event_id=e.get("recurringEventId"),
         )
         for e in events
     ]
@@ -87,6 +88,15 @@ async def create_calendar_event(
     return await calendar_tool.create_event(
         db, user_id, body.summary, body.start, body.end, body.description, body.weekdays, body.until, body.timezone
     )
+
+
+@router.delete("/calendar/events/{event_id}")
+async def delete_calendar_event(
+    event_id: str,
+    user_id: uuid.UUID = Depends(get_current_user_id),
+    db: AsyncSession = Depends(get_db),
+):
+    return await calendar_tool.delete_event(db, user_id, event_id)
 
 
 # --- Tasks ---

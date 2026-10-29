@@ -65,6 +65,7 @@ class EventSummary(BaseModel):
     end: str
     all_day: bool = False
     location: str | None = None
+    recurring_event_id: str | None = None  # id de la serie si es una ocurrencia
 
 
 # --- Tasks ---

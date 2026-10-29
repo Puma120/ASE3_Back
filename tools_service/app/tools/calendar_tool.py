@@ -61,6 +61,13 @@ async def create_event(
     return event
 
 
+async def delete_event(db: AsyncSession, user_id: uuid.UUID, event_id: str) -> dict:
+    credentials = await get_user_credentials(db, user_id)
+    await asyncio.to_thread(calendar_client.delete_event, credentials, event_id)
+    await activity_logs.insert_one(build_activity_log(str(user_id), "event_deleted", {"event_id": event_id}))
+    return {"deleted": event_id}
+
+
 async def list_events(
     db: AsyncSession, user_id: uuid.UUID, window_start: datetime, window_end: datetime
 ) -> list[dict]:

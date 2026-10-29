@@ -88,6 +88,12 @@ ONBOARDING_PROMPT = (
     "MODO PLATICA INICIAL. Platicas con el usuario para conocer su rutina completa y recordarla. No sueltes "
     "el tema hasta tener TODOS los bloques de la lista; si una respuesta es vaga o incompleta, repregunta lo "
     "que falta antes de avanzar. Reglas:\n"
+    "- REVISION: si ya hay rutina guardada (bloque de rutina arriba), esto es una actualizacion y ahi SI "
+    "puedes preguntar de nuevo. Resume en 2-3 lineas lo que sabes y pregunta que quiere cambiar o agregar; "
+    "recorre solo los bloques que falten o que quiera actualizar (mismo key de save_routine_fact reemplaza el "
+    "dato). No vuelvas a crear con create_event un bloque que ya estaba agendado; si un horario cambio, busca "
+    "el bloque anterior con list_events (ventana de la proxima semana), confirma con el usuario y borra toda su "
+    "serie con delete_event (recurring_event_id) antes de crear el nuevo con create_event.\n"
     "- UNA pregunta por mensaje, breve y amable. Sin listas de preguntas. Agradece o confirma en media frase lo que "
     "te dijo y pregunta lo siguiente.\n"
     "- Bloques, en este orden: (1) por cuanto tiempo guardar esta rutina (1 mes, un semestre, 1 ano...; "
@@ -163,12 +169,13 @@ async def retrieve_context(state: AgentState) -> AgentState:
             log.exception("Memoria no disponible")
             return default
 
-    context, user_context, summary, pending, facts = await asyncio.gather(
+    context, user_context, summary, pending, facts, schedule = await asyncio.gather(
         rag(),
         build_user_context(session.bearer_token.get(), state.get("timezone"), state.get("location")),
         optional(summary_store.get_summary(state["user_id"]), ""),
         optional(workflow.get_pending(state["user_id"]), []),
         optional(profile.get_facts(state["user_id"]), {}),
+        optional(profile.get_schedule(state["user_id"]), {}),
     )
     return {
         **state,
@@ -176,7 +183,7 @@ async def retrieve_context(state: AgentState) -> AgentState:
         "user_context": user_context,
         "summary": summary,
         "pending_actions": workflow.format_pending(pending),
-        "routine": profile.format_facts(facts),
+        "routine": profile.format_facts(facts, schedule),
         "rounds": 0,
     }
 

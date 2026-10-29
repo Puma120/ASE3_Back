@@ -183,3 +183,17 @@ async def test_la_zona_horaria_del_estado_llega_al_horario_y_a_los_huecos(extern
 def test_la_platica_inicial_cubre_todos_los_bloques():
     for tema in ("fin de semana", "pasatiempos", "ejercicio", "fecha en que termina", "save_sleep_schedule"):
         assert tema in nodes.ONBOARDING_PROMPT
+
+
+async def test_la_rutina_inyectada_incluye_las_horas_de_vigilia_aunque_no_haya_datos():
+    await profile.save_schedule(USUARIO_A, HORARIO, None)
+
+    texto = profile.format_facts(await profile.get_facts(USUARIO_A), await profile.get_schedule(USUARIO_A))
+
+    assert "despierta entre semana: 06:30" in texto
+    assert "se acuesta en fin de semana: 01:00" in texto
+    assert profile.format_facts({}, {}) == ""
+
+
+def test_la_platica_se_puede_repetir_como_revision():
+    assert "REVISION" in nodes.ONBOARDING_PROMPT and "delete_event" in nodes.ONBOARDING_PROMPT

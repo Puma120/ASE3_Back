@@ -10,6 +10,7 @@ from zoneinfo import ZoneInfo
 
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
 
 
 def _service(credentials: Credentials):
@@ -94,6 +95,16 @@ def move_event(credentials: Credentials, event_id: str, start: datetime, end: da
     return (
         _service(credentials).events().patch(calendarId="primary", eventId=event_id, body=body).execute()
     )
+
+
+def delete_event(credentials: Credentials, event_id: str) -> None:
+    """Borra un evento; con el id de una serie recurrente borra toda la serie,
+    con el de una ocurrencia solo esa. Ya borrado (404/410) cuenta como hecho."""
+    try:
+        _service(credentials).events().delete(calendarId="primary", eventId=event_id).execute()
+    except HttpError as exc:
+        if exc.resp.status not in (404, 410):
+            raise
 
 
 def list_events(credentials: Credentials, window_start: datetime, window_end: datetime) -> list[dict]:
