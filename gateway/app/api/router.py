@@ -27,7 +27,7 @@ PUBLIC_AUTH_PATHS = {"google/login", "google/callback", "register", "login", "ve
 # reintenta antes de devolver 500 al cliente en vez de fallar al primer intento.
 PROXY_RETRIES = 4
 PROXY_RETRY_DELAY_SECONDS = 2.0
-PROXY_TIMEOUT_SECONDS = 90.0
+PROXY_TIMEOUT_SECONDS = 240.0
 
 # Peticiones por usuario y minuto segun el destino. El chat es el mas caro
 # (cada mensaje dispara llamadas al LLM), por eso el tope es bajo.
