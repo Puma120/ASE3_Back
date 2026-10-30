@@ -282,3 +282,9 @@ async def test_sin_eventos_creados_la_rutina_sigue_pendiente(client, auth_header
     await client.post("/agent/chat", json={"message": "Agenda", "calendar_sync_until": hasta}, headers=auth_headers(USUARIO_A))
 
     assert await profile.get_calendar_sync(USUARIO_A) == profile.PENDING
+
+
+def test_al_agendar_siempre_pregunta_la_repeticion_y_lo_mete_al_calendario():
+    assert "pregunta SIEMPRE" in nodes.SYSTEM_PROMPT
+    assert "una sola vez o se repite" in nodes.SYSTEM_PROMPT
+    assert "SIEMPRE ponlo en su calendario con create_event" in nodes.SYSTEM_PROMPT
