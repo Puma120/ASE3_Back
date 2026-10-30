@@ -10,7 +10,7 @@ from app.graph.nodes import proactive_suggestion_text
 from app.memory import params as params_store
 from app.memory import profile
 from app.memory.params import AgentParams, AgentParamsUpdate
-from app.schemas.chat import OnboardingStatus, SuggestionResponse
+from app.schemas.chat import CalendarSyncStatus, OnboardingStatus, SuggestionResponse
 
 router = APIRouter(prefix="/agent", tags=["agent"])
 
@@ -43,3 +43,15 @@ async def read_onboarding(user_id: uuid.UUID = Depends(get_current_user_id)) -> 
 async def skip_onboarding(user_id: uuid.UUID = Depends(get_current_user_id)) -> OnboardingStatus:
     await profile.set_onboarding(user_id, profile.SKIPPED)
     return OnboardingStatus(status=profile.SKIPPED)
+
+
+@router.get("/calendar-sync", response_model=CalendarSyncStatus)
+async def read_calendar_sync(user_id: uuid.UUID = Depends(get_current_user_id)) -> CalendarSyncStatus:
+    """`pending` si hay rutina guardada que aun no se ofrecio agendar en el calendario."""
+    return CalendarSyncStatus(status=await profile.get_calendar_sync(user_id))
+
+
+@router.post("/calendar-sync/skip", response_model=CalendarSyncStatus)
+async def skip_calendar_sync(user_id: uuid.UUID = Depends(get_current_user_id)) -> CalendarSyncStatus:
+    await profile.set_calendar_sync(user_id, profile.SKIPPED)
+    return CalendarSyncStatus(status=profile.SKIPPED)

@@ -119,6 +119,19 @@ async def set_onboarding(user_id: UUID, status: str) -> None:
     await user_profile.update_one({"_id": str(user_id)}, {"$set": {"onboarding": status}}, upsert=True)
 
 
+async def get_calendar_sync(user_id: UUID) -> str:
+    """Si la rutina guardada ya se agendo en el calendario (o el usuario lo omitio).
+    Con rutina guardada y sin respuesta devuelve `pending`; sin rutina, `none`."""
+    doc = await user_profile.find_one({"_id": str(user_id)}) or {}
+    if "calendar_sync" in doc:
+        return doc["calendar_sync"]
+    return PENDING if await get_facts(user_id) else "none"
+
+
+async def set_calendar_sync(user_id: UUID, status: str) -> None:
+    await user_profile.update_one({"_id": str(user_id)}, {"$set": {"calendar_sync": status}}, upsert=True)
+
+
 async def run_tool(name: str, arguments: dict, user_id: UUID, tz_name: str | None = None) -> dict:
     if name == "save_sleep_schedule":
         return await save_schedule(user_id, arguments, tz_name)

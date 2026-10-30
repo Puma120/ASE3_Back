@@ -197,3 +197,88 @@ async def test_la_rutina_inyectada_incluye_las_horas_de_vigilia_aunque_no_haya_d
 
 def test_la_platica_se_puede_repetir_como_revision():
     assert "REVISION" in nodes.ONBOARDING_PROMPT and "delete_event" in nodes.ONBOARDING_PROMPT
+
+
+async def test_estado_de_agendar_rutina_segun_haya_datos_y_respuesta():
+    assert await profile.get_calendar_sync(USUARIO_A) == "none"
+
+    await profile.save_fact(USUARIO_A, "clases", "Lunes a viernes 8:00-14:00")
+    assert await profile.get_calendar_sync(USUARIO_A) == profile.PENDING
+
+    await profile.set_calendar_sync(USUARIO_A, profile.SKIPPED)
+    assert await profile.get_calendar_sync(USUARIO_A) == profile.SKIPPED
+    assert await profile.get_calendar_sync(USUARIO_B) == "none"
+
+
+async def test_agendar_rutina_por_http_omitir(client, auth_headers):
+    headers = auth_headers(USUARIO_A)
+    await profile.save_fact(USUARIO_A, "clases", "Lunes a viernes 8:00-14:00")
+
+    assert (await client.get("/agent/calendar-sync", headers=headers)).json() == {"status": "pending"}
+    assert (await client.post("/agent/calendar-sync/skip", headers=headers)).json() == {"status": "skipped"}
+    assert (await client.get("/agent/calendar-sync", headers=headers)).json() == {"status": "skipped"}
+
+
+def test_el_modo_agendar_rutina_solo_va_si_se_pidio():
+    prompt = nodes.calendar_sync_prompt("2026-12-01", "Clases")
+
+    assert not any(m.content == prompt for m in nodes._to_langchain_messages(_estado()))
+    assert any(m.content == prompt for m in nodes._to_langchain_messages(_estado(calendar_sync=prompt)))
+    assert "2026-12-01" in prompt and "Clases" in prompt
+
+
+async def test_chat_agendar_rutina_inyecta_el_modo_y_marca_hecho(client, auth_headers, monkeypatch):
+    from app.api.routes import chat
+
+    recibido = {}
+
+    class Grafo:
+        async def ainvoke(self, estado):
+            recibido.update(estado)
+            return {"response": "agendado", "events_created": True}
+
+    async def eventos(tool, payload, token):
+        return {"items": [{"summary": "Gimnasio"}]}
+
+    monkeypatch.setattr(chat, "agent_graph", Grafo())
+    monkeypatch.setattr(chat, "call_tool", eventos)
+    await profile.save_fact(USUARIO_A, "clases", "Lunes a viernes 8:00-14:00")
+    hasta = (date.today() + timedelta(days=30)).isoformat()
+
+    r = await client.post(
+        "/agent/chat", json={"message": "Agenda mi rutina", "calendar_sync_until": hasta}, headers=auth_headers(USUARIO_A)
+    )
+
+    assert r.status_code == 200
+    assert hasta in recibido["calendar_sync"] and "Gimnasio" in recibido["calendar_sync"]
+    assert await profile.get_calendar_sync(USUARIO_A) == profile.DONE
+
+
+async def test_chat_agendar_rutina_rechaza_fechas_fuera_de_rango(client, auth_headers):
+    ayer = (date.today() - timedelta(days=1)).isoformat()
+
+    r = await client.post(
+        "/agent/chat", json={"message": "Agenda", "calendar_sync_until": ayer}, headers=auth_headers(USUARIO_A)
+    )
+
+    assert r.status_code == 422
+
+
+async def test_sin_eventos_creados_la_rutina_sigue_pendiente(client, auth_headers, monkeypatch):
+    from app.api.routes import chat
+
+    class Grafo:
+        async def ainvoke(self, estado):
+            return {"response": "conecta Google"}
+
+    async def eventos(tool, payload, token):
+        return {"error": "sin google"}
+
+    monkeypatch.setattr(chat, "agent_graph", Grafo())
+    monkeypatch.setattr(chat, "call_tool", eventos)
+    await profile.save_fact(USUARIO_A, "clases", "Lunes a viernes 8:00-14:00")
+    hasta = (date.today() + timedelta(days=30)).isoformat()
+
+    await client.post("/agent/chat", json={"message": "Agenda", "calendar_sync_until": hasta}, headers=auth_headers(USUARIO_A))
+
+    assert await profile.get_calendar_sync(USUARIO_A) == profile.PENDING

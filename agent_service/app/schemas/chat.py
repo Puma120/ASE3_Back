@@ -1,6 +1,6 @@
 """Esquemas Pydantic (request/response) del Agent Service."""
 
-from datetime import datetime
+from datetime import date, datetime
 from typing import Literal
 
 from pydantic import BaseModel, Field
@@ -17,6 +17,8 @@ class ChatMessageRequest(BaseModel):
     lng: float | None = Field(default=None, ge=-180, le=180)
     # El cliente esta en la configuracion inicial: el agente conduce la entrevista de rutina.
     onboarding: bool = False
+    # El usuario acepto agendar en su calendario la rutina ya guardada, hasta esta fecha.
+    calendar_sync_until: date | None = None
     # Plataforma del cliente (android / ios / web): define que capacidades puede prometer el agente.
     client: str | None = Field(default=None, max_length=20)
 
@@ -37,6 +39,11 @@ class ChatMessageResponse(BaseModel):
 
 class OnboardingStatus(BaseModel):
     status: Literal["pending", "done", "skipped"]
+
+
+class CalendarSyncStatus(BaseModel):
+    # "none": aun no hay rutina guardada que agendar.
+    status: Literal["none", "pending", "done", "skipped"]
 
 
 class HistoryMessage(BaseModel):
