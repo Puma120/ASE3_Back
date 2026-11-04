@@ -56,13 +56,18 @@ def derive(logs: list[dict], tz: ZoneInfo) -> list[str]:
     created = [d for d in logs if d["kind"] == "task_created"]
     rules: list[str] = []
 
-    if slot := _dominant([_slot(_local(d["created_at"], tz).hour) for d in completed], MIN_COMPLETED):
-        rules.append(f"Completa casi todo por la {slot}: ponle ahi las tareas importantes o dificiles.")
-
+    best = _dominant([_slot(_local(d["created_at"], tz).hour) for d in completed], MIN_COMPLETED)
     origins = [_slot(_local(d["payload"]["from_start"], tz).hour) for d in rescheduled if d["payload"].get("from_start")]
-    if slot := _dominant(origins, MIN_RESCHEDULED):
+    worst = _dominant(origins, MIN_RESCHEDULED)
+    # Misma franja en ambas: senal mixta. Dar las dos reglas seria contradecirse.
+    if best == worst:
+        best = worst = None
+
+    if best:
+        rules.append(f"Completa casi todo por la {best}: ponle ahi las tareas importantes o dificiles.")
+    if worst:
         rules.append(
-            f"Suele posponer lo que agenda por la {slot}: evita cargarla con tareas importantes "
+            f"Suele posponer lo que agenda por la {worst}: evita cargarla con tareas importantes "
             "o usa bloques mas cortos."
         )
 

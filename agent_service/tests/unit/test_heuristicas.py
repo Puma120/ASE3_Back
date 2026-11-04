@@ -59,6 +59,32 @@ async def test_franja_en_que_pospone(mongo):
     assert "posponer lo que agenda por la noche" in texto
 
 
+async def test_misma_franja_al_completar_y_posponer_no_da_reglas_opuestas(mongo):
+    """Decirle a la vez 'ponle ahi lo importante' y 'evita cargarla' es una contradiccion."""
+
+    def pospuesta(i):
+        origen = (datetime.now(timezone.utc) + timedelta(days=i)).replace(hour=22, minute=0).isoformat()
+        return _log(USUARIO_A, "task_rescheduled", 12, i + 1, title=f"x{i}", from_start=origen)
+
+    completadas = [_log(USUARIO_A, "task_completed", 22, i + 1, title=f"t{i}") for i in range(4)]
+    await _sembrar(mongo, completadas + [pospuesta(i) for i in range(3)])
+    texto = await heuristics.build(str(USUARIO_A), "UTC")
+    assert "Completa casi todo por la noche" not in texto
+    assert "posponer lo que agenda por la noche" not in texto
+
+
+async def test_franjas_distintas_al_completar_y_posponer_dan_ambas_reglas(mongo):
+    def pospuesta(i):
+        origen = (datetime.now(timezone.utc) + timedelta(days=i)).replace(hour=22, minute=0).isoformat()
+        return _log(USUARIO_A, "task_rescheduled", 12, i + 1, title=f"x{i}", from_start=origen)
+
+    completadas = [_log(USUARIO_A, "task_completed", 9, i + 1, title=f"t{i}") for i in range(4)]
+    await _sembrar(mongo, completadas + [pospuesta(i) for i in range(3)])
+    texto = await heuristics.build(str(USUARIO_A), "UTC")
+    assert "Completa casi todo por la" in texto
+    assert "posponer lo que agenda por la noche" in texto
+
+
 async def test_titulos_pospuestos_varias_veces(mongo):
     await _sembrar(
         mongo,
