@@ -59,3 +59,19 @@ La corrida completa tarda unas 1.5-2.5 h; la mayor parte es la exactitud de
 respuesta (qwen3.8 responde las 220 consultas por cada top_k). Con
 `--sin-respuestas` baja a unos 15-20 min. El reporte (Markdown, JSON con cada
 respuesta calificada y tablas LaTeX) queda en `tests/kpi/resultados/`.
+
+KPI del Objetivo 4 (respuestas sin alucinaciones ni contradicciones). Gemini, grafo,
+heuristicas y RAG son reales; los datos del usuario y las respuestas de las tools son
+simulados. Con Gemini hace maximo 100 peticiones (las rondas de tools no cuentan como
+peticion, pero si se cobran):
+
+```bash
+python -m tests.kpi.eval_obj4 --casos 5                     # ensayo gratis con Ollama
+python -m tests.kpi.eval_obj4                               # ensayo completo gratis
+python -m tests.kpi.eval_obj4 --llm gemini --verificar      # solo gasta embeddings
+python -m tests.kpi.eval_obj4 --llm gemini --confirmar-gasto
+python -m tests.kpi.eval_obj4 --solo-calificar <corrida>    # recalifica sin gastar
+```
+
+Las reglas no detectan afirmaciones en texto libre: el KPI final requiere llenar
+`veredicto` (`coherente` o `falla`) en `obj4_<corrida>_revision.json` y recalificar.
