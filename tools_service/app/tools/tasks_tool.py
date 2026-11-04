@@ -173,6 +173,7 @@ async def reschedule_task(
     task = await asyncio.to_thread(tasks_client.get_task, credentials, task_id)
     title = task.get("title", "")
     doc = await scheduled_tasks.find_one({"user_id": str(user_id), "task_id": task_id})
+    from_start = _utc_iso(doc["start"]) if doc else None
     # Quita la linea de ventana anterior de las notas para no acumularlas.
     kept = [ln for ln in (task.get("notes") or "").splitlines() if not ln.startswith("Inicio: ")]
     await asyncio.to_thread(tasks_client.set_due, credentials, task_id, end, _with_note("\n".join(kept), start, end))
@@ -194,7 +195,13 @@ async def reschedule_task(
         build_activity_log(
             str(user_id),
             "task_rescheduled",
-            {"task_id": task_id, "title": title, "start": start.isoformat(), "end": end.isoformat()},
+            {
+                "task_id": task_id,
+                "title": title,
+                "from_start": from_start,
+                "start": start.isoformat(),
+                "end": end.isoformat(),
+            },
         )
     )
     return {"id": task_id, "title": title, "start": start.isoformat(), "end": end.isoformat()}

@@ -24,7 +24,7 @@ from app.db.mongo import activity_logs
 from app.graph.state import AgentState
 from app.graph.tool_specs import capabilities_for, excluded_tools, specs_for
 from app.graph.user_context import build_user_context
-from app.memory import profile
+from app.memory import heuristics, profile
 from app.memory import summary as summary_store
 from app.memory import vector_store
 from app.memory import workflow
@@ -44,6 +44,15 @@ SYSTEM_PROMPT = (
     "la tool en vez de solo describirlo, pero solo lo que el usuario pidio de "
     "forma explicita en esta conversacion.\n"
     "- Puedes llamar varias tools en una misma ronda si son independientes.\n"
+    "- Fechas: usa EXACTAMENTE el dia que dijo el usuario (un dia de la semana, 'el 15', 'el viernes') "
+    "tomandolo del calendario de proximos dias del contexto. Nunca lo cambies a manana ni a otro dia por "
+    "tu cuenta; solo es manana si el dijo manana. Si el dia que pidio es hoy y la hora ya paso, o la fecha no "
+    "te queda clara, preguntale en una frase antes de crear nada. Antes de llamar la tool revisa que la "
+    "fecha del start coincida con el dia pedido.\n"
+    "- Nunca le des instrucciones para que lo haga el solo (como abrir el reloj, el calendario o Google para "
+    "crear la alarma, el evento o el recordatorio): tu lo haces con la tool. Si una tool falla o algo no esta "
+    "en tus capacidades, dilo en una frase y ejecuta la alternativa mas cercana que si tengas (por ejemplo "
+    "un recordatorio con aviso o un evento en el calendario en lugar de una alarma), sin pasarle la tarea.\n"
     "- Agendar (cita, clase, junta, evento, compromiso, habito): antes de crear nada pregunta SIEMPRE, en un solo "
     "mensaje corto, lo que falte entre: si es una sola vez o se repite; si se repite, que dias y hasta cuando "
     "(fecha fin o por cuanto tiempo); y la hora de inicio y fin. Solo te saltas la pregunta que el usuario ya "
@@ -204,13 +213,14 @@ async def retrieve_context(state: AgentState) -> AgentState:
             log.exception("Memoria no disponible")
             return default
 
-    context, user_context, summary, pending, facts, schedule = await asyncio.gather(
+    context, user_context, summary, pending, facts, schedule, learned = await asyncio.gather(
         rag(),
         build_user_context(session.bearer_token.get(), state.get("timezone"), state.get("location")),
         optional(summary_store.get_summary(state["user_id"]), ""),
         optional(workflow.get_pending(state["user_id"]), []),
         optional(profile.get_facts(state["user_id"]), {}),
         optional(profile.get_schedule(state["user_id"]), {}),
+        optional(heuristics.build(str(state["user_id"]), state.get("timezone")), ""),
     )
     return {
         **state,
@@ -219,6 +229,7 @@ async def retrieve_context(state: AgentState) -> AgentState:
         "summary": summary,
         "pending_actions": workflow.format_pending(pending),
         "routine": profile.format_facts(facts, schedule),
+        "heuristics": learned,
         "rounds": 0,
     }
 
@@ -230,6 +241,8 @@ def _to_langchain_messages(state: AgentState) -> list:
         messages.append(SystemMessage(content=state["user_context"]))
     if state.get("routine"):
         messages.append(SystemMessage(content=state["routine"]))
+    if state.get("heuristics"):
+        messages.append(SystemMessage(content=state["heuristics"]))
     if state.get("onboarding"):
         messages.append(SystemMessage(content=ONBOARDING_PROMPT))
     if state.get("calendar_sync"):
@@ -294,6 +307,37 @@ async def call_llm(state: AgentState) -> AgentState:
     return {**state, "response": _extract_text(ai_message.content), "pending_calls": []}
 
 
+# Campo con la fecha de inicio de cada tool que agenda algo.
+_START_FIELD = {
+    "create_event": "start",
+    "create_task": "start",
+    "create_subtasks": "start",
+    "reschedule_task": "start",
+    "set_alarm": "time",
+    "create_reminder": "fire_at",
+}
+_PAST_TOLERANCE = timedelta(minutes=5)
+
+
+def _stale_start(name: str, arguments: dict) -> str:
+    """Error si el modelo agenda en el pasado (un dia mal calculado): lo obliga a corregir o a preguntar.
+    Los eventos recurrentes quedan fuera: su primera ocurrencia puede ser anterior."""
+    field = _START_FIELD.get(name)
+    raw = arguments.get(field) if field else None
+    if not raw or arguments.get("weekdays"):
+        return ""
+    try:
+        start = datetime.fromisoformat(str(raw))
+    except ValueError:
+        return ""
+    if start.tzinfo is None or start >= datetime.now(timezone.utc) - _PAST_TOLERANCE:
+        return ""
+    return (
+        f"La fecha de inicio {raw} ya paso. Usa el dia que pidio el usuario segun el calendario de proximos "
+        "dias; si de verdad pidio algo que ya paso, preguntale que dia quiere. No lo muevas a manana por tu cuenta."
+    )
+
+
 def _tool_content(name: str, result: dict) -> str:
     text = json.dumps(result, default=str, ensure_ascii=False)
     if name in UNTRUSTED_TOOLS:
@@ -323,6 +367,8 @@ async def call_tool(state: AgentState) -> AgentState:
         if call["name"] in profile.LOCAL_TOOLS:
             return await profile.run_tool(call["name"], call["arguments"], state["user_id"], state.get("timezone"))
         arguments = call["arguments"]
+        if stale := _stale_start(call["name"], arguments):
+            return {"error": stale}
         if call["name"] == "find_free_slots" and state.get("timezone"):
             arguments = {**arguments, "timezone": state["timezone"]}  # horas despierto por defecto
         return await invoke_tool(call["name"], arguments, session.bearer_token.get())

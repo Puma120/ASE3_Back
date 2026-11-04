@@ -24,6 +24,7 @@ class AgentState(TypedDict, total=False):
     calendar_sync: str  # instrucciones para agendar la rutina guardada en el calendario (vacio = modo apagado)
     events_created: bool  # create_event tuvo exito en este turno
     routine: str  # datos fijos de rutina vigentes (memory/profile.py), formateados
+    heuristics: str  # reglas de organizacion aprendidas del historial (memory/heuristics.py)
     user_context: str  # perfil, fecha/hora local, ubicacion; se inyecta en el prompt
     pending_calls: list[dict[str, Any]]  # tool_calls de la ronda actual: {"id","name","arguments"}
     tool_exchange: list[Any]  # AIMessage/ToolMessage ya intercambiados en este turno

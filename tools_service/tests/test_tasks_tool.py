@@ -245,3 +245,11 @@ async def test_completar_apaga_el_enfoque(env, monkeypatch):
     created = await tasks_tool.create_task(None, USER, "Estudiar", "", *_window(-0.5), focus=True)
     scheduled.docs[0]["status"] = "done"
     assert await tasks_tool.focus_now(USER) == [] and created
+
+
+async def test_reagendar_registra_de_que_hora_la_movio(env):
+    created = await tasks_tool.create_task(None, USER, "Informe", "", *_window(3))
+    original = created["start"]
+    await tasks_tool.reschedule_task(None, USER, created["id"], *_window(8))
+    log = next(d for d in tasks_tool.activity_logs.docs if d["kind"] == "task_rescheduled")
+    assert datetime.fromisoformat(log["payload"]["from_start"]) == datetime.fromisoformat(original)

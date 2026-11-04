@@ -3,7 +3,7 @@ el, donde esta. Solo datos de perfil/ajustes/ubicacion: nunca credenciales ni
 nada de auth (el agente ni siquiera tiene forma de pedirlos)."""
 
 import asyncio
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
 from app.clients.tools_client import fetch_json
@@ -28,6 +28,8 @@ async def build_user_context(
         f"Fecha y hora actuales del usuario: {_DAYS[now.weekday()]} {now.isoformat(timespec='minutes')} "
         f"(zona horaria {tz.key}). Usa SIEMPRE esta zona para fechas relativas como "
         "'manana' o 'a las 5', y manda los datetime ISO con su offset.",
+        "Calendario de los proximos 14 dias (copia de aqui el dia que diga el usuario, no lo calcules): "
+        + _upcoming_days(now),
     ]
     if profile and profile.get("full_name"):
         lines.append(f"Nombre del usuario: {profile['full_name']}.")
@@ -51,6 +53,16 @@ async def build_user_context(
     else:
         lines.append("Ubicacion actual: desconocida. Si necesitas un origen, preguntalo.")
     return "\n".join(lines)
+
+
+def _upcoming_days(now: datetime) -> str:
+    labels = ["hoy", "manana"]
+    days = []
+    for i in range(14):
+        day = now + timedelta(days=i)
+        prefix = f"{labels[i]} " if i < len(labels) else ""
+        days.append(f"{prefix}{_DAYS[day.weekday()]} {day.date().isoformat()}")
+    return "; ".join(days) + "."
 
 
 def _zone(name: str | None) -> ZoneInfo | None:
