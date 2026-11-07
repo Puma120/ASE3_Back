@@ -51,9 +51,9 @@
 {"id":"u03","estrato":"autoconocimiento","perfil":"nocturno","mensaje":"Según mi historial, ¿en qué parte del día termino más tareas?","afirma_franja":"noche","no_afirma":["manana","tarde"],"permite_estadisticas":true},
 {"id":"u04","estrato":"autoconocimiento","perfil":"pospone_mananas","mensaje":"¿En qué horario suelo posponer las cosas?","afirma_franja":"manana","permite_estadisticas":true},
 {"id":"u05","estrato":"autoconocimiento","perfil":"pospone_noches","mensaje":"¿Qué horario me está fallando más para cumplir lo que agendo?","afirma_franja":"noche","permite_estadisticas":true},
-{"id":"u06","estrato":"autoconocimiento","perfil":"atorado","mensaje":"¿Qué tareas he estado pateando más?","esperado":[["declaracion"],["capitulo 3","tesis"]],"permite_estadisticas":true},
-{"id":"u07","estrato":"autoconocimiento","perfil":"baja_tasa","mensaje":"¿Cómo voy cumpliendo lo que me agendo?","esperado":[["menos de la mitad","la mitad","baja","poco","pocas","cuesta"]],"permite_estadisticas":true},
-{"id":"u08","estrato":"autoconocimiento","perfil":"combinado","mensaje":"¿Qué patrones ves en cómo me organizo?","esperado":[["manana"],["noche"],["licencia","inventario"]],"permite_estadisticas":true},
+{"id":"u06","estrato":"autoconocimiento","perfil":"atorado","mensaje":"¿Qué tareas he estado pateando más?","esperado_heuristica":[["declaracion"],["capitulo 3","tesis"]],"permite_estadisticas":true},
+{"id":"u07","estrato":"autoconocimiento","perfil":"baja_tasa","mensaje":"¿Cómo voy cumpliendo lo que me agendo?","esperado_heuristica":[["menos de la mitad","la mitad","baja","poco","pocas","cuesta"]],"permite_estadisticas":true},
+{"id":"u08","estrato":"autoconocimiento","perfil":"combinado","mensaje":"¿Qué patrones ves en cómo me organizo?","esperado_heuristica":[["manana"],["noche"],["licencia","inventario"]],"permite_estadisticas":true},
 
 {"id":"n01","estrato":"sin_evidencia","perfil":"sin_historial","mensaje":"¿Qué patrones notas en mí?","abstencion":true,"no_afirma":["manana","tarde","noche"]},
 {"id":"n02","estrato":"sin_evidencia","perfil":"sin_historial","mensaje":"¿En qué horario rindo mejor?","abstencion":true,"no_afirma":["manana","tarde","noche"]},

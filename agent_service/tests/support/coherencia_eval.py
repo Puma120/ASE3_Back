@@ -64,6 +64,12 @@ def expandir_mensaje(mensaje: str, ahora_local: datetime) -> str:
     )
 
 
+def mensajes_posibles(casos: list[dict], ahora: datetime) -> set[str]:
+    """Todo lo que los casos pueden mandar al RAG, sea cual sea el dia en que corran
+    (una corrida larga puede cruzar la medianoche y cambiar el nombre de {dia+N})."""
+    return {expandir_mensaje(c["mensaje"], ahora + timedelta(days=d)) for c in casos for d in range(7)}
+
+
 # --- Tools simuladas ---
 
 
@@ -462,11 +468,50 @@ def _afirma_franja(cuerpo: str, franja: str) -> bool:
     """Una frase afirmativa que da esa franja como la buena del usuario."""
     raices = r"\b(mejor|conviene|rindes|rindas|recomiendo|sugiero|propongo|aprovecha|funciona|completas|terminas|avanzas|productiv\w*|siempre)\b"
     frases = "|".join(re.escape(f) for f in _FRASES_FRANJA[franja])
-    negacion = r"\b(no|evita|evitar|menos|nunca|tampoco|sin embargo|aunque|pero)\b"
+    negacion = r"\b(no|evita|evitar|menos|nunca|tampoco|sin embargo|aunque|pero|pospon\w*|pospues\w*)\b"
     for frase in re.split(r"[.\n!?]", normalizar(cuerpo)):
         if re.search(raices, frase) and re.search(frases, frase) and not re.search(negacion, frase):
             return True
     return False
+
+
+_VINETA = re.compile(r"\s*(?:[-*•]|\d+[.)])\s")
+_RECOMIENDA = re.compile(r"\b(?:recomiendo|sugiero|propongo|conviene)\b")
+_RECOMIENDA_FRANJA = re.compile(_RECOMIENDA.pattern + r".*\b(?:de|por|en) la (manana|tarde|noche)\b")
+_PROPONE = re.compile(_RECOMIENDA.pattern + r"|\bmi (?:sugerencia|propuesta|plan)\b")
+
+
+def _horas_para_franja(cuerpo: str, validas: set[str], prohibidas: set[str], existentes: set[int]) -> list[Hora]:
+    """Horas que juzga R2. Una lista es un menu de opciones: no cuenta si la recomendacion
+    esta fuera de ella, sea una hora o una franja permitida. Si no, se juzga todo."""
+    fuera = [linea for linea in cuerpo.splitlines() if not _VINETA.match(linea)]
+    horas = extraer_horas("\n".join(fuera))
+    if any(not h.es_fin and not set(h.lecturas) & existentes for h in horas):
+        return horas
+    # La hora recomendada puede coincidir con el fin de una tarea: es justo donde empieza el hueco.
+    if any(_RECOMIENDA.search(normalizar(linea)) and extraer_horas(linea) for linea in fuera):
+        return horas
+    franjas = {m[1] for linea in fuera if (m := _RECOMIENDA_FRANJA.search(normalizar(linea)))}
+    if franjas and all((not validas or f in validas) and f not in prohibidas for f in franjas):
+        return horas
+    return extraer_horas(cuerpo)
+
+
+def _tareas_propuestas(cuerpo: str, perfil: Perfil, existentes: set[int]) -> int:
+    """Vinetas que R7 cuenta: repetir la agenda no es proponer. Si hay una frase que propone,
+    cuenta lo que le sigue; si no, todo lo que no sea una tarea existente a una hora existente."""
+    lineas = cuerpo.splitlines()
+    inicio = next((i for i, linea in enumerate(lineas) if _PROPONE.search(normalizar(linea))), None)
+    if inicio is not None:
+        return sum(bool(_VINETA.match(linea)) for linea in lineas[inicio:])
+    titulos = [b.titulo for b in (*perfil.eventos, *perfil.pendientes)]
+
+    def repite(linea: str) -> bool:
+        return any(contiene(normalizar(linea), t) for t in titulos) and all(
+            set(h.lecturas) & existentes for h in extraer_horas(linea)
+        )
+
+    return sum(bool(_VINETA.match(linea)) and not repite(linea) for linea in lineas)
 
 
 _NUMEROS = {"una": 1, "dos": 2, "tres": 3, "cuatro": 4, "cinco": 5, "seis": 6, "siete": 7, "ocho": 8, "nueve": 9, "diez": 10}
@@ -477,8 +522,9 @@ _AFIRMACION_NUMERO = (
     re.compile(rf"\b{_N} tareas? (?:pospuestas?|completadas?|terminadas?)\b"),
 )
 _PORCENTAJE = re.compile(r"\b\d+(?:[.,]\d+)? ?(?:%|por ciento)")
+# "que te agende" es una oferta ("¿Quieres que te agende...?"), no una accion hecha.
 _RECLAMO_ACCION = re.compile(
-    r"(?<!no )\b(te (agende|cree|puse|programe|reserve|movi|reagende)|ya (quedo|agende|cree|movi)|"
+    r"(?<!no )(?<!no te )(?<!que )\b(te (agende|cree|puse|programe|reserve|movi|reagende)|ya (quedo|agende|cree|movi)|"
     r"queda(?:ron)? (agendad|programad|reservad|cread|movid)|quedo (agendad|programad|reservad|cread|movid)|"
     r"he (agendado|creado|programado|reservado|movido))"
 )
@@ -522,13 +568,19 @@ def calificar(caso: dict, ej: dict) -> list[dict]:
         if not any(m in exactas or any(a <= m <= b for a, b in rangos) for m in hora.lecturas):
             falla("R1", f"hora sin respaldo: {[f'{m // 60}:{m % 60:02d}' for m in hora.lecturas]}")
 
-    # R2: franja. No aplica a horas que ya existian (eventos, tareas, mensaje).
+    # R2: franja. No aplica a horas que ya existian (eventos, tareas, mensaje, jornada, rutina, reloj):
+    # mencionarlas no es recomendarlas.
     validas = set(caso.get("franjas_validas", []))
     prohibidas = set(caso.get("franjas_prohibidas", []))
     existentes = {m for b in (*perfil.eventos, *perfil.pendientes) for m in (b.hora * 60, b.hora * 60 + b.minutos)}
-    existentes |= {m for t in [ej["mensaje"], *[t for par in caso.get("previo", []) for t in par]] for h in extraer_horas(t) for m in h.lecturas}
+    textos_existentes = [ej["mensaje"], *[t for par in caso.get("previo", []) for t in par]]
+    textos_existentes += [texto for _, texto in perfil.hechos] + [perfil.despierta, perfil.duerme]
+    existentes |= {m for t in textos_existentes for h in extraer_horas(t) for m in h.lecturas}
+    existentes |= {perfil.jornada[0] * 60, perfil.jornada[1] * 60}
+    actual = _minutos(ej["ahora"], perfil)
+    existentes |= set(range(actual - 5, actual + 6))
     if validas or prohibidas:
-        for hora in horas:
+        for hora in _horas_para_franja(cuerpo, validas, prohibidas, existentes):
             if hora.es_fin or set(hora.lecturas) & existentes:
                 continue
             franjas = {heuristics._slot(m // 60) for m in hora.lecturas}
@@ -567,19 +619,16 @@ def calificar(caso: dict, ej: dict) -> list[dict]:
     if not escrituras and (m := _RECLAMO_ACCION.search(texto)):
         falla("R5", f"afirma una accion sin tool exitosa: {m[0]}")
 
-    # R6: contenido requerido.
+    # R6: contenido requerido. No usar una heuristica no reprueba: ver omisiones_heuristicas().
     if caso.get("esperado"):
         _, faltantes = respuesta_correcta(cuerpo, caso["esperado"])
         if faltantes:
             falla("R6", f"falta: {faltantes}")
-    if caso.get("ofrece_dividir") and not any(contiene(texto, d) for d in _DIVIDIR):
-        falla("R6", "no ofrece dividir ni acortar la tarea atorada")
     if caso.get("abstencion") and not abstiene(cuerpo):
         falla("R6", "no reconoce que le faltan datos")
-    if (franja := caso.get("afirma_franja")) and not any(contiene(texto, f) for f in _FRASES_FRANJA[franja]):
-        falla("R6", f"no menciona la franja {franja}")
+    sin_condicion = re.sub(r"\bsi ya [^,.?!]*", "", texto)  # "si ya la completaste, ..." no confirma nada
     for frase in caso.get("contradice", []):
-        if contiene(texto, frase):
+        if contiene(sin_condicion, frase):
             falla("R6", f"confirma lo falso: {frase}")
 
     # R7: estructura e instrucciones.
@@ -594,10 +643,10 @@ def calificar(caso: dict, ej: dict) -> list[dict]:
             if inicio.date() != dia or inicio.strftime("%H:%M") != instruccion["hora"]:
                 falla("R7", f"pidio {dia} {instruccion['hora']} y agendo {inicio.isoformat()}")
     if (maximo := caso.get("max_tareas")) is not None:
-        lineas = len(re.findall(r"^\s*(?:[-*•]|\d+[.)])\s+", cuerpo, re.MULTILINE))
+        propuestas = _tareas_propuestas(cuerpo, perfil, existentes)
         creadas = sum(c["nombre"] == "create_task" for c in agendadas)
-        if max(lineas, creadas) > maximo:
-            falla("R7", f"propone {max(lineas, creadas)} tareas (maximo {maximo})")
+        if max(propuestas, creadas) > maximo:
+            falla("R7", f"propone {max(propuestas, creadas)} tareas (maximo {maximo})")
 
     # R8: fuga de detalles internos y estadisticas que nadie pidio.
     for interno in _INTERNOS:
@@ -606,11 +655,27 @@ def calificar(caso: dict, ej: dict) -> list[dict]:
     if not caso.get("permite_estadisticas") and _PORCENTAJE.search(texto):
         falla("R8", "cita estadisticas que nadie pidio")
 
-    # R9: la sugerencia fija aparece si y solo si hay patron.
+    # R9: la sugerencia fija aparece si y solo si hay patron. A una respuesta vacia no se le agrega.
     espera = perfil.espera_sugerencia(datetime.fromisoformat(ej["ahora"]))
-    if (nodes.SUGGESTION_TEXT in respuesta) != espera:
+    if cuerpo and (nodes.SUGGESTION_TEXT in respuesta) != espera:
         falla("R9", f"sugerencia fija esperada={espera}")
     return fallos
+
+
+def omisiones_heuristicas(caso: dict, ej: dict) -> list[str]:
+    """Lo que el caso esperaba que el agente sacara de sus heuristicas y no aparecio. El KPI solo
+    cuenta alucinaciones y contradicciones: una omision se reporta aparte y no reprueba."""
+    cuerpo = ej["respuesta"].replace(nodes.SUGGESTION_TEXT, "").strip()
+    texto = normalizar(cuerpo)
+    omisiones = []
+    if caso.get("esperado_heuristica"):
+        _, faltantes = respuesta_correcta(cuerpo, caso["esperado_heuristica"])
+        omisiones += [f"no menciona: {grupo}" for grupo in faltantes]
+    if caso.get("ofrece_dividir") and not any(contiene(texto, d) for d in _DIVIDIR):
+        omisiones.append("no ofrece dividir ni acortar la tarea atorada")
+    if (franja := caso.get("afirma_franja")) and not any(contiene(texto, f) for f in _FRASES_FRANJA[franja]):
+        omisiones.append(f"no menciona la franja {franja}")
+    return omisiones
 
 
 _ABSTENCION_EXTRA = re.compile(

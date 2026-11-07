@@ -2,8 +2,8 @@
 Gemini. Vive en tests/ (no en app/) para que la imagen de produccion, que
 solo copia app/, quede identica a la que corre en Railway.
 
-Configurable con OLLAMA_BASE_URL, OLLAMA_CHAT_MODEL, OLLAMA_EMBEDDING_MODEL y
-OLLAMA_EMBEDDING_SIZE.
+Configurable con OLLAMA_BASE_URL, OLLAMA_CHAT_MODEL, OLLAMA_EMBEDDING_MODEL,
+OLLAMA_EMBEDDING_SIZE y OLLAMA_NUM_CTX.
 """
 
 import os
@@ -15,6 +15,8 @@ OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 OLLAMA_CHAT_MODEL = os.getenv("OLLAMA_CHAT_MODEL", "qwen3.8")
 OLLAMA_EMBEDDING_MODEL = os.getenv("OLLAMA_EMBEDDING_MODEL", "qwen3-embedding:0.6b")
 OLLAMA_EMBEDDING_SIZE = int(os.getenv("OLLAMA_EMBEDDING_SIZE", "1024"))
+# El prompt del agente con sus tools no cabe en el contexto por defecto de Ollama, que lo recorta sin avisar.
+OLLAMA_NUM_CTX = int(os.getenv("OLLAMA_NUM_CTX", "16384"))
 
 
 def _con_tag(modelo: str) -> str:
@@ -35,12 +37,19 @@ def motivo_no_disponible(*modelos: str) -> str | None:
     return None
 
 
+def descargar(*modelos: str) -> None:
+    """Saca los modelos de la memoria, igual que `ollama stop`."""
+    for modelo in modelos:
+        httpx.post(f"{OLLAMA_BASE_URL}/api/generate", json={"model": modelo, "keep_alive": 0}, timeout=30).raise_for_status()
+
+
 def build_chat_model(temperature: float, **kwargs) -> ChatOllama:
     # Sin razonamiento: qwen3.x piensa por defecto y eso solo agrega latencia.
     return ChatOllama(
         model=OLLAMA_CHAT_MODEL,
         base_url=OLLAMA_BASE_URL,
         temperature=temperature,
+        num_ctx=OLLAMA_NUM_CTX,
         reasoning=False,
         **kwargs,
     )

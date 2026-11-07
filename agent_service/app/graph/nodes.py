@@ -404,9 +404,9 @@ async def call_tool(state: AgentState) -> AgentState:
 
 
 SUGGESTION_TEXT = (
-    "Note que has pospuesto varias tareas ultimamente. "
-    "Si quieres, puedo ayudarte a dividir tu proxima tarea grande en "
-    "pasos mas pequenos, o buscar un hueco libre en tu calendario para ella."
+    "Noté que has pospuesto varias tareas últimamente. "
+    "Si quieres, puedo ayudarte a dividir tu próxima tarea grande en "
+    "pasos más pequeños, o buscar un hueco libre en tu calendario para ella."
 )
 
 
@@ -421,8 +421,10 @@ async def proactive_suggestion_text(user_id: str) -> str:
 
 
 async def generate_proactive_suggestion(state: AgentState) -> AgentState:
-    """Agrega la sugerencia proactiva (si hay patron) a la respuesta."""
-    suggestion = await proactive_suggestion_text(str(state["user_id"]))
+    """Agrega la sugerencia proactiva (si hay patron) a la respuesta, salvo que venga vacia."""
     base_response = _extract_text(state.get("response", ""))
+    if not base_response.strip():
+        return {**state, "response": base_response}
+    suggestion = await proactive_suggestion_text(str(state["user_id"]))
     suffix = f"\n\n{suggestion}" if suggestion else ""
     return {**state, "response": base_response + suffix}

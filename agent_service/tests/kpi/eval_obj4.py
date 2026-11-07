@@ -30,6 +30,7 @@ AGENT_DIR = Path(__file__).resolve().parents[2]
 RESULTADOS = Path(__file__).resolve().parent / "resultados"
 COLECCION_EVAL = "tdah_agent_memory_eval_obj4"
 RAG_MIN_SCORE_PRODUCCION = "0.5"  # configurar_entorno lo pone en -1 (sin umbral)
+UMBRAL_CONTEXTO_RECORTADO = 0.98  # fraccion de num_ctx a partir de la cual se considera recortado
 
 
 def clasificar(porcentaje: float) -> str:
@@ -63,25 +64,35 @@ def _args(argv=None) -> argparse.Namespace:
 
 
 class _Medido:
-    def __init__(self, llm, contador):
-        self.llm, self.contador = llm, contador
+    def __init__(self, llm, contador, limite_ctx: int | None = None):
+        self.llm, self.contador, self.limite_ctx = llm, contador, limite_ctx
 
     async def ainvoke(self, mensajes, **kwargs):
         self.contador["llamadas_llm"] += 1
         respuesta = await self.llm.ainvoke(mensajes, **kwargs)
         uso = getattr(respuesta, "usage_metadata", None) or {}
-        self.contador["tokens_entrada"] += uso.get("input_tokens", 0)
+        entrada = uso.get("input_tokens", 0)
+        self.contador["tokens_entrada"] += entrada
         self.contador["tokens_salida"] += uso.get("output_tokens", 0)
+        # Ollama recorta sin avisar: un prompt que llega al limite ya no es el prompt real.
+        if self.limite_ctx and entrada >= self.limite_ctx * UMBRAL_CONTEXTO_RECORTADO:
+            raise RuntimeError(f"Contexto recortado: {entrada} tokens de entrada con num_ctx={self.limite_ctx}")
         return respuesta
 
 
 class _EmbeddingsMedidos:
     def __init__(self, embeddings, contador):
-        self.embeddings, self.contador = embeddings, contador
+        self.embeddings, self.contador, self.precalculados = embeddings, contador, {}
 
     async def aembed_query(self, texto):
+        if texto in self.precalculados:
+            return self.precalculados[texto]
         self.contador["embeddings"] += 1
         return await self.embeddings.aembed_query(texto)
+
+    async def precalcular(self, textos):
+        for texto in textos:
+            self.precalculados[texto] = await self.aembed_query(texto)
 
 
 def _preparar(llm: str, contador: Counter) -> str:
@@ -99,16 +110,16 @@ def _preparar(llm: str, contador: Counter) -> str:
     if llm == "gemini":
         if not settings.gemini_api_key:
             raise SystemExit("Falta GEMINI_API_KEY en agent_service/.env")
-        obtener, modelo = nodes._get_llm, settings.gemini_chat_model
+        obtener, modelo, limite_ctx = nodes._get_llm, settings.gemini_chat_model, None
         embeddings = vector_store._get_embeddings()
     else:
         if motivo := local_models.motivo_no_disponible(local_models.OLLAMA_CHAT_MODEL, local_models.OLLAMA_EMBEDDING_MODEL):
             raise SystemExit(motivo)
-        obtener, modelo = local_models.get_llm_local(), local_models.OLLAMA_CHAT_MODEL
+        obtener, modelo, limite_ctx = local_models.get_llm_local(), local_models.OLLAMA_CHAT_MODEL, local_models.OLLAMA_NUM_CTX
         embeddings = local_models.build_embeddings()
         vector_store._EMBEDDING_SIZE = local_models.OLLAMA_EMBEDDING_SIZE
     vector_store._embeddings = _EmbeddingsMedidos(embeddings, contador)
-    nodes._get_llm = lambda *a, **k: _Medido(obtener(*a, **k), contador)
+    nodes._get_llm = lambda *a, **k: _Medido(obtener(*a, **k), contador, limite_ctx)
     return modelo
 
 
@@ -128,6 +139,14 @@ async def _correr(args: argparse.Namespace) -> str | None:
         return None
     if faltan and args.llm == "gemini":
         raise SystemExit("Revision previa fallida: no salio ninguna peticion. Ajusta esos casos.")
+    if args.llm == "ollama":
+        # Chat y embeddings no caben juntos en la GPU: el chat se reparte con la CPU y cada caso se alenta.
+        from app.memory import vector_store
+        from tests.support import local_models
+
+        print("Precalculando embeddings y liberando la GPU...", flush=True)
+        await vector_store._embeddings.precalcular(ev.mensajes_posibles(casos, datetime.now()))
+        local_models.descargar(local_models.OLLAMA_EMBEDDING_MODEL, local_models.OLLAMA_CHAT_MODEL)
 
     RESULTADOS.mkdir(exist_ok=True)
     corrida = f"{datetime.now():%Y%m%d_%H%M%S}_{args.llm}"
@@ -136,7 +155,11 @@ async def _correr(args: argparse.Namespace) -> str | None:
 
     async def ejecutar(caso):
         antes = Counter(contador)
-        resultado = await ev.ejecutar_caso(caso)
+        try:
+            resultado = await ev.ejecutar_caso(caso)
+        except Exception:
+            bitacora.anotar(tipo="consumo_error", id=caso["id"], consumo=dict(contador - antes))
+            raise
         return {**resultado, "consumo": dict(contador - antes)}
 
     estado = await ev.correr(casos, bitacora, ejecutar)
@@ -179,6 +202,7 @@ def _calificar(corrida: str) -> None:
                 "rag_context": resultado["rag_context"],
                 "tools": resultado["tools"],
                 "fallos_reglas": fallos,
+                "omisiones_heuristicas": ev.omisiones_heuristicas(caso, resultado),
                 "veredicto": previa.get("veredicto"),
                 "justificacion": previa.get("justificacion", ""),
             }
@@ -220,6 +244,14 @@ def _calificar(corrida: str) -> None:
     md += [f"| {e} | {a}/{t} |" for e, (a, t) in por_estrato.items()]
     md += ["", f"Fallos por regla: {dict(por_regla) or 'ninguno'}", "", "## Fallos de reglas", ""]
     md += [f"- **{f['id']}** ({f['perfil']}): {[x['regla'] + ' ' + x['detalle'] for x in f['fallos_reglas']]}\n  - {f['respuesta']!r}" for f in filas if f["fallos_reglas"]] or ["Ninguno."]
+    medibles = [
+        f for f in filas
+        if any(k in casos[f["id"]] for k in ("esperado_heuristica", "ofrece_dividir", "afirma_franja"))
+    ]
+    omitidas = [f for f in medibles if f["omisiones_heuristicas"]]
+    md += ["", "## Uso de heurísticas (aparte, no cuenta para el KPI)", ""]
+    md += [f"Las usa en {len(medibles) - len(omitidas)}/{len(medibles)} casos donde aplicaban.", ""]
+    md += [f"- **{f['id']}** ({f['perfil']}): {f['omisiones_heuristicas']}" for f in omitidas] or ["Sin omisiones."]
     if errores:
         md += ["", "## Errores", "", *[f"- {e['id']}: {e['error']}" for e in errores]]
     md += [
@@ -247,7 +279,7 @@ def main() -> None:
     # Sin Gemini la key queda vacia: un error aqui falla en vez de cobrar.
     configurar_entorno(COLECCION_EVAL, conservar_gemini=args.llm == "gemini" and not args.solo_calificar)
     os.environ["RAG_MIN_SCORE"] = RAG_MIN_SCORE_PRODUCCION
-    os.environ.setdefault("OLLAMA_CHAT_MODEL", "qwen3.5:9b")  # qwen3.8, el default, no esta instalado
+    os.environ.setdefault("OLLAMA_CHAT_MODEL", "qwen3.8")
 
     if args.solo_calificar:
         _calificar(args.solo_calificar)

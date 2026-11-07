@@ -1,6 +1,7 @@
 """Prueba de coherencia del Objetivo 4, sin gastar: oraculo de los perfiles, dataset,
 sensibilidad de las reglas, tope de peticiones y cableado con un LLM falso."""
 
+from collections import Counter
 from datetime import datetime, timedelta, timezone
 
 import pytest
@@ -8,7 +9,7 @@ from langchain_core.messages import AIMessage
 
 from app.graph import nodes, user_context
 from app.memory import heuristics, vector_store
-from tests.kpi.eval_obj4 import _args, clasificar, wilson
+from tests.kpi.eval_obj4 import _args, _EmbeddingsMedidos, _Medido, clasificar, wilson
 from tests.support import coherencia_eval as ev
 from tests.support.coherencia_perfiles import PERFILES, POR_CLAVE
 from tests.support.rag_eval import contiene, normalizar
@@ -97,7 +98,6 @@ def _caso(perfil="matutino", **extra):
         ("R4", _caso(), "La pospusiste 7 veces."),
         ("R5", _caso(), "Ya te agendé la tarea."),
         ("R6", _caso(esperado=[["b12"]]), "No recuerdo el cubículo."),
-        ("R6", _caso(ofrece_dividir=True), "Va, queda para mañana."),
         ("R6", _caso(abstencion=True), "Rindes increíble."),
         ("R7", _caso(max_tareas=2), "- uno\n- dos\n- tres"),
         ("R8", _caso(), "Usé find_free_slots para eso."),
@@ -127,7 +127,133 @@ def test_la_sugerencia_fija_debe_coincidir_con_el_historial():
 
 def test_la_sugerencia_fija_no_cuenta_como_ofrecer_dividir():
     caso = _caso("atorado", ofrece_dividir=True)
-    assert "R6" in _reglas(caso, _ejecucion("Va.\n\n" + nodes.SUGGESTION_TEXT))
+    assert ev.omisiones_heuristicas(caso, _ejecucion("Va.\n\n" + nodes.SUGGESTION_TEXT))
+
+
+@pytest.mark.parametrize(
+    "extra,respuesta",
+    [
+        ({"ofrece_dividir": True}, "Va, queda para mañana."),
+        ({"afirma_franja": "noche"}, "No, no te dije eso."),
+        ({"esperado_heuristica": [["licencia"]]}, "Vas bien."),
+    ],
+)
+def test_omitir_una_heuristica_se_reporta_pero_no_reprueba(extra, respuesta):
+    caso = _caso(**extra)
+    assert "R6" not in _reglas(caso, _ejecucion(respuesta))
+    assert ev.omisiones_heuristicas(caso, _ejecucion(respuesta))
+
+
+def test_contradecir_una_heuristica_si_reprueba():
+    assert "R2" in _reglas(_caso(afirma_franja="manana", no_afirma=["noche"]), _ejecucion("Rindes mejor por la noche."))
+
+
+def test_r2_no_marca_horas_del_propio_horario_del_usuario():
+    # matutino: jornada de 7 a 15, clases de 15:00 a 19:00, se duerme a las 23:30.
+    caso = _caso(franjas_validas=["manana"])
+    respuesta = "Tu jornada termina a las 15:00, tienes clases de 15:00 a 19:00 y te duermes a las 23:30."
+    assert "R2" not in _reglas(caso, _ejecucion(respuesta))
+
+
+@pytest.mark.parametrize(
+    "respuesta,reprueba",
+    [
+        ("- Sábado 21:00\n\nTe propongo mañana de 8:00 a 8:45.", False),  # la lista es un menu
+        ("- Sábado 21:00\n\nTe sugiero el de 11:30 a 12:00.", False),  # 11:30 es el fin de una tarea
+        ("- Sábado 21:00\n\nTe recomiendo los bloques de la mañana.", False),  # recomienda con palabras
+        ("- Sábado 9:00\n\nTe propongo a las 21:00.", True),  # la recomendacion es mala
+        ("- Sábado 21:00\n- Domingo 22:00", True),  # no hay recomendacion fuera de la lista
+        ("- Sábado 21:00\n\nTe recomiendo los bloques de la noche.", True),  # recomienda una franja mala
+        ("Tu jornada termina a las 15:00.\n- Sábado a las 21:00", True),  # repetir su horario no es recomendar
+    ],
+)
+def test_r2_no_juzga_una_lista_de_opciones_si_la_recomendacion_esta_fuera(respuesta, reprueba):
+    assert ("R2" in _reglas(_caso(franjas_validas=["manana"]), _ejecucion(respuesta))) is reprueba
+
+
+def test_r2_no_toma_lo_que_pospone_como_su_franja_buena():
+    caso = _caso(no_afirma=["noche"])
+    assert "R2" not in _reglas(caso, _ejecucion("Completas casi todo, y lo que pospones cae por la noche."))
+    assert "R2" in _reglas(caso, _ejecucion("Completas casi todo por la noche."))
+
+
+def test_r5_distingue_una_oferta_de_una_accion_hecha():
+    assert "R5" not in _reglas(_caso(), _ejecucion("¿Quieres que te agende ese bloque?"))
+    assert "R5" in _reglas(_caso(), _ejecucion("Listo, te agendé ese bloque."))
+
+
+def test_r5_no_toma_una_negacion_como_accion_hecha():
+    assert "R5" not in _reglas(_caso(), _ejecucion("Después de eso, no te he programado nada más."))
+    assert "R5" in _reglas(_caso(), _ejecucion("Ya te he programado el bloque."))
+
+
+def test_r6_no_toma_una_condicion_como_confirmacion():
+    caso = _caso("atorado", contradice=["ya la completaste", "la completaste ayer"])
+    assert "R6" not in _reglas(caso, _ejecucion("Si ya la completaste ayer, no la tengo registrada."))
+    assert "R6" in _reglas(caso, _ejecucion("Sí, ya la completaste ayer."))
+
+
+@pytest.mark.parametrize(
+    "respuesta,reprueba",
+    [
+        # Repite la agenda, con o sin hora: no propone nada.
+        ("- 9:00 Repaso final de Cálculo\n- 10:00 Reporte de Física parte 2\n- 11:00 Llamar al dentista\n\n¿Quieres que te proponga algo?", False),
+        ("- Repaso final de Cálculo (domingo)\n- Llamar al dentista (viernes)\n- Clase de Termodinámica (viernes)", False),
+        # Solo cuenta lo que sigue a la propuesta.
+        ("- 9:00 Repaso final de Cálculo\n- 10:00 Reporte de Física parte 2\n- 11:00 Llamar al dentista\n\nTe propongo:\n- 8:00 Uno", False),
+        ("- 9:00 Repaso final de Cálculo\n\nTe propongo:\n- 8:00 Uno\n- 8:30 Dos\n- 13:15 Tres", True),
+        # Sin frase que proponga, una tarea existente a una hora nueva si es propuesta.
+        ("- 13:15 Repaso final de Cálculo\n- 13:45 Llamar al dentista\n- 14:15 Reporte de Física parte 2", True),
+    ],
+)
+def test_r7_cuenta_lo_propuesto_y_no_la_agenda_que_ya_existe(respuesta, reprueba):
+    assert ("R7" in _reglas(_caso(max_tareas=2), _ejecucion(respuesta))) is reprueba
+
+
+async def test_a_una_respuesta_vacia_no_se_le_agrega_la_sugerencia(monkeypatch):
+    async def con_patron(_user_id):
+        return nodes.SUGGESTION_TEXT
+
+    monkeypatch.setattr(nodes, "proactive_suggestion_text", con_patron)
+    assert (await nodes.generate_proactive_suggestion({"user_id": "u", "response": ""}))["response"] == ""
+    assert nodes.SUGGESTION_TEXT in (await nodes.generate_proactive_suggestion({"user_id": "u", "response": "Hola."}))["response"]
+
+    reglas = _reglas(_caso("pospone_noches"), _ejecucion(""))
+    assert "R6" in reglas and "R9" not in reglas
+
+
+async def test_un_prompt_que_llega_al_limite_de_contexto_es_error():
+    class LLM:
+        async def ainvoke(self, _mensajes):
+            return AIMessage(content="ok", usage_metadata={"input_tokens": 2050, "output_tokens": 1, "total_tokens": 2051})
+
+    with pytest.raises(RuntimeError, match="Contexto recortado"):
+        await _Medido(LLM(), Counter(), limite_ctx=2048).ainvoke([])
+    assert (await _Medido(LLM(), Counter(), limite_ctx=16384).ainvoke([])).content == "ok"
+
+
+async def test_un_embedding_precalculado_no_vuelve_al_modelo():
+    pedidos = []
+
+    class Embeddings:
+        async def aembed_query(self, texto):
+            pedidos.append(texto)
+            return [1.0]
+
+    contador = Counter()
+    medidos = _EmbeddingsMedidos(Embeddings(), contador)
+    await medidos.precalcular({"hola"})
+    assert await medidos.aembed_query("hola") == [1.0]
+    assert pedidos == ["hola"] and contador["embeddings"] == 1
+    await medidos.aembed_query("otro")
+    assert pedidos == ["hola", "otro"] and contador["embeddings"] == 2
+
+
+def test_los_mensajes_posibles_cubren_cualquier_dia_de_la_corrida():
+    posibles = ev.mensajes_posibles([{"mensaje": "Agenda el {dia+2}"}, {"mensaje": "Hola"}], AHORA)
+    assert "Hola" in posibles and len(posibles) == 8
+    for dias in range(30):
+        assert ev.expandir_mensaje("Agenda el {dia+2}", AHORA + timedelta(days=dias)) in posibles
 
 
 def test_una_respuesta_buena_pasa():
